@@ -1,8 +1,7 @@
 #include "df_serialize/test/rapidjson/document.h"
-#include "df_serialize/test/rapidjson//error/en.h"
+#include "df_serialize/test/rapidjson/error/en.h"
 
 #include "schemas/types.h"
-
 #include "color.h"
 
 #define MAKE_JSON_LOG(...) printf(__VA_ARGS__);
@@ -14,18 +13,19 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-void DoClear(const Data::Clear& clear, std::vector<Data::Color>& pixels)
-{
-    std::fill(pixels.begin(), pixels.end(), clear.color);
-}
-
 void GenerateFrame(const Data::Document& document, std::vector<Data::Color>& pixels, int frameIndex)
 {
     float frameTime = float(frameIndex) / float(document.FPS);
     pixels.resize(document.sizeX*document.sizeY);
+    std::fill(pixels.begin(), pixels.end(), Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f });
 
     // copy the entities so we can apply events to them
-    std::vector<Data::Clear> clears = document.clears;
+    std::vector<Data::Clear> clears;
+    for (const Data::Clear& clear : document.clears)
+    {
+        if (frameTime >= clear.createTime && (clear.destroyTime < 0.0f || frameTime < clear.destroyTime))
+            clears.push_back(clear);
+    }
 
     // Process events
     for (const Data::Event& event : document.events)
@@ -39,7 +39,7 @@ void GenerateFrame(const Data::Document& document, std::vector<Data::Color>& pix
 
     // process the clears
     for (const Data::Clear& clear : clears)
-        DoClear(clear, pixels);
+        std::fill(pixels.begin(), pixels.end(), clear.color);
 }
 
 int main(int argc, char** argv)
@@ -89,11 +89,12 @@ int main(int argc, char** argv)
  * polymorphic types. already thinking about having an array of whatever types of things
  * fixed sized arrays. For colors, for instance, i want a size of 4. maybe have -1 be dynamic sized?
  * i want uint8_t. probably more basic types supported out of the box... maybe have a default templated thing, and specifics added as needed?
- * Need reflection of some kind for setting field name values
+ * Need reflection of some kind for setting field name values. like "set field to json", where you give a field name and a json string.
+ * could be better about errors, like a static assert on a templated class to say that a type is not supported?
 
 TODO:
 * pre multiplied alpha
-* anti aliased
+* anti aliased (SDF? super sampling?). for super sampling, could have a render size and an output size.
 ? do we need a special time type? unsure if floats in seconds will cut it?
 ? should we multithread this? i think we could... file writes may get heinous, but rendering should be fine with it.
 * probably should have non instant events -> blending non linearly etc
