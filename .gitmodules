@@ -1,0 +1,3 @@
+[submodule "df_serialize"]
+	path = df_serialize
+	url = https://github.com/Atrix256/df_serialize.git

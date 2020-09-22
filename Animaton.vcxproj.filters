@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="schemas">
+      <UniqueIdentifier>{7dcb7012-fea7-4a0a-a777-37b8640527f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{9c8bc379-3b97-4747-b645-c5fc67bdfa8c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="schemas\schemas.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="schemas\json.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="schemas\types.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\clip.json">
+      <Filter>assets</Filter>
+    </None>
+  </ItemGroup>
+</Project>
