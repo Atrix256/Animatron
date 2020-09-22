@@ -21,6 +21,8 @@
     <ClInclude Include="schemas\types.h">
       <Filter>schemas</Filter>
     </ClInclude>
+    <ClInclude Include="math.h" />
+    <ClInclude Include="color.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json">
