@@ -119,7 +119,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="color.h" />
+    <ClInclude Include="utils.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="schemas\json.h" />
     <ClInclude Include="schemas\lerp.h" />

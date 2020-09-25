@@ -23,13 +23,13 @@
       <Filter>schemas</Filter>
     </ClInclude>
     <ClInclude Include="math.h" />
-    <ClInclude Include="color.h" />
     <ClInclude Include="schemas\lerp.h">
       <Filter>schemas</Filter>
     </ClInclude>
     <ClInclude Include="schemas\schemas_entities.h">
       <Filter>schemas</Filter>
     </ClInclude>
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json">

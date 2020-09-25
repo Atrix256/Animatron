@@ -10,7 +10,7 @@
 #include "schemas/json.h"
 #include "schemas/lerp.h"
 
-#include "color.h"
+#include "utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -81,13 +81,10 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
 
             // Get the entity(ies) involved
             const Data::EntityVariant& entity1 = timeline.keyFrames[cursorIndex].entity;
-            const Data::EntityVariant* entity2 = (cursorIndex + 1 < timeline.keyFrames.size())
-                ? &timeline.keyFrames[cursorIndex + 1].entity
-                : nullptr;
+            const Data::EntityVariant& entity2 = timeline.keyFrames[cursorIndex + 1].entity;
 
             // Do the lerp between keyframe entities
-            Data::EntityVariant entity;
-            Lerp(entity, *entity2, entity, blendPercent);
+            Lerp(entity1, entity2, entity, blendPercent);
         }
         // otherwise we are beyond the last key frame, so just set the value
         else
