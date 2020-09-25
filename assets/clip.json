@@ -9,7 +9,7 @@
       "createTime": 0.1,
       "destroyTime": 1.0,
       "data": {
-        "clear": {
+        "fill": {
           "color": {
             "R": 0.2,
             "G": 0.4,
@@ -24,7 +24,7 @@
       "createTime": 1.1,
       "destroyTime": -1.0,
       "data": {
-        "clear": {
+        "fill": {
           "color": {
             "R": 0.8,
             "G": 0.4,
@@ -116,13 +116,13 @@
       "entityId": "Background Color 2",
       "time": 1.5,
       "blendControlPoints": [ 0.1, 0.2 ],
-      "newValue": "{\"clear\":{\"color\":{\"R\":0.5, \"G\":0.5, \"B\":0.5}}}"
+      "newValue": "{\"fill\":{\"color\":{\"R\":0.5, \"G\":0.5, \"B\":0.5}}}"
     },
     {
       "entityId": "Background Color 2",
       "time": 1.75,
       "blendControlPoints": [ 0.2, 0.9 ],
-      "newValue": "{\"clear\":{\"color\":{\"G\":1.0}}}"
+      "newValue": "{\"fill\":{\"color\":{\"G\":1.0}}}"
     },
     {
       "entityId": "Circle1",

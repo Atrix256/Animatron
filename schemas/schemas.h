@@ -24,11 +24,11 @@ STRUCT_END()
 
 // ----------------------------- Specific Entity Types -----------------------------
 
-STRUCT_BEGIN(Data, EntityClear, "Clear the screen")
-    STRUCT_FIELD(Color, color, Color{}, "The color of the clear")
+STRUCT_BEGIN(Data, EntityFill, "Fills the screen")
+    STRUCT_FIELD(Color, color, Color{}, "The color of the fill")
 STRUCT_END()
 
-STRUCT_BEGIN(Data, EntityCircle, "Clear the screen")
+STRUCT_BEGIN(Data, EntityCircle, "Draw a circle")
     STRUCT_FIELD(Point2D, center, Point2D(), "The location of the circle")
     STRUCT_FIELD(float, innerRadius, 0.9f, "The distance from the center that is not filled in.")
     STRUCT_FIELD(float, outerRadius, 1.0f, "The distance beyond that distance that is filled in.")
@@ -38,7 +38,7 @@ STRUCT_END()
 // ----------------------------- Entity Types -----------------------------
 
 VARIANT_BEGIN(Data, EntityVariant, "Storage for entity type specific information")
-    VARIANT_TYPE(EntityClear, clear, EntityClear(), "")
+    VARIANT_TYPE(EntityFill, fill, EntityFill(), "")
     VARIANT_TYPE(EntityCircle, circle, EntityCircle(), "")
 VARIANT_END()
 

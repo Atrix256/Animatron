@@ -51,17 +51,18 @@ struct EntityTimeline
     std::vector<EntityTimelineKeyframe> keyFrames;
 };
 
-void HandleEntity_Clear(
+void HandleEntity_Fill(
     const Data::Document& document,
     std::vector<Data::Color>& pixels,
     float blendPercent,
-    const Data::EntityClear& A,
-    const Data::EntityClear* B
+    const Data::EntityFill& A,
+    const Data::EntityFill* B
 )
 {
-    // TODO: should rename to fill. if alpha isn't 1.0, should do an alpha blend instead of a straight fill.
+    // TODO: probably should switch to alpha blended color in the pixels?
+    // TODO: if alpha isn't 1.0, should do an alpha blend instead of a straight fill.
 
-    Data::EntityClear fill = A;
+    Data::EntityFill fill = A;
     if (B != nullptr)
     {
         fill.color.R = Lerp(A.color.R, B->color.R, blendPercent);
@@ -108,6 +109,7 @@ void HandleEntity_Circle(
 
     // TODO: this could be done better - like by finding the bounding box
     // TODO: handle alpha blending
+    // TODO: could calculate coordinate of the pixel (ix,iy) and calculate distances etc based on that. should be fast... it's linear
     for (int iy = 0; iy < document.sizeY; ++iy)
     {
         float distY = abs(float(iy - centerPy));
@@ -122,13 +124,6 @@ void HandleEntity_Circle(
             pixel++;
         }
     }
-
-    /*
-    std::fill(pixels.begin(), pixels.end(), fill.color);
-    */
-
-    // TODO: draw a circle! need to convert coordinates and such
-
     // TODO: how to do anti aliasing? maybe render too large and shrink?
 }
 
@@ -177,14 +172,14 @@ bool GenerateFrame(const Data::Document& document, const std::unordered_map<std:
         // do the entity action
         switch (timeline.keyFrames[0].entity._index)
         {
-            case Data::EntityVariant::c_index_clear:
+            case Data::EntityVariant::c_index_fill:
             {
-                HandleEntity_Clear(
+                HandleEntity_Fill(
                     document,
                     pixels,
                     blendPercent,
-                    entity1.clear,
-                    entity2 ? &entity2->clear : nullptr
+                    entity1.fill,
+                    entity2 ? &entity2->fill : nullptr
                 );
                 break;
             }
@@ -320,6 +315,7 @@ TODO:
 
 * what units of measurement for drawing things?
  * I like "aspect ratio corrected UV" but also that is too small, so maybe like... *100? so percent instead of uv?
+* should document that somewhere
 
 * rename project / solution to animatron. typod
 
