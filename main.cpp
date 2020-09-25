@@ -6,8 +6,10 @@
 #include <array>
 #include <unordered_map>
 
+// TODO: probably should put these into a different folder than just where the schemas live
 #include "schemas/types.h"
 #include "schemas/json.h"
+#include "schemas/lerp.h"
 
 #include "color.h"
 
@@ -32,26 +34,10 @@ struct EntityTimeline
     std::vector<EntityTimelineKeyframe> keyFrames;
 };
 
-void HandleEntity_Fill(
-    const Data::Document& document,
-    std::vector<Data::Color>& pixels,
-    float blendPercent,
-    const Data::EntityFill& A,
-    const Data::EntityFill* B
-)
+void HandleEntity_EntityFill(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::EntityFill& fill)
 {
     // TODO: probably should switch to alpha blended color in the pixels?
     // TODO: if alpha isn't 1.0, should do an alpha blend instead of a straight fill.
-
-    Data::EntityFill fill = A;
-    if (B != nullptr)
-    {
-        fill.color.R = Lerp(A.color.R, B->color.R, blendPercent);
-        fill.color.G = Lerp(A.color.G, B->color.G, blendPercent);
-        fill.color.B = Lerp(A.color.B, B->color.B, blendPercent);
-        fill.color.A = Lerp(A.color.A, B->color.A, blendPercent);
-    }
-
     std::fill(pixels.begin(), pixels.end(), fill.color);
 }
 
@@ -67,27 +53,8 @@ void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY, float
     canvasY = 100.0f * float(pixelY - centerPy) / float(canvasSizeInPixels);
 }
 
-void HandleEntity_Circle(
-    const Data::Document& document,
-    std::vector<Data::Color>& pixels,
-    float blendPercent,
-    const Data::EntityCircle& A,
-    const Data::EntityCircle* B
-)
+void HandleEntity_EntityCircle(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::EntityCircle& circle)
 {
-    Data::EntityCircle circle = A;
-    if (B != nullptr)
-    {
-        circle.center.X = Lerp(A.center.X, B->center.X, blendPercent);
-        circle.center.Y = Lerp(A.center.Y, B->center.Y, blendPercent);
-        circle.color.R = Lerp(A.color.R, B->color.R, blendPercent);
-        circle.color.G = Lerp(A.color.G, B->color.G, blendPercent);
-        circle.color.B = Lerp(A.color.B, B->color.B, blendPercent);
-        circle.color.A = Lerp(A.color.A, B->color.A, blendPercent);
-        circle.innerRadius = Lerp(A.innerRadius, B->innerRadius, blendPercent);
-        circle.outerRadius = Lerp(A.outerRadius, B->outerRadius, blendPercent);
-    }
-
     // TODO: maybe could have an aspect ratio on the circle to squish it and stretch it? Nah... parent it off a transform!
 
     // TODO: this could be done better - like by finding the bounding box
@@ -132,56 +99,54 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
         if (frameTime < timeline.createTime || (timeline.destroyTime >= 0.0f && frameTime > timeline.destroyTime))
             continue;
 
+        // find where we are in the time line
         int cursorIndex = 0;
         while (cursorIndex + 1 < timeline.keyFrames.size() && timeline.keyFrames[cursorIndex+1].time < frameTime)
             cursorIndex++;
 
-        // calculate the blend percentage from the key frame percentage and the control points
-        float blendPercent = 0.0f;
+        // interpolate keyframes if we are between two key frames
+        Data::EntityVariant entity;
         if (cursorIndex + 1 < timeline.keyFrames.size())
         {
-            float t = frameTime - timeline.keyFrames[cursorIndex].time;
-            t /= (timeline.keyFrames[cursorIndex + 1].time - timeline.keyFrames[cursorIndex].time);
+            // calculate the blend percentage from the key frame percentage and the control points
+            float blendPercent = 0.0f;
+            if (cursorIndex + 1 < timeline.keyFrames.size())
+            {
+                float t = frameTime - timeline.keyFrames[cursorIndex].time;
+                t /= (timeline.keyFrames[cursorIndex + 1].time - timeline.keyFrames[cursorIndex].time);
 
-            float CPA = 0.0f;
-            float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
-            float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
-            float CPD = 1.0f;
+                float CPA = 0.0f;
+                float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
+                float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
+                float CPD = 1.0f;
 
-            blendPercent = CubicBezierInterpolation(CPA, CPB, CPC, CPD, t);
+                blendPercent = CubicBezierInterpolation(CPA, CPB, CPC, CPD, t);
+            }
+
+            // Get the entity(ies) involved
+            const Data::EntityVariant& entity1 = timeline.keyFrames[cursorIndex].entity;
+            const Data::EntityVariant* entity2 = (cursorIndex + 1 < timeline.keyFrames.size())
+                ? &timeline.keyFrames[cursorIndex + 1].entity
+                : nullptr;
+
+            // Do the lerp between keyframe entities
+            Data::EntityVariant entity;
+            Lerp(entity, *entity2, entity, blendPercent);
         }
-
-        // Get the entity(ies) involved
-        const Data::EntityVariant& entity1 = timeline.keyFrames[cursorIndex].entity;
-        const Data::EntityVariant* entity2 = (cursorIndex + 1 < timeline.keyFrames.size())
-            ? &timeline.keyFrames[cursorIndex + 1].entity
-            : nullptr;
+        // otherwise we are beyond the last key frame, so just set the value
+        else
+        {
+            entity = timeline.keyFrames[cursorIndex].entity;
+        }
 
         // do the entity action
         switch (timeline.keyFrames[0].entity._index)
         {
-            case Data::EntityVariant::c_index_fill:
-            {
-                HandleEntity_Fill(
-                    document,
-                    pixels,
-                    blendPercent,
-                    entity1.fill,
-                    entity2 ? &entity2->fill : nullptr
-                );
-                break;
-            }
-            case Data::EntityVariant::c_index_circle:
-            {
-                HandleEntity_Circle(
-                    document,
-                    pixels,
-                    blendPercent,
-                    entity1.circle,
-                    entity2 ? &entity2->circle : nullptr
-                );
-                break;
-            }
+            #include "df_serialize/df_serialize/_common.h"
+            #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
+                case Data::EntityVariant::c_index_##_NAME: HandleEntity_##_TYPE(document, pixels, entity.##_NAME); break;
+            #include "df_serialize/df_serialize/_fillunsetdefines.h"
+            #include "schemas/schemas_entities.h"
             default:
             {
                 printf("unhandled entity type in variant\n");
@@ -321,33 +286,21 @@ int main(int argc, char** argv)
 /*
 TODO:
 
-* probably should do lerp thing soon too
-
 * probably should put entities in a different file, leave this simple? could auto generate the functions expected, and the calls here. put entities into it's own schema header or something.
 
 ! generate documentation from schemas?
-
 * should document that +/-50 canvas units is the largest square that fits in the center.
 
 * rename project / solution to animatron. typod
 
-* df_serialize desires
- * polymorphic types. already thinking about having an array of whatever types of things
- * fixed sized arrays. For colors, for instance, i want a size of 4. maybe have -1 be dynamic sized?
- * i want uint8_t. probably more basic types supported out of the box... maybe have a default templated thing, and specifics added as needed?
- * Need reflection of some kind for setting field name values. like "set field to json", where you give a field name and a json string.
- * could be better about errors, like a static assert on a templated class to say that a type is not supported?
 
 TODO:
 * pre multiplied alpha
 * anti aliased (SDF? super sampling?). for super sampling, could have a render size and an output size.
-? do we need a special time type? unsure if floats in seconds will cut it?
 ? should we multithread this? i think we could... file writes may get heinous, but rendering should be fine with it.
-* probably should have non instant events -> blending non linearly etc
-* should we put an ordering on things? like if you have 2 clears, how's it decide which to do?
 
 Low priority:
 * maybe generate html documentaion?
-* could do 3d rendering later (path tracing)
+* could do 3d rendering later (path tracing) also whitted raytracing. can have 3d scenes and have defined lights. unlit if no lights defined.
 
 */

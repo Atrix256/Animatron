@@ -37,10 +37,7 @@ STRUCT_END()
 
 // ----------------------------- Entity Types -----------------------------
 
-VARIANT_BEGIN(Data, EntityVariant, "Storage for entity type specific information")
-    VARIANT_TYPE(EntityFill, fill, EntityFill(), "")
-    VARIANT_TYPE(EntityCircle, circle, EntityCircle(), "")
-VARIANT_END()
+#include "schemas_entities.h"
 
 STRUCT_BEGIN(Data, Entity, "All information about an entity")
     STRUCT_FIELD(std::string, id, "", "The unique ID of the entity")

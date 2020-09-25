@@ -121,7 +121,9 @@
     <ClInclude Include="color.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="schemas\json.h" />
+    <ClInclude Include="schemas\lerp.h" />
     <ClInclude Include="schemas\schemas.h" />
+    <ClInclude Include="schemas\schemas_entities.h" />
     <ClInclude Include="schemas\types.h" />
   </ItemGroup>
   <ItemGroup>
