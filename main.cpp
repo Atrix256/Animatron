@@ -17,26 +17,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-void ToPixelCoordinates(const Data::Document& document, float x, float y, int& px, int& py)
-{
-    float aspectRatio = float(document.sizeX) / float(document.sizeY);
-    // TODO: handle aspect ratio
-
-    // convert to uv (0 to 1)
-    x /= 100.0f;
-    y /= 100.0f;
-
-    y *= aspectRatio;
-
-    // put (0,0) in the middle of the image
-    x += 0.5f;
-    y += 0.5f;
-
-    // convert to pixels
-    px = int(float(document.sizeX) * x);
-    py = int(float(document.sizeY) * y);
-}
-
 struct EntityTimelineKeyframe
 {
     float time = 0.0f;
@@ -74,6 +54,18 @@ void HandleEntity_Fill(
     std::fill(pixels.begin(), pixels.end(), fill.color);
 }
 
+void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY, float& canvasX, float& canvasY)
+{
+    // +/- 50 in canvas units is the largest square that can fit in the render, centered in the middle of the render.
+
+    int canvasSizeInPixels = (document.sizeX >= document.sizeY) ? document.sizeY : document.sizeX;
+    int centerPx = document.sizeX / 2;
+    int centerPy = document.sizeY / 2;
+
+    canvasX = 100.0f * float(pixelX - centerPx) / float(canvasSizeInPixels);
+    canvasY = 100.0f * float(pixelY - centerPy) / float(canvasSizeInPixels);
+}
+
 void HandleEntity_Circle(
     const Data::Document& document,
     std::vector<Data::Color>& pixels,
@@ -95,31 +87,28 @@ void HandleEntity_Circle(
         circle.outerRadius = Lerp(A.outerRadius, B->outerRadius, blendPercent);
     }
 
-    // TODO: maybe could have an aspect ratio on the circle to squish it and stretch it?
-
-    // TODO: you are calculating distance in pixel space, not the coordinates, that's why the circle is staying a circle.
-
-    // TODO: make a helper function!
-    float innerRadiusPx = circle.innerRadius * float(document.sizeX) / 100.0f;
-    float outerRadiusPx = circle.outerRadius * float(document.sizeY) / 100.0f;
-
-    int centerPx = 0;
-    int centerPy = 0;
-    ToPixelCoordinates(document, circle.center.X, circle.center.Y, centerPx, centerPy);
+    // TODO: maybe could have an aspect ratio on the circle to squish it and stretch it? Nah... parent it off a transform!
 
     // TODO: this could be done better - like by finding the bounding box
     // TODO: handle alpha blending
-    // TODO: could calculate coordinate of the pixel (ix,iy) and calculate distances etc based on that. should be fast... it's linear
+    float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
+    PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
+    PixelToCanvas(document, document.sizeX - 1, document.sizeY - 1, canvasMaxX, canvasMaxY);
     for (int iy = 0; iy < document.sizeY; ++iy)
     {
-        float distY = abs(float(iy - centerPy));
+        float percentY = float(iy) / float(document.sizeY - 1);
+        float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
+        float distY = abs(canvasY - circle.center.Y);
         Data::Color* pixel = &pixels[iy * document.sizeX];
         for (int ix = 0; ix < document.sizeX; ++ix)
         {
-            float distX = abs(float(ix - centerPx));
+            float percentX = float(ix) / float(document.sizeX - 1);
+            float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
+            float distX = abs(canvasX - circle.center.X);
+
             float dist = sqrt(distX*distX + distY * distY);
-            dist -= innerRadiusPx;
-            if (dist > 0.0f && dist <= outerRadiusPx)
+            dist -= circle.innerRadius;
+            if (dist > 0.0f && dist <= circle.outerRadius)
                 *pixel = circle.color;
             pixel++;
         }
@@ -313,9 +302,7 @@ int main(int argc, char** argv)
 /*
 TODO:
 
-* what units of measurement for drawing things?
- * I like "aspect ratio corrected UV" but also that is too small, so maybe like... *100? so percent instead of uv?
-* should document that somewhere
+* should document that +/-50 canvas units is the largest square that fits in the center.
 
 * rename project / solution to animatron. typod
 
