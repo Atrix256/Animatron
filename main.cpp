@@ -13,18 +13,18 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-void GenerateFrame(const Data::Document& document, std::vector<Data::Color>& pixels, int frameIndex)
+bool GenerateFrame(const Data::Document& document, std::vector<Data::Color>& pixels, int frameIndex)
 {
     float frameTime = float(frameIndex) / float(document.FPS);
     pixels.resize(document.sizeX*document.sizeY);
     std::fill(pixels.begin(), pixels.end(), Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f });
 
     // copy the entities so we can apply events to them
-    std::vector<Data::Clear> clears;
-    for (const Data::Clear& clear : document.clears)
+    std::vector<Data::Entity> entities;
+    for (const Data::Entity& entity : document.entities)
     {
-        if (frameTime >= clear.createTime && (clear.destroyTime < 0.0f || frameTime < clear.destroyTime))
-            clears.push_back(clear);
+        if (frameTime >= entity.createTime && (entity.destroyTime < 0.0f || frameTime < entity.destroyTime))
+            entities.push_back(entity);
     }
 
     // Process events
@@ -37,9 +37,26 @@ void GenerateFrame(const Data::Document& document, std::vector<Data::Color>& pix
         int ijkl = 0;
     }
 
-    // process the clears
-    for (const Data::Clear& clear : clears)
-        std::fill(pixels.begin(), pixels.end(), clear.color);
+    // process the entities
+    for (const Data::Entity& entity : entities)
+    {
+        switch (entity.data._index)
+        {
+            case Data::EntityVariant::c_index_clear:
+            {
+                std::fill(pixels.begin(), pixels.end(), entity.data.clear.color);
+                break;
+            }
+            default:
+            {
+                printf("unhandled entity type in variant\n");
+                return false;
+            }
+        }
+        
+    }
+
+    return true;
 }
 
 int main(int argc, char** argv)
@@ -48,7 +65,7 @@ int main(int argc, char** argv)
     const char* fileName = "./assets/clip.json";
     const char* outFilePath = "./out/";
     Data::Document document;
-    if (!ReadFromJSON(document, fileName))
+    if (!ReadFromJSONFile(document, fileName))
         return 1;
 
     // Render and write out each frame
@@ -69,7 +86,8 @@ int main(int argc, char** argv)
         }
 
         // render a frame
-        GenerateFrame(document, pixels, frameIndex);
+        if (!GenerateFrame(document, pixels, frameIndex))
+            break;
 
         // Convert it to RGBAU8
         ColorToColorU8(pixels, pixelsU8);
@@ -84,6 +102,14 @@ int main(int argc, char** argv)
 }
 
 /*
+
+* rename event to keyframe.
+ * it gives an object name and a serialization string for that keyframe
+ * maybe have a way of knowing which fields were present when serializing? so we know those are the ones to lerp
+  * actually probably not... just start from the first event and go to the last, and partially seralize over the top to get the next key frame. maybe?
+ * for interpolation, give coefficients to a polynomial. probably a cubic bezier, in bernstein basis form, would be best (easiest to understand)
+
+* rename to animatron
 
 * df_serialize desires
  * polymorphic types. already thinking about having an array of whatever types of things

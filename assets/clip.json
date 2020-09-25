@@ -3,27 +3,35 @@
   "sizeY": 200,
   "FPS": 30,
   "duration": 2,
-  "clears": [
+  "entities": [
     {
       "id": "Background Color 1",
       "createTime": 0.1,
       "destroyTime": 1.0,
-      "color": {
-        "R": 0.2,
-        "G": 0.4,
-        "B": 0.8,
-        "A": 1.0
+      "data": {
+        "clear": {
+          "color": {
+            "R": 0.2,
+            "G": 0.4,
+            "B": 0.8,
+            "A": 1.0
+          }
+        }
       }
     },
     {
       "id": "Background Color 2",
       "createTime": 1.1,
       "destroyTime": -1.0,
-      "color": {
-        "R": 0.8,
-        "G": 0.4,
-        "B": 0.2,
-        "A": 1.0
+      "data": {
+        "clear": {
+          "color": {
+            "R": 0.8,
+            "G": 0.4,
+            "B": 0.2,
+            "A": 1.0
+          }
+        }
       }
     }
   ]
