@@ -8,6 +8,7 @@
       "id": "Background Color 1",
       "createTime": 0.1,
       "destroyTime": 1.0,
+      "zorder": -1000.0,
       "data": {
         "fill": {
           "color": {
@@ -23,6 +24,7 @@
       "id": "Background Color 2",
       "createTime": 1.1,
       "destroyTime": -1.0,
+      "zorder": -1000.0,
       "data": {
         "fill": {
           "color": {
@@ -36,6 +38,7 @@
     },
     {
       "id": "Circle1",
+      "zorder": 1.0,
       "data": {
         "circle": {
           "center": {
@@ -55,6 +58,7 @@
     },
     {
       "id": "Circle2",
+      "zorder": 2.0,
       "data": {
         "circle": {
           "center": {
@@ -74,6 +78,7 @@
     },
     {
       "id": "Circle3",
+      "zorder": 3.0,
       "data": {
         "circle": {
           "center": {
@@ -93,6 +98,7 @@
     },
     {
       "id": "Circle4",
+      "zorder": 4.0,
       "data": {
         "circle": {
           "center": {

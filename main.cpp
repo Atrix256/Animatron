@@ -26,6 +26,7 @@ struct EntityTimelineKeyframe
 
 struct EntityTimeline
 {
+    float zorder = 0.0f;
     float createTime = 0.0f;
     float destroyTime = -1.0f;
     std::vector<EntityTimelineKeyframe> keyFrames;
@@ -116,20 +117,18 @@ void HandleEntity_Circle(
     // TODO: how to do anti aliasing? maybe render too large and shrink?
 }
 
-bool GenerateFrame(const Data::Document& document, const std::unordered_map<std::string, EntityTimeline>& entityTimelines, std::vector<Data::Color>& pixels, int frameIndex)
+bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::Color>& pixels, int frameIndex)
 {
     // setup for the frame
     float frameTime = float(frameIndex) / float(document.FPS);
     pixels.resize(document.sizeX*document.sizeY);
     std::fill(pixels.begin(), pixels.end(), Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f });
 
-    // TODO: need some kind of ordering to the processing entities. the map is unordered. Z order?
-
     // process the entities
-    for (auto& pair : entityTimelines)
+    for (const EntityTimeline* timeline_ : entityTimelines)
     {
         // skip any entity that doesn't currently exist
-        const EntityTimeline& timeline = pair.second;
+        const EntityTimeline& timeline = *timeline_;
         if (frameTime < timeline.createTime || (timeline.destroyTime >= 0.0f && frameTime > timeline.destroyTime))
             continue;
 
@@ -204,10 +203,11 @@ int main(int argc, char** argv)
         return 1;
 
     // make a timeline for each entity by just starting with the entity definition
-    std::unordered_map<std::string, EntityTimeline> entityTimelines;
+    std::unordered_map<std::string, EntityTimeline> entityTimelinesMap;
     for (const Data::Entity& entity : document.entities)
     {
         EntityTimeline newTimeline;
+        newTimeline.zorder = entity.zorder;
         newTimeline.createTime = entity.createTime;
         newTimeline.destroyTime = entity.destroyTime;
 
@@ -216,7 +216,7 @@ int main(int argc, char** argv)
         newKeyFrame.entity = entity.data;
         newTimeline.keyFrames.push_back(newKeyFrame);
 
-        entityTimelines[entity.id] = newTimeline;
+        entityTimelinesMap[entity.id] = newTimeline;
     }
 
     // sort the keyframes by time ascending to put them in order
@@ -235,8 +235,8 @@ int main(int argc, char** argv)
         if (keyFrame.newValue.empty())
             continue;
 
-        auto it = entityTimelines.find(keyFrame.entityId);
-        if (it == entityTimelines.end())
+        auto it = entityTimelinesMap.find(keyFrame.entityId);
+        if (it == entityTimelinesMap.end())
         {
             printf("Could not find entity %s for keyframe!\n", keyFrame.entityId.c_str());
             return 2;
@@ -265,6 +265,25 @@ int main(int argc, char** argv)
         }
         it->second.keyFrames.push_back(newKeyFrame);
     }
+
+    // put the entities into a list sorted by z order ascending
+    // stable sort to keep a deterministic ordering of elements for ties
+    std::vector<const EntityTimeline*> entityTimelines;
+    {
+        for (auto& pair : entityTimelinesMap)
+            entityTimelines.push_back(&pair.second);
+
+        std::stable_sort(
+            entityTimelines.begin(),
+            entityTimelines.end(),
+            [](const EntityTimeline* a, const EntityTimeline* b)
+            {
+                return a->zorder < b->zorder;
+            }
+        );
+    }
+
+    // TODO: use OMP to go multithreaded. probably need a per thread structure to hold pixels (to avoid alloc churn!) etc.
 
     // Render and write out each frame
     printf("Rendering clip...\n");
@@ -301,6 +320,12 @@ int main(int argc, char** argv)
 
 /*
 TODO:
+
+* probably should do lerp thing soon too
+
+* probably should put entities in a different file, leave this simple? could auto generate the functions expected, and the calls here. put entities into it's own schema header or something.
+
+! generate documentation from schemas?
 
 * should document that +/-50 canvas units is the largest square that fits in the center.
 

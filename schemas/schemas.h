@@ -44,6 +44,7 @@ VARIANT_END()
 
 STRUCT_BEGIN(Data, Entity, "All information about an entity")
     STRUCT_FIELD(std::string, id, "", "The unique ID of the entity")
+    STRUCT_FIELD(float, zorder, 0.0f, "Determines the order of rendering. higher numbers are on top.")
     STRUCT_FIELD(float, createTime, 0.0f, "The time in seconds that the object is created.")
     STRUCT_FIELD(float, destroyTime, -1.0f, "The time in seconds that the object is destroyed. -1 means it is never destroyed")
     STRUCT_FIELD(EntityVariant, data, EntityVariant(), "Entity type specific information")
