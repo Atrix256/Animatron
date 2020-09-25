@@ -1,5 +1,5 @@
 {
-  "sizeX": 320,
+  "sizeX": 600,
   "sizeY": 200,
   "FPS": 30,
   "duration": 2,
@@ -33,13 +33,89 @@
           }
         }
       }
+    },
+    {
+      "id": "Circle1",
+      "data": {
+        "circle": {
+          "center": {
+            "X": -15.0,
+            "Y": 0.0
+          },
+          "innerRadius": 12.0,
+          "outerRadius": 3.0,
+          "color": {
+            "R": 1.0,
+            "G": 0.2,
+            "B": 0.1,
+            "A": 1.0
+          }
+        }
+      }
+    },
+    {
+      "id": "Circle2",
+      "data": {
+        "circle": {
+          "center": {
+            "X": 0.0,
+            "Y": 0.0
+          },
+          "innerRadius": 12.0,
+          "outerRadius": 3.0,
+          "color": {
+            "R": 0.2,
+            "G": 1.0,
+            "B": 0.1,
+            "A": 1.0
+          }
+        }
+      }
+    },
+    {
+      "id": "Circle3",
+      "data": {
+        "circle": {
+          "center": {
+            "X": 15.0,
+            "Y": 0.0
+          },
+          "innerRadius": 12.0,
+          "outerRadius": 3.0,
+          "color": {
+            "R": 0.1,
+            "G": 0.2,
+            "B": 1.0,
+            "A": 1.0
+          }
+        }
+      }
+    },
+    {
+      "id": "Circle4",
+      "data": {
+        "circle": {
+          "center": {
+            "X": 0.0,
+            "Y": 15.0
+          },
+          "innerRadius": 12.0,
+          "outerRadius": 3.0,
+          "color": {
+            "R": 1.0,
+            "G": 0.2,
+            "B": 1.0,
+            "A": 1.0
+          }
+        }
+      }
     }
   ],
   "keyFrames": [
     {
       "entityId": "Background Color 2",
       "time": 1.5,
-      "blendControlPoints": [0.1, 0.2],
+      "blendControlPoints": [ 0.1, 0.2 ],
       "newValue": "{\"clear\":{\"color\":{\"R\":0.5, \"G\":0.5, \"B\":0.5}}}"
     },
     {
@@ -47,6 +123,18 @@
       "time": 1.75,
       "blendControlPoints": [ 0.2, 0.9 ],
       "newValue": "{\"clear\":{\"color\":{\"G\":1.0}}}"
+    },
+    {
+      "entityId": "Circle1",
+      "time": 1,
+      "blendControlPoints": [ 0.2, 0.9 ],
+      "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}}}"
+    },
+    {
+      "entityId": "Circle1",
+      "time": 2,
+      "blendControlPoints": [ 0.2, 0.9 ],
+      "newValue": "{\"circle\":{\"center\":{\"X\":50.0, \"Y\":-20.0}}}"
     }
   ]
 }

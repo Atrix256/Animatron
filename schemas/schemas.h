@@ -17,14 +17,29 @@ STRUCT_BEGIN(Data, ColorU8, "An sRGB U8 color")
     STRUCT_FIELD(uint8_t, A, 0, "Alpha")
 STRUCT_END()
 
-// ----------------------------- Entity Types -----------------------------
+STRUCT_BEGIN(Data, Point2D, "A 2d Point")
+    STRUCT_FIELD(float, X, 0.0f, "X")
+    STRUCT_FIELD(float, Y, 0.0f, "Y")
+STRUCT_END()
+
+// ----------------------------- Specific Entity Types -----------------------------
 
 STRUCT_BEGIN(Data, EntityClear, "Clear the screen")
     STRUCT_FIELD(Color, color, Color{}, "The color of the clear")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, EntityCircle, "Clear the screen")
+    STRUCT_FIELD(Point2D, center, Point2D(), "The location of the circle")
+    STRUCT_FIELD(float, innerRadius, 0.9f, "The distance from the center that is not filled in.")
+    STRUCT_FIELD(float, outerRadius, 1.0f, "The distance beyond that distance that is filled in.")
+    STRUCT_FIELD(Color, color, Color{}, "The color of the circle")
+STRUCT_END()
+
+// ----------------------------- Entity Types -----------------------------
+
 VARIANT_BEGIN(Data, EntityVariant, "Storage for entity type specific information")
     VARIANT_TYPE(EntityClear, clear, EntityClear(), "")
+    VARIANT_TYPE(EntityCircle, circle, EntityCircle(), "")
 VARIANT_END()
 
 STRUCT_BEGIN(Data, Entity, "All information about an entity")

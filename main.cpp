@@ -17,6 +17,26 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
+void ToPixelCoordinates(const Data::Document& document, float x, float y, int& px, int& py)
+{
+    float aspectRatio = float(document.sizeX) / float(document.sizeY);
+    // TODO: handle aspect ratio
+
+    // convert to uv (0 to 1)
+    x /= 100.0f;
+    y /= 100.0f;
+
+    y *= aspectRatio;
+
+    // put (0,0) in the middle of the image
+    x += 0.5f;
+    y += 0.5f;
+
+    // convert to pixels
+    px = int(float(document.sizeX) * x);
+    py = int(float(document.sizeY) * y);
+}
+
 struct EntityTimelineKeyframe
 {
     float time = 0.0f;
@@ -40,18 +60,76 @@ void HandleEntity_Clear(
 )
 {
     // TODO: should rename to fill. if alpha isn't 1.0, should do an alpha blend instead of a straight fill.
-    if (B == nullptr)
+
+    Data::EntityClear fill = A;
+    if (B != nullptr)
     {
-        std::fill(pixels.begin(), pixels.end(), A.color);
-        return;
+        fill.color.R = Lerp(A.color.R, B->color.R, blendPercent);
+        fill.color.G = Lerp(A.color.G, B->color.G, blendPercent);
+        fill.color.B = Lerp(A.color.B, B->color.B, blendPercent);
+        fill.color.A = Lerp(A.color.A, B->color.A, blendPercent);
     }
 
-    Data::Color fill;
-    fill.R = Lerp(A.color.R, B->color.R, blendPercent);
-    fill.G = Lerp(A.color.G, B->color.G, blendPercent);
-    fill.B = Lerp(A.color.B, B->color.B, blendPercent);
-    fill.A = Lerp(A.color.A, B->color.A, blendPercent);
-    std::fill(pixels.begin(), pixels.end(), fill);
+    std::fill(pixels.begin(), pixels.end(), fill.color);
+}
+
+void HandleEntity_Circle(
+    const Data::Document& document,
+    std::vector<Data::Color>& pixels,
+    float blendPercent,
+    const Data::EntityCircle& A,
+    const Data::EntityCircle* B
+)
+{
+    Data::EntityCircle circle = A;
+    if (B != nullptr)
+    {
+        circle.center.X = Lerp(A.center.X, B->center.X, blendPercent);
+        circle.center.Y = Lerp(A.center.Y, B->center.Y, blendPercent);
+        circle.color.R = Lerp(A.color.R, B->color.R, blendPercent);
+        circle.color.G = Lerp(A.color.G, B->color.G, blendPercent);
+        circle.color.B = Lerp(A.color.B, B->color.B, blendPercent);
+        circle.color.A = Lerp(A.color.A, B->color.A, blendPercent);
+        circle.innerRadius = Lerp(A.innerRadius, B->innerRadius, blendPercent);
+        circle.outerRadius = Lerp(A.outerRadius, B->outerRadius, blendPercent);
+    }
+
+    // TODO: maybe could have an aspect ratio on the circle to squish it and stretch it?
+
+    // TODO: you are calculating distance in pixel space, not the coordinates, that's why the circle is staying a circle.
+
+    // TODO: make a helper function!
+    float innerRadiusPx = circle.innerRadius * float(document.sizeX) / 100.0f;
+    float outerRadiusPx = circle.outerRadius * float(document.sizeY) / 100.0f;
+
+    int centerPx = 0;
+    int centerPy = 0;
+    ToPixelCoordinates(document, circle.center.X, circle.center.Y, centerPx, centerPy);
+
+    // TODO: this could be done better - like by finding the bounding box
+    // TODO: handle alpha blending
+    for (int iy = 0; iy < document.sizeY; ++iy)
+    {
+        float distY = abs(float(iy - centerPy));
+        Data::Color* pixel = &pixels[iy * document.sizeX];
+        for (int ix = 0; ix < document.sizeX; ++ix)
+        {
+            float distX = abs(float(ix - centerPx));
+            float dist = sqrt(distX*distX + distY * distY);
+            dist -= innerRadiusPx;
+            if (dist > 0.0f && dist <= outerRadiusPx)
+                *pixel = circle.color;
+            pixel++;
+        }
+    }
+
+    /*
+    std::fill(pixels.begin(), pixels.end(), fill.color);
+    */
+
+    // TODO: draw a circle! need to convert coordinates and such
+
+    // TODO: how to do anti aliasing? maybe render too large and shrink?
 }
 
 bool GenerateFrame(const Data::Document& document, const std::unordered_map<std::string, EntityTimeline>& entityTimelines, std::vector<Data::Color>& pixels, int frameIndex)
@@ -107,6 +185,17 @@ bool GenerateFrame(const Data::Document& document, const std::unordered_map<std:
                     blendPercent,
                     entity1.clear,
                     entity2 ? &entity2->clear : nullptr
+                );
+                break;
+            }
+            case Data::EntityVariant::c_index_circle:
+            {
+                HandleEntity_Circle(
+                    document,
+                    pixels,
+                    blendPercent,
+                    entity1.circle,
+                    entity2 ? &entity2->circle : nullptr
                 );
                 break;
             }
@@ -227,13 +316,10 @@ int main(int argc, char** argv)
 }
 
 /*
+TODO:
 
-* keyframe.
- * it gives an object name and a serialization string for that keyframe
- * maybe have a way of knowing which fields were present when serializing? so we know those are the ones to lerp
-  * actually probably not... just start from the first event and go to the last, and partially seralize over the top to get the next key frame. maybe?
-  * yeah could maybe keep track of the last time it was changed and lerp from there?
- * for interpolation, give coefficients to a polynomial. probably a cubic bezier, in bernstein basis form, would be best (easiest to understand)
+* what units of measurement for drawing things?
+ * I like "aspect ratio corrected UV" but also that is too small, so maybe like... *100? so percent instead of uv?
 
 * rename project / solution to animatron. typod
 
