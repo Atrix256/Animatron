@@ -34,13 +34,13 @@ STRUCT_BEGIN(Data, Entity, "All information about an entity")
     STRUCT_FIELD(EntityVariant, data, EntityVariant(), "Entity type specific information")
 STRUCT_END()
 
-// ----------------------------- Events -----------------------------
+// ----------------------------- Key Frames -----------------------------
 
-STRUCT_BEGIN(Data, Event, "An Event")
-    STRUCT_FIELD(std::string, entityId, "", "The ID of the entity affected by this event")
+STRUCT_BEGIN(Data, KeyFrame, "A KeyFrame")
+    STRUCT_FIELD(std::string, entityId, "", "The ID of the entity affected")
     STRUCT_FIELD(float, time, 0.0f, "The time in seconds the event occurs")
-    STRUCT_FIELD(std::string, field, "", "The name of the field to change")
-    STRUCT_FIELD(std::string, newValue, "", "The new value of the field, as a JSON string")
+    STRUCT_FIELD(std::string, newValue, "", "JSON describing the value of the entity at this point in time")
+    STRUCT_STATIC_ARRAY(float, blendControlPoints, 2, {1.0f / 3.0f COMMA 2.0f / 3.0f}, "Middle two Cubic Bezier control points for blending from the previous value. The endpoints not given are 0.0 and 1.0")
 STRUCT_END()
 
 // ----------------------------- The Document -----------------------------
@@ -51,5 +51,5 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(float, duration, 4.0f, "The duration of the rendering")
     STRUCT_FIELD(int, FPS, 30, "The frame rate of the render")
     STRUCT_DYNAMIC_ARRAY(Entity, entities, "")
-    STRUCT_DYNAMIC_ARRAY(Event, events, "")
+    STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")
 STRUCT_END()

@@ -4,6 +4,9 @@
 // RapidJSON Github:  https://github.com/Tencent/rapidjson/
 #pragma once
 
+#include "df_serialize/test/rapidjson/document.h"
+#include "df_serialize/test/rapidjson/error/en.h"
+
 // Reading
 #include "../df_serialize/df_serialize/MakeJSONReadHeader.h"
 #include "schemas.h"

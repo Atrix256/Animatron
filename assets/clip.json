@@ -34,5 +34,19 @@
         }
       }
     }
+  ],
+  "keyFrames": [
+    {
+      "entityId": "Background Color 2",
+      "time": 1.5,
+      "blendControlPoints": [0.1, 0.2],
+      "newValue": "{\"clear\":{\"color\":{\"R\":0.0, \"G\":0.0, \"B\":0.0, \"A\":1.0}}}"
+    },
+    {
+      "entityId": "Background Color 2",
+      "time": 1.75,
+      "blendControlPoints": [ 0.2, 0.9 ],
+      "newValue": "{\"clear\":{\"color\":{\"R\":0.0, \"G\":1.0, \"B\":0.0, \"A\":1.0}}}"
+    }
   ]
 }
