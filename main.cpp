@@ -39,6 +39,7 @@ void HandleEntity_Clear(
     const Data::EntityClear* B
 )
 {
+    // TODO: should rename to fill. if alpha isn't 1.0, should do an alpha blend instead of a straight fill.
     if (B == nullptr)
     {
         std::fill(pixels.begin(), pixels.end(), A.color);
@@ -60,7 +61,7 @@ bool GenerateFrame(const Data::Document& document, const std::unordered_map<std:
     pixels.resize(document.sizeX*document.sizeY);
     std::fill(pixels.begin(), pixels.end(), Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f });
 
-    // TODO: need some kind of ordering to the processing entities. the map is unordered.
+    // TODO: need some kind of ordering to the processing entities. the map is unordered. Z order?
 
     // process the entities
     for (auto& pair : entityTimelines)
@@ -73,8 +74,6 @@ bool GenerateFrame(const Data::Document& document, const std::unordered_map<std:
         int cursorIndex = 0;
         while (cursorIndex + 1 < timeline.keyFrames.size() && timeline.keyFrames[cursorIndex+1].time < frameTime)
             cursorIndex++;
-
-        // TODO: make sure we handle the end of an object's life. easy enough to test with something without keyframes!
 
         // calculate the blend percentage from the key frame percentage and the control points
         float blendPercent = 0.0f;
@@ -170,14 +169,17 @@ int main(int argc, char** argv)
             return 2;
         }
 
+        // ignore events outside the lifetime of the entity
+        if ((keyFrame.time < it->second.createTime) || (it->second.destroyTime >= 0.0f && keyFrame.time > it->second.destroyTime))
+            continue;
 
-        // TODO: ignore events that are outside of the lifetime of the entity
-
+        // make a new key frame entry
         EntityTimelineKeyframe newKeyFrame;
         newKeyFrame.time = keyFrame.time;
         newKeyFrame.blendControlPoints = keyFrame.blendControlPoints;
 
-        // TODO: maybe have each key frame for an object start with the value of the previous key frame of the object, so that only properties mentioned change
+        // start the keyframe entity values at the last keyframe value, so people only make keyframes for the things they want to change
+        newKeyFrame.entity = it->second.keyFrames.rbegin()->entity;
 
         // TODO: shouldn't have to do this! maybe make ReadFromJSONBuffer (also?) read from a string or char*. probably have both call into the constt char* version
         std::vector<char> temp;
