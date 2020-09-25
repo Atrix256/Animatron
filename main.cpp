@@ -172,11 +172,8 @@ int main(int argc, char** argv)
         // start the keyframe entity values at the last keyframe value, so people only make keyframes for the things they want to change
         newKeyFrame.entity = it->second.keyFrames.rbegin()->entity;
 
-        // TODO: shouldn't have to do this! maybe make ReadFromJSONBuffer (also?) read from a string or char*. probably have both call into the constt char* version
-        std::vector<char> temp;
-        temp.resize(keyFrame.newValue.size() + 1);
-        strcpy(temp.data(), keyFrame.newValue.c_str());
-        if (!ReadFromJSONBuffer(newKeyFrame.entity, temp))
+        // load the sparse json data over the keyframe data
+        if (!ReadFromJSONBuffer(newKeyFrame.entity, keyFrame.newValue))
         {
             printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
             return 3;
