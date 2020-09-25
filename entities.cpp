@@ -9,6 +9,7 @@ void HandleEntity_EntityFill(const Data::Document& document, std::vector<Data::C
     std::fill(pixels.begin(), pixels.end(), fill.color);
 }
 
+// TODO: could put this into a header. math.h and color.h don't quite fit. maybe combine those into math.h and put this in? dunno.
 void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY, float& canvasX, float& canvasY)
 {
     // +/- 50 in canvas units is the largest square that can fit in the render, centered in the middle of the render.

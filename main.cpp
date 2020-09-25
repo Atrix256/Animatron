@@ -6,7 +6,6 @@
 #include <array>
 #include <unordered_map>
 
-// TODO: probably should put these into a different folder than just where the schemas live
 #include "schemas/types.h"
 #include "schemas/json.h"
 #include "schemas/lerp.h"
@@ -242,6 +241,8 @@ int main(int argc, char** argv)
 
 /*
 TODO:
+
+! the lerping may be broken... the images changed after you did that work (and it's checked in)
 
 * probably should put entities in a different file, leave this simple? could auto generate the functions expected, and the calls here. put entities into it's own schema header or something.
 
