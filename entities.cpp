@@ -28,26 +28,26 @@ void HandleEntity_EntityCircle(const Data::Document& document, std::vector<Data:
     maxPixelY++;
 
     // clip the bounding box to the screen
-    minPixelX = Clamp(minPixelX, 0, document.sizeX - 1);
-    maxPixelX = Clamp(maxPixelX, 0, document.sizeX - 1);
-    minPixelY = Clamp(minPixelY, 0, document.sizeY - 1);
-    maxPixelY = Clamp(maxPixelY, 0, document.sizeY - 1);
+    minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
+    maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
+    minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
+    maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
 
     // TODO: handle alpha blending. maybe some template parameter function for speed?
 
     // Draw the circle
     float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
     PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
-    PixelToCanvas(document, document.sizeX - 1, document.sizeY - 1, canvasMaxX, canvasMaxY);
+    PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
     for (int iy = minPixelY; iy <= maxPixelY; ++iy)
     {
-        float percentY = float(iy) / float(document.sizeY - 1);
+        float percentY = float(iy) / float(document.renderSizeY - 1);
         float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
         float distY = abs(canvasY - circle.center.Y);
-        Data::Color* pixel = &pixels[iy * document.sizeX + minPixelX];
+        Data::Color* pixel = &pixels[iy * document.renderSizeX + minPixelX];
         for (int ix = minPixelX; ix <= maxPixelX; ++ix)
         {
-            float percentX = float(ix) / float(document.sizeX - 1);
+            float percentX = float(ix) / float(document.renderSizeX - 1);
             float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
             float distX = abs(canvasX - circle.center.X);
 
@@ -58,6 +58,5 @@ void HandleEntity_EntityCircle(const Data::Document& document, std::vector<Data:
             pixel++;
         }
     }
-    // TODO: how to do anti aliasing? maybe render too large and shrink?
 }
 

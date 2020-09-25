@@ -25,9 +25,9 @@ inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY
 {
     // +/- 50 in canvas units is the largest square that can fit in the render, centered in the middle of the render.
 
-    int canvasSizeInPixels = (document.sizeX >= document.sizeY) ? document.sizeY : document.sizeX;
-    int centerPx = document.sizeX / 2;
-    int centerPy = document.sizeY / 2;
+    int canvasSizeInPixels = (document.renderSizeX >= document.renderSizeY) ? document.renderSizeY : document.renderSizeX;
+    int centerPx = document.renderSizeX / 2;
+    int centerPy = document.renderSizeY / 2;
 
     canvasX = 100.0f * float(pixelX - centerPx) / float(canvasSizeInPixels);
     canvasY = 100.0f * float(pixelY - centerPy) / float(canvasSizeInPixels);
@@ -35,15 +35,56 @@ inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY
 
 inline void CanvasToPixel(const Data::Document& document, float canvasX, float canvasY, int& pixelX, int& pixelY)
 {
-    // TODO: test to make sure this works ok
-    int canvasSizeInPixels = (document.sizeX >= document.sizeY) ? document.sizeY : document.sizeX;
+    int canvasSizeInPixels = (document.renderSizeX >= document.renderSizeY) ? document.renderSizeY : document.renderSizeX;
 
     canvasX = canvasX * float(canvasSizeInPixels) / 100.0f;
     canvasY = canvasY * float(canvasSizeInPixels) / 100.0f;
 
-    int centerPx = document.sizeX / 2;
-    int centerPy = document.sizeY / 2;
+    int centerPx = document.renderSizeX / 2;
+    int centerPy = document.renderSizeY / 2;
 
     pixelX = int(canvasX + float(centerPx));
     pixelY = int(canvasY + float(centerPy));
 }
+
+inline Data::Color CubicHermite(const Data::Color& A, const Data::Color& B, const Data::Color& C, const Data::Color& D, float t)
+{
+    Data::Color ret;
+    ret.R = CubicHermite(A.R, B.R, C.R, D.R, t);
+    ret.G = CubicHermite(A.G, B.G, C.G, D.G, t);
+    ret.B = CubicHermite(A.B, B.B, C.B, D.B, t);
+    ret.A = CubicHermite(A.A, B.A, C.A, D.A, t);
+    return ret;
+}
+
+inline Data::Color operator + (const Data::Color& A, const Data::Color& B)
+{
+    Data::Color ret;
+    ret.R = A.R + B.R;
+    ret.G = A.G + B.G;
+    ret.B = A.B + B.B;
+    ret.A = A.A + B.A;
+    return ret;
+}
+
+inline Data::Color operator * (const Data::Color& A, float B)
+{
+    Data::Color ret;
+    ret.R = A.R * B;
+    ret.G = A.G * B;
+    ret.B = A.B * B;
+    ret.A = A.A * B;
+    return ret;
+}
+
+inline Data::Color operator / (const Data::Color& A, float B)
+{
+    Data::Color ret;
+    ret.R = A.R / B;
+    ret.G = A.G / B;
+    ret.B = A.B / B;
+    ret.A = A.A / B;
+    return ret;
+}
+
+void Resize(std::vector<Data::Color>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY);

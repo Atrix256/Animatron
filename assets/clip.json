@@ -1,6 +1,8 @@
 {
-  "sizeX": 600,
-  "sizeY": 200,
+  "outputSizeX": 200,
+  "outputSizeY": 200,
+  "renderSizeX": 800,
+  "renderSizeY": 800,
   "FPS": 30,
   "duration": 2,
   "entities": [

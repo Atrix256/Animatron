@@ -44,7 +44,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
 {
     // setup for the frame
     float frameTime = float(frameIndex) / float(document.FPS);
-    pixels.resize(document.sizeX*document.sizeY);
+    pixels.resize(document.renderSizeX*document.renderSizeY);
     std::fill(pixels.begin(), pixels.end(), Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f });
 
     // process the entities
@@ -119,6 +119,14 @@ int main(int argc, char** argv)
     Data::Document document;
     if (!ReadFromJSONFile(document, fileName))
         return 1;
+
+    // data interpretation
+    {
+        if (document.renderSizeX == 0)
+            document.renderSizeX = document.outputSizeX;
+        if (document.renderSizeY == 0)
+            document.renderSizeY = document.outputSizeY;
+    }
 
     // make a timeline for each entity by just starting with the entity definition
     std::unordered_map<std::string, EntityTimeline> entityTimelinesMap;
@@ -221,12 +229,15 @@ int main(int argc, char** argv)
         if (!GenerateFrame(document, entityTimelines, pixels, frameIndex))
             return 4;
 
+        // resize from the rendered size to the output size
+        Resize(pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
+
         // Convert it to RGBAU8
         ColorToColorU8(pixels, pixelsU8);
 
         // write it out
         sprintf_s(outFileName, "%s%i.png", outFilePath, frameIndex);
-        stbi_write_png(outFileName, document.sizeX, document.sizeY, 4, pixelsU8.data(), document.sizeX * 4);
+        stbi_write_png(outFileName, document.outputSizeX, document.outputSizeY, 4, pixelsU8.data(), document.outputSizeX * 4);
     }
     printf("\r100%%\n");
 
@@ -235,13 +246,11 @@ int main(int argc, char** argv)
 
 /*
 TODO:
-
 * profile!
 
 ! generate documentation from schemas?
 * should document that +/-50 canvas units is the largest square that fits in the center.
 * rename project / solution to animatron. typod
-
 
 TODO:
 * pre multiplied alpha
@@ -251,5 +260,9 @@ TODO:
 Low priority:
 * maybe generate html documentaion?
 * could do 3d rendering later (path tracing) also whitted raytracing. can have 3d scenes and have defined lights. unlit if no lights defined.
+
+
+TODO: 's for later
+* option for different image shrink / grow operations. right now it box filters down and bicubics up.
 
 */

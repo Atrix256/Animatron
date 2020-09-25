@@ -59,8 +59,10 @@ STRUCT_END()
 // ----------------------------- The Document -----------------------------
 
 STRUCT_BEGIN(Data, Document, "A document")
-    STRUCT_FIELD(int, sizeX, 800, "The size of the render on the X axis")
-    STRUCT_FIELD(int, sizeY, 600, "The size of the render on the Y axis")
+    STRUCT_FIELD(int, outputSizeX, 320, "The size of the output render on the X axis")
+    STRUCT_FIELD(int, outputSizeY, 200, "The size of the output render on the Y axis")
+    STRUCT_FIELD(int, renderSizeX, 0, "The size of the render on the X axis. 0 means use output size. The rendered image will be sized down (for AA) or up to match the output size.")
+    STRUCT_FIELD(int, renderSizeY, 0, "The size of the render on the Y axis. 0 means use output size. The rendered image will be sized down (for AA) or up to match the output size.")
     STRUCT_FIELD(float, duration, 4.0f, "The duration of the rendering")
     STRUCT_FIELD(int, FPS, 30, "The frame rate of the render")
     STRUCT_DYNAMIC_ARRAY(Entity, entities, "")

@@ -11,6 +11,12 @@ T Clamp(T value, T min, T max)
         return value;
 }
 
+template <typename T>
+T Min(T a, T b)
+{
+    return (a < b) ? a : b;
+}
+
 inline float LinearToSRGB(float x)
 {
     x = Clamp(x, 0.0f, 1.0f);
@@ -27,6 +33,11 @@ inline float SRGBToLinear(float x)
         return x / 12.92f;
     else
         return pow((x + 0.055f) / 1.055f, 2.4f);
+}
+
+inline float Fract(float f)
+{
+    return f - floor(f);
 }
 
 inline float Lerp(float A, float B, float t)
@@ -55,4 +66,17 @@ inline float CubicBezierInterpolation(float A, float B, float C, float D, float 
         3.0f * C * s*t*t +
         D * t*t*t
         ;
+}
+
+// t is a value that goes from 0 to 1 to interpolate in a C1 continuous way across uniformly sampled data points.
+// when t is 0, this will return B.  When t is 1, this will return C.  Inbetween values will return an interpolation
+// between B and C.  A and B are used to calculate slopes at the edges.
+inline float CubicHermite(float A, float B, float C, float D, float t)
+{
+    float a = -A / 2.0f + (3.0f*B) / 2.0f - (3.0f*C) / 2.0f + D / 2.0f;
+    float b = A - (5.0f*B) / 2.0f + 2.0f*C - D / 2.0f;
+    float c = -A / 2.0f + C / 2.0f;
+    float d = B;
+
+    return a * t*t*t + b * t*t + c * t + d;
 }

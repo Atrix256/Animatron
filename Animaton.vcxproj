@@ -117,6 +117,7 @@
   <ItemGroup>
     <ClCompile Include="entities.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils.h" />
