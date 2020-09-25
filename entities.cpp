@@ -17,20 +17,35 @@ void HandleEntity_EntityFill(const Data::Document& document, std::vector<Data::C
 
 void HandleEntity_EntityCircle(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::EntityCircle& circle)
 {
-    // TODO: maybe could have an aspect ratio on the circle to squish it and stretch it? Nah... parent it off a transform!
+    // Get a bounding box of the circle
+    int minPixelX, minPixelY, maxPixelX, maxPixelY;
+    float totalRadius = circle.innerRadius + circle.outerRadius;
+    CanvasToPixel(document, circle.center.X - totalRadius, circle.center.Y - totalRadius, minPixelX, minPixelY);
+    CanvasToPixel(document, circle.center.X + totalRadius, circle.center.Y + totalRadius, maxPixelX, maxPixelY);
+    minPixelX--;
+    minPixelY--;
+    maxPixelX++;
+    maxPixelY++;
 
-    // TODO: this could be done better - like by finding the bounding box. Use CanvasToPixel.
-    // TODO: handle alpha blending
+    // clip the bounding box to the screen
+    minPixelX = Clamp(minPixelX, 0, document.sizeX - 1);
+    maxPixelX = Clamp(maxPixelX, 0, document.sizeX - 1);
+    minPixelY = Clamp(minPixelY, 0, document.sizeY - 1);
+    maxPixelY = Clamp(maxPixelY, 0, document.sizeY - 1);
+
+    // TODO: handle alpha blending. maybe some template parameter function for speed?
+
+    // Draw the circle
     float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
     PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
     PixelToCanvas(document, document.sizeX - 1, document.sizeY - 1, canvasMaxX, canvasMaxY);
-    for (int iy = 0; iy < document.sizeY; ++iy)
+    for (int iy = minPixelY; iy <= maxPixelY; ++iy)
     {
         float percentY = float(iy) / float(document.sizeY - 1);
         float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
         float distY = abs(canvasY - circle.center.Y);
-        Data::Color* pixel = &pixels[iy * document.sizeX];
-        for (int ix = 0; ix < document.sizeX; ++ix)
+        Data::Color* pixel = &pixels[iy * document.sizeX + minPixelX];
+        for (int ix = minPixelX; ix <= maxPixelX; ++ix)
         {
             float percentX = float(ix) / float(document.sizeX - 1);
             float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
