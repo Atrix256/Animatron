@@ -5,4 +5,6 @@ VARIANT_BEGIN(Data, EntityVariant, "Storage for entity type specific information
     VARIANT_TYPE(EntityCircle, circle, EntityCircle(), "")
     VARIANT_TYPE(EntityRectangle, rectangle, EntityRectangle(), "")
     VARIANT_TYPE(EntityLine, line, EntityLine(), "")
+    VARIANT_TYPE(EntityLines3D, lines3d, EntityLines3D(), "")
+    VARIANT_TYPE(EntityCamera, camera, EntityCamera(), "")
 VARIANT_END()

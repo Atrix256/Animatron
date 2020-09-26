@@ -23,7 +23,11 @@
 // prototypes for entity handler functions. These are implemented in entities.cpp
 #include "df_serialize/df_serialize/_common.h"
 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-    void HandleEntity_##_TYPE(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::##_TYPE& _NAME);
+    void HandleEntity_##_TYPE( \
+        const Data::Document& document, \
+        const std::unordered_map<std::string, Data::EntityVariant>& entityMap, \
+        std::vector<Data::Color>& pixels, \
+        const Data::##_TYPE& _NAME);
 #include "df_serialize/df_serialize/_fillunsetdefines.h"
 #include "schemas/schemas_entities.h"
 
@@ -36,6 +40,7 @@ struct EntityTimelineKeyframe
 
 struct EntityTimeline
 {
+    std::string id;
     float zorder = 0.0f;
     float createTime = 0.0f;
     float destroyTime = -1.0f;
@@ -49,57 +54,73 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
     pixels.resize(document.renderSizeX*document.renderSizeY);
     std::fill(pixels.begin(), pixels.end(), Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f });
 
-    // process the entities
+    // Get the key frame interpolated state of each entity first, so that they can look at eachother (like 3d objects looking at their camera)
+    std::unordered_map<std::string, Data::EntityVariant> entityMap;
+    {
+        for (const EntityTimeline* timeline_ : entityTimelines)
+        {
+            // skip any entity that doesn't currently exist
+            const EntityTimeline& timeline = *timeline_;
+            if (frameTime < timeline.createTime || (timeline.destroyTime >= 0.0f && frameTime > timeline.destroyTime))
+                continue;
+
+            // find where we are in the time line
+            int cursorIndex = 0;
+            while (cursorIndex + 1 < timeline.keyFrames.size() && timeline.keyFrames[cursorIndex + 1].time < frameTime)
+                cursorIndex++;
+
+            // interpolate keyframes if we are between two key frames
+            Data::EntityVariant entity;
+            if (cursorIndex + 1 < timeline.keyFrames.size())
+            {
+                // calculate the blend percentage from the key frame percentage and the control points
+                float blendPercent = 0.0f;
+                if (cursorIndex + 1 < timeline.keyFrames.size())
+                {
+                    float t = frameTime - timeline.keyFrames[cursorIndex].time;
+                    t /= (timeline.keyFrames[cursorIndex + 1].time - timeline.keyFrames[cursorIndex].time);
+
+                    float CPA = 0.0f;
+                    float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
+                    float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
+                    float CPD = 1.0f;
+
+                    blendPercent = CubicBezierInterpolation(CPA, CPB, CPC, CPD, t);
+                }
+
+                // Get the entity(ies) involved
+                const Data::EntityVariant& entity1 = timeline.keyFrames[cursorIndex].entity;
+                const Data::EntityVariant& entity2 = timeline.keyFrames[cursorIndex + 1].entity;
+
+                // Do the lerp between keyframe entities
+                Lerp(entity1, entity2, entity, blendPercent);
+            }
+            // otherwise we are beyond the last key frame, so just set the value
+            else
+            {
+                entity = timeline.keyFrames[cursorIndex].entity;
+            }
+
+            entityMap[timeline.id] = entity;
+        }
+    }
+
+    // process the entities in zorder
     for (const EntityTimeline* timeline_ : entityTimelines)
     {
         // skip any entity that doesn't currently exist
         const EntityTimeline& timeline = *timeline_;
-        if (frameTime < timeline.createTime || (timeline.destroyTime >= 0.0f && frameTime > timeline.destroyTime))
+        auto it = entityMap.find(timeline.id);
+        if (it == entityMap.end())
             continue;
 
-        // find where we are in the time line
-        int cursorIndex = 0;
-        while (cursorIndex + 1 < timeline.keyFrames.size() && timeline.keyFrames[cursorIndex+1].time < frameTime)
-            cursorIndex++;
-
-        // interpolate keyframes if we are between two key frames
-        Data::EntityVariant entity;
-        if (cursorIndex + 1 < timeline.keyFrames.size())
-        {
-            // calculate the blend percentage from the key frame percentage and the control points
-            float blendPercent = 0.0f;
-            if (cursorIndex + 1 < timeline.keyFrames.size())
-            {
-                float t = frameTime - timeline.keyFrames[cursorIndex].time;
-                t /= (timeline.keyFrames[cursorIndex + 1].time - timeline.keyFrames[cursorIndex].time);
-
-                float CPA = 0.0f;
-                float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
-                float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
-                float CPD = 1.0f;
-
-                blendPercent = CubicBezierInterpolation(CPA, CPB, CPC, CPD, t);
-            }
-
-            // Get the entity(ies) involved
-            const Data::EntityVariant& entity1 = timeline.keyFrames[cursorIndex].entity;
-            const Data::EntityVariant& entity2 = timeline.keyFrames[cursorIndex + 1].entity;
-
-            // Do the lerp between keyframe entities
-            Lerp(entity1, entity2, entity, blendPercent);
-        }
-        // otherwise we are beyond the last key frame, so just set the value
-        else
-        {
-            entity = timeline.keyFrames[cursorIndex].entity;
-        }
-
         // do the entity action
-        switch (timeline.keyFrames[0].entity._index)
+        const Data::EntityVariant& entity = it->second;
+        switch (entity._index)
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: HandleEntity_##_TYPE(document, pixels, entity.##_NAME); break;
+                case Data::EntityVariant::c_index_##_NAME: HandleEntity_##_TYPE(document, entityMap, pixels, entity.##_NAME); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -135,6 +156,7 @@ int main(int argc, char** argv)
     for (const Data::Entity& entity : document.entities)
     {
         EntityTimeline newTimeline;
+        newTimeline.id = entity.id;
         newTimeline.zorder = entity.zorder;
         newTimeline.createTime = entity.createTime;
         newTimeline.destroyTime = entity.destroyTime;
@@ -208,10 +230,16 @@ int main(int argc, char** argv)
         );
     }
 
-    // Render and write out each frame
-    printf("Rendering clip...\n");
-
+    // report what we are doing
     int framesTotal = int(document.duration * float(document.FPS));
+    printf("Rendering with %i threads...\n", omp_get_max_threads());
+    printf("  input: %s\n", fileName);
+    printf("  output: %s\n", outFilePath);
+    printf("  %i frames rendered at %i x %i, output to %i x %i\n",
+        framesTotal, document.renderSizeX, document.renderSizeY,
+        document.outputSizeX, document.outputSizeY);
+
+    // Render and write out each frame multithreadedly
 
     struct ThreadData
     {
@@ -230,7 +258,7 @@ int main(int argc, char** argv)
         ThreadData& threadData = threadsData[omp_get_thread_num()];
 
         // report progress
-        if (omp_get_thread_num() == 0)
+        //if (omp_get_thread_num() == 0)
         {
             static int lastPercent = -1;
             int percent = int(100.0f * float(framesDone) / float(framesTotal - 1));
@@ -278,6 +306,11 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+* NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
+ * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
+
+* camera needs ortho vs perspective ability and parameters
+
 * parenting and transforms next?
 
 
@@ -316,6 +349,8 @@ TODO:
 * be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
  * should probably have a bitset of what fields are present in json data.
  * this could be a feature of df_serialize to reflect out this parallel object of bools and also fill it in.
+
+ * report how long it took to render, and an average render time per frame
 
 TODO:
 * pre multiplied alpha

@@ -1,8 +1,13 @@
 #include <array>
 #include "schemas/types.h"
 #include "utils.h"
+#include <unordered_map>
 
-void HandleEntity_EntityFill(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::EntityFill& fill)
+void HandleEntity_EntityFill(
+    const Data::Document& document, 
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::Color>& pixels,
+    const Data::EntityFill& fill)
 {
     // if the color is opaque just do a fill
     if (fill.color.A >= 1.0f)
@@ -15,7 +20,11 @@ void HandleEntity_EntityFill(const Data::Document& document, std::vector<Data::C
     std::fill(pixels.begin(), pixels.end(), fill.color);
 }
 
-void HandleEntity_EntityCircle(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::EntityCircle& circle)
+void HandleEntity_EntityCircle(
+    const Data::Document& document,
+    const std::unordered_map<std::string,
+    Data::EntityVariant>& entityMap, std::vector<Data::Color>& pixels,
+    const Data::EntityCircle& circle)
 {
     // Get a bounding box of the circle
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
@@ -60,7 +69,11 @@ void HandleEntity_EntityCircle(const Data::Document& document, std::vector<Data:
     }
 }
 
-void HandleEntity_EntityRectangle(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::EntityRectangle& rectangle)
+void HandleEntity_EntityRectangle(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::Color>& pixels,
+    const Data::EntityRectangle& rectangle)
 {
     // Get the box of the rectangle
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
@@ -91,16 +104,11 @@ void HandleEntity_EntityRectangle(const Data::Document& document, std::vector<Da
     }
 }
 
-// todo: put this in utils.h i think
-float sdLine(vec2 a, vec2 b, vec2 p)
-{
-    vec2 pa = p - a;
-    vec2 ba = b - a;
-    float h = Clamp(Dot(pa, ba) / Dot(ba, ba), 0.0f, 1.0f);
-    return Length(pa - ba * h);
-}
-
-void HandleEntity_EntityLine(const Data::Document& document, std::vector<Data::Color>& pixels, const Data::EntityLine& line)
+void HandleEntity_EntityLine(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::Color>& pixels,
+    const Data::EntityLine& line)
 {
     // Get a bounding box of the line
     float minX = Min(line.A.X, line.B.X) - line.width;
@@ -136,4 +144,22 @@ void HandleEntity_EntityLine(const Data::Document& document, std::vector<Data::C
             pixel++;
         }
     }
+}
+
+void HandleEntity_EntityCamera(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::Color>& pixels,
+    const Data::EntityCamera& camera)
+{
+    // nothing to do for a camera
+}
+
+void HandleEntity_EntityLines3D(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap, 
+    std::vector<Data::Color>& pixels,
+    const Data::EntityLines3D& lines)
+{
+    // TODO: The lines want a camera, to be able to turn 3d lines into 2d. We probably need to make a map of all the entities and their correct state for this frame and pass it to each of these functions.
 }

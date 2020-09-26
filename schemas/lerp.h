@@ -59,7 +59,8 @@
         { \
             Result = (t < 0.5f) ? A : B; \
             return; \
-        }
+        } \
+        Result._index = A._index;
 
 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
         if (A._index == ThisType::c_index_##_NAME) \

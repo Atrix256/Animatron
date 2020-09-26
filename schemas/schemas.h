@@ -22,6 +22,12 @@ STRUCT_BEGIN(Data, Point2D, "A 2d Point")
     STRUCT_FIELD(float, Y, 0.0f, "Y")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, Point3D, "A 3d Point")
+    STRUCT_FIELD(float, X, 0.0f, "X")
+    STRUCT_FIELD(float, Y, 0.0f, "Y")
+    STRUCT_FIELD(float, Z, 0.0f, "Z")
+STRUCT_END()
+
 // ----------------------------- Specific Entity Types -----------------------------
 
 STRUCT_BEGIN(Data, EntityFill, "Fills the screen")
@@ -47,6 +53,19 @@ STRUCT_BEGIN(Data, EntityLine, "Draw a line")
     STRUCT_FIELD(Point2D, B, Point2D(), "The other point of the line")
     STRUCT_FIELD(float, width, 1.0f, "Line width")
     STRUCT_FIELD(Color, color, Color{}, "The color of the line")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, EntityLines3D, "Draw 3d lines")
+    STRUCT_DYNAMIC_ARRAY(Point2D, points, "The list of points in the lines")
+    STRUCT_FIELD(float, width, 1.0f, "Width of lines")
+    STRUCT_FIELD(Color, color, Color{}, "The color of the lines")
+    STRUCT_FIELD(std::string, camera, "", "The name of the camera used by the lines")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, EntityCamera, "A camera, used to turn 3d objects into 2d")
+    STRUCT_FIELD(Point3D, position, Point3D(), "The position of the camera")
+    STRUCT_FIELD(Point3D, at, Point3D{ 0.0f COMMA 0.0f COMMA 1.0f }, "The point the camera is aimed at")
+    STRUCT_FIELD(Point3D, up, Point3D{ 0.0f COMMA 1.0f COMMA 0.0f }, "The up direction for the camera's orientation")
 STRUCT_END()
 
 // ----------------------------- Entity Types -----------------------------

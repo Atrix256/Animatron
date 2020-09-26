@@ -42,6 +42,14 @@ float Length(const std::array<float, N>& A)
 
 
 
+float sdLine(vec2 a, vec2 b, vec2 p)
+{
+    vec2 pa = p - a;
+    vec2 ba = b - a;
+    float h = Clamp(Dot(pa, ba) / Dot(ba, ba), 0.0f, 1.0f);
+    return Length(pa - ba * h);
+}
+
 inline Data::ColorU8 ColorToColorU8(const Data::Color& color)
 {
     Data::ColorU8 ret;
