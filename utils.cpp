@@ -209,6 +209,7 @@ bool MakeJitterSequence(Data::Document& document)
             MakeJitterSequence_MitchellsBlueNoise(document);
             break;
         }
+        // TODO: could make this a compile time error by explanding schemas here
         default:
         {
             printf("Error: Unhandled jitter sequence type encountered!");

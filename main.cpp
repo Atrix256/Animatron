@@ -353,6 +353,20 @@ TODO:
  * Have a function to return an offset based on an index.
  * Probably use Mitchell's best candidate to make blue noise offsets to minimize the impact of the noise? Or maybe choose. Cause a path tracer would use this and probably would want a different jitter sequence!
 
+* jittering also support uniform and jittered grid
+
+* be able to change size of rendering at runtime and get rid of the render vs output size too
+ * I think this could work by just having a canvas be an entity that can be parented off of, and it's always resized to the target when mering.
+ * In this way, I think you can get rid of render/output size and just make that be supported through this canvas mechanism.
+
+* Let all 4 blend control points be changed. This lets you do stuff like flip immediately instead of blend. but other things too.
+
+* add option for dithering before quantizing
+ * Blue noise by default but IGN, Bayer and some other options available.
+ * Probably could have a setting to over-quantize.
+ * Probably also option for resize up using "nearest".
+ * Could over quantize with Bayer and up sample with nearest to make retro looking things.
+
 ! other subpixel jitter types to implement: white noise, projective blue noise, R2, sobol.
  * may also have some that animate over time to make the noise good over time
 
@@ -424,5 +438,13 @@ Low priority:
 TODO: 's for later
 * option for different image shrink / grow operations. right now it box filters down and bicubics up.
 * audio synth.. wave forms, envelopes, per channel operations, FIR, IIR. karplus strong, etc.
+* poisson blending could be cool to paste objects into scenes they arent from.
+* Could do effects between frames but it would serialize it. lik ebeing able to blend with the previous frame.
+* prefabs for library of reusable objects
+ * Prefabs are another list of things.
+ * They are a list of entities.
+ * Allow file includes in general where an included json could have any of the data a regular file could. Prefabs included but not limited to.
+ * When you make an entity of type prefab, it makes objects with a name prefix (name. Or name::) before the name.
+ * This lets you make dice etc that are reusable.
 
 */
