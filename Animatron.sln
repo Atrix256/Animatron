@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.902
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Animaton", "Animaton.vcxproj", "{2B86E8D3-43C3-4215-A20F-694208CDF7FF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Animatron", "Animatron.vcxproj", "{2B86E8D3-43C3-4215-A20F-694208CDF7FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

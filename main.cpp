@@ -305,7 +305,6 @@ TODO:
 
 ! generate documentation from schemas?
 * should document that +/-50 canvas units is the largest square that fits in the center.
-* rename project / solution to animatron. typod
 
 * For aa, could also just render N frames at different (random? Lds?) Subpixel offsets and average them together. simpler interface than resizing.
 
