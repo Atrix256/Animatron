@@ -1,10 +1,7 @@
 {
   "outputSizeX": 1024,
   "outputSizeY": 768,
-  //"renderSizeX": 4096,
-  //"renderSizeY": 3072,
   "FPS": 30,
-  "samplesPerPixel": 16,
   "duration": 2,
   "entities": [
     {
@@ -91,13 +88,13 @@
     {
       "entityId": "Circle1",
       "time": 1,
-      "blendControlPoints": [ 2.0, -1.0 ],
+      "blendControlPoints": [ 0.0, 2.0, -1.0, 1.0 ],
       "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}, \"innerRadius\": 1.0, \"outerRadius\": 5.0}}"
     },
     {
       "entityId": "Circle1",
       "time": 2,
-      "blendControlPoints": [ 0.9, 0.1 ],
+      "blendControlPoints": [ 0.0, 0.9, 0.1, 1.0 ],
       "newValue": "{\"circle\":{\"center\":{\"X\":50.0, \"Y\":-20.0}, \"innerRadius\": 12.0, \"outerRadius\": 1.0}}"
     }
   ]

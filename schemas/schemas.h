@@ -132,7 +132,7 @@ STRUCT_BEGIN(Data, KeyFrame, "A KeyFrame")
     STRUCT_FIELD(std::string, entityId, "", "The ID of the entity affected")
     STRUCT_FIELD(float, time, 0.0f, "The time in seconds the event occurs")
     STRUCT_FIELD(std::string, newValue, "", "JSON describing the value of the entity at this point in time")
-    STRUCT_STATIC_ARRAY(float, blendControlPoints, 2, {1.0f / 3.0f COMMA 2.0f / 3.0f}, "Middle two Cubic Bezier control points for blending from the previous value. The endpoints not given are 0.0 and 1.0")
+    STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, {0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f}, "Middle two Cubic Bezier control points for blending from the previous value. The endpoints not given are 0.0 and 1.0")
 STRUCT_END()
 
 // ----------------------------- The Document -----------------------------
@@ -146,7 +146,7 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(int, FPS, 30, "The frame rate of the render")
     STRUCT_FIELD(bool, forceOpaqueOutput, true, "If true, it will force all output pixels to be opaque. False to let transparency be output.")
 
-    STRUCT_FIELD(uint32_t, samplesPerPixel, 1, "The number of samples taken per pixel, increase for better anti aliasing but increased rendering cost.")
+    STRUCT_FIELD(uint32_t, samplesPerPixel, 16, "The number of samples taken per pixel, increase for better anti aliasing but increased rendering cost.")
     STRUCT_FIELD(SamplesType2D, jitterSequenceType, SamplesType2D::MitchellsBlueNoise, "The jitter sequence to use for the samples in samplesPerPixel.")
     STRUCT_FIELD_NO_SERIALIZE(Point2DArray, jitterSequence, Point2DArray(), "The actual jitter sequence used per pixel")
 

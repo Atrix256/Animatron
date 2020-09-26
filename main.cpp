@@ -36,7 +36,7 @@
 struct EntityTimelineKeyframe
 {
     float time = 0.0f;
-    std::array<float,2> blendControlPoints = { 1.0f / 3.0f, 2.0f / 3.0f };
+    std::array<float,4> blendControlPoints = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
     Data::EntityVariant entity;
 };
 
@@ -82,10 +82,10 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                     float t = frameTime - timeline.keyFrames[cursorIndex].time;
                     t /= (timeline.keyFrames[cursorIndex + 1].time - timeline.keyFrames[cursorIndex].time);
 
-                    float CPA = 0.0f;
-                    float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
-                    float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
-                    float CPD = 1.0f;
+                    float CPA = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
+                    float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
+                    float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[2];
+                    float CPD = timeline.keyFrames[cursorIndex + 1].blendControlPoints[3];
 
                     blendPercent = Clamp(CubicBezierInterpolation(CPA, CPB, CPC, CPD, t), 0.0f, 1.0f);
                 }
@@ -341,6 +341,8 @@ int main(int argc, char** argv)
 
 /*
 TODO:
+
+* test semi transparency
 
 ! compare perf with multisampling vs resizing image. put difference / details in checkin notes
 

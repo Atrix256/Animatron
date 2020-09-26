@@ -84,7 +84,7 @@ inline void ColorToColorU8(const std::vector<Data::Color>& pixels, std::vector<D
         pixelsU8[pixelIndex] = ColorToColorU8(pixels[pixelIndex]);
 }
 
-inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY, float& canvasX, float& canvasY)
+inline void PixelToCanvas(const Data::Document& document, float pixelX, float pixelY, float& canvasX, float& canvasY)
 {
     // +/- 50 in canvas units is the largest square that can fit in the render, centered in the middle of the render.
 
@@ -94,6 +94,11 @@ inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY
 
     canvasX = 100.0f * float(pixelX - centerPx) / float(canvasSizeInPixels);
     canvasY = 100.0f * float(pixelY - centerPy) / float(canvasSizeInPixels);
+}
+
+inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY, float& canvasX, float& canvasY)
+{
+    PixelToCanvas(document, (float)pixelX, (float)pixelY, canvasX, canvasY);
 }
 
 inline void CanvasToPixel(const Data::Document& document, float canvasX, float canvasY, int& pixelX, int& pixelY)

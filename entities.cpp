@@ -4,7 +4,6 @@
 #include <unordered_map>
 
 // TODO: need to look at samplesPerPixel and jitterSequence.points, for multi sampling
-// TODO: will have to turn PMA back into non PMA before writing it out (and before making it opaque!)
 
 void EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill)
 {
@@ -56,7 +55,6 @@ void EntityCircle_DoAction(
     minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
     maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
 
-    // TODO: handle alpha blending. maybe some template parameter function for speed? or always pay worst case
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(circle.color);
 
     // Draw the circle
@@ -65,20 +63,37 @@ void EntityCircle_DoAction(
     PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
     for (int iy = minPixelY; iy <= maxPixelY; ++iy)
     {
-        float percentY = float(iy) / float(document.renderSizeY - 1);
-        float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
-        float distY = abs(canvasY - circle.center.Y);
         Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
         for (int ix = minPixelX; ix <= maxPixelX; ++ix)
         {
-            float percentX = float(ix) / float(document.renderSizeX - 1);
-            float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
-            float distX = abs(canvasX - circle.center.X);
+            // do multiple jittered samples per pixel and integrate (average) the result
+            Data::ColorPMA samplesColor;
+            for (uint32_t sampleIndex = 0; sampleIndex < document.samplesPerPixel; ++sampleIndex)
+            {
+                Data::Point2D offset = document.jitterSequence.points[sampleIndex];
 
-            float dist = (float)sqrt(distX*distX + distY * distY);
-            dist -= circle.innerRadius;
-            if (dist > 0.0f && dist <= circle.outerRadius)
-                *pixel = colorPMA;
+                float percentX = (float(ix) + offset.X) / float(document.renderSizeX - 1);
+                float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
+                float distX = abs(canvasX - circle.center.X);
+
+                float percentY = (float(iy) + offset.Y) / float(document.renderSizeY - 1);
+                float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
+                float distY = abs(canvasY - circle.center.Y);
+
+                float dist = (float)sqrt(distX * distX + distY * distY);
+                dist -= circle.innerRadius;
+
+                if (dist > 0.0f && dist <= circle.outerRadius)
+                {
+                    samplesColor.R += colorPMA.R / float(document.samplesPerPixel);
+                    samplesColor.G += colorPMA.G / float(document.samplesPerPixel);
+                    samplesColor.B += colorPMA.B / float(document.samplesPerPixel);
+                    samplesColor.A += colorPMA.A / float(document.samplesPerPixel);
+                }
+            }
+
+            // alpha blend the result in
+            *pixel = Blend(*pixel, samplesColor);
             pixel++;
         }
     }
@@ -109,7 +124,6 @@ void EntityRectangle_DoAction(
     minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
     maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
 
-    // TODO: handle alpha blending.
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(rectangle.color);
 
     // Draw the rectangle
@@ -118,7 +132,7 @@ void EntityRectangle_DoAction(
         Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
         for (int ix = minPixelX; ix <= maxPixelX; ++ix)
         {
-            *pixel = colorPMA;
+            *pixel = Blend(*pixel, colorPMA);
             pixel++;
         }
     }
@@ -150,7 +164,6 @@ void EntityLine_DoAction(
     minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
     maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
 
-    // TODO: handle alpha blending.
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(line.color);
 
     // Draw the line
@@ -159,13 +172,28 @@ void EntityLine_DoAction(
         Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
         for (int ix = minPixelX; ix <= maxPixelX; ++ix)
         {
-            float canvasX, canvasY;
-            PixelToCanvas(document, ix, iy, canvasX, canvasY);
+            // do multiple jittered samples per pixel and integrate (average) the result
+            Data::ColorPMA samplesColor;
+            for (uint32_t sampleIndex = 0; sampleIndex < document.samplesPerPixel; ++sampleIndex)
+            {
+                Data::Point2D offset = document.jitterSequence.points[sampleIndex];
 
-            float distance = sdLine({ line.A.X, line.A.Y }, { line.B.X, line.B.Y }, { canvasX, canvasY });
+                float canvasX, canvasY;
+                PixelToCanvas(document, (float)ix + offset.X, (float)iy + offset.Y, canvasX, canvasY);
 
-            if (distance < line.width)
-                *pixel = colorPMA;
+                float distance = sdLine({ line.A.X, line.A.Y }, { line.B.X, line.B.Y }, { canvasX, canvasY });
+
+                if (distance < line.width)
+                {
+                    samplesColor.R += colorPMA.R / float(document.samplesPerPixel);
+                    samplesColor.G += colorPMA.G / float(document.samplesPerPixel);
+                    samplesColor.B += colorPMA.B / float(document.samplesPerPixel);
+                    samplesColor.A += colorPMA.A / float(document.samplesPerPixel);
+                }
+            }
+
+            // alpha blend the result in
+            *pixel = Blend(*pixel, samplesColor);
             pixel++;
         }
     }
@@ -198,4 +226,5 @@ void EntityLines3D_DoAction(
 {
     // TODO: The lines want a camera, to be able to turn 3d lines into 2d. We probably need to make a map of all the entities and their correct state for this frame and pass it to each of these functions.
     // TODO: get the viewProj matrix from the camera
+    // TODO: probably need an oriented bounded box? maybe everything needs a transform? i dunno.
 }
