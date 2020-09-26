@@ -166,6 +166,10 @@ int main(int argc, char** argv)
             document.renderSizeX = document.outputSizeX;
         if (document.renderSizeY == 0)
             document.renderSizeY = document.outputSizeY;
+        if (document.samplesPerPixel < 1)
+            document.samplesPerPixel = 1;
+
+        MakeJitterSequence(document);
     }
 
     // make a timeline for each entity by just starting with the entity definition
@@ -342,6 +346,9 @@ TODO:
  * Probably use Mitchell's best candidate to make blue noise offsets to minimize the impact of the noise? Or maybe choose. Cause a path tracer would use this and probably would want a different jitter sequence!
 
 ! other subpixel jitter types to implement: white noise, projective blue noise, R2, sobol.
+ * may also have some that animate over time to make the noise good over time
+
+! could show an estimated time remaining along with the percent!
 
 ! probably want some storage space on those schemas... fields defined but not serialized
  * for the camera, I want to have a matrix there.

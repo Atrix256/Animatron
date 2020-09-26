@@ -13,6 +13,8 @@ void EntityFill_DoAction(
     std::vector<Data::Color>& pixels,
     const Data::EntityFill& fill)
 {
+    // NOTE: no need to do anything for multi sampling.
+
     // if the color is opaque just do a fill
     if (fill.color.A >= 1.0f)
     {

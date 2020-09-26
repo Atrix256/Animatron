@@ -135,3 +135,5 @@ inline Data::Color operator / (const Data::Color& A, float B)
 }
 
 void Resize(std::vector<Data::Color>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY);
+
+bool MakeJitterSequence(Data::Document& document);

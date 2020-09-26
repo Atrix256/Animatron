@@ -158,3 +158,33 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
         sizeY = desiredSizeY;
     }
 }
+
+void MakeJitterSequence_(Data::Document& document)
+{
+    // TODO: this
+}
+
+bool MakeJitterSequence(Data::Document& document)
+{
+    // TODO: review how you are rendering, see if half a pixel offset is correct or if it should be 0. If zero, jitter should be +/- 0.5.
+    if (document.samplesPerPixel == 1)
+    {
+        document.jitterSequence.points.push_back(Data::Point2D{0.5f, 0.5f});
+        return;
+    }
+
+    switch (document.jitterSequenceType)
+    {
+        case Data::SamplesType2D::MitchellsBlueNoise:
+        {
+            MakeJitterSequence_(document);
+            break;
+        }
+        default:
+        {
+            printf("Error: Unhandled jitter sequence type encountered!");
+            return false;
+        }
+    }
+    return true;
+}

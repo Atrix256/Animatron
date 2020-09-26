@@ -53,6 +53,16 @@ STRUCT_BEGIN(Data, Matrix4x4, "A 4x4 matrix")
     STRUCT_FIELD(Point4D, W, Point4D{0.0f COMMA 0.0f COMMA  0.0f COMMA 1.0f}, "W axis")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, Point2DArray, "A dynamic array of Point2Ds")
+    STRUCT_DYNAMIC_ARRAY(Point2D, points, "")
+STRUCT_END()
+
+// ----------------------------- Enums -----------------------------
+
+ENUM_BEGIN(Data, SamplesType2D, "Type of 2d samples generated")
+    ENUM_ITEM(MitchellsBlueNoise, "2d blue noise, made with Mitchell's Best Candidate algorithm. Good at hiding the error in low sample counts.")
+ENUM_END()
+
 // ----------------------------- Specific Entity Types -----------------------------
 
 STRUCT_BEGIN(Data, EntityFill, "Fills the screen")
@@ -128,6 +138,11 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(float, duration, 4.0f, "The duration of the rendering")
     STRUCT_FIELD(int, FPS, 30, "The frame rate of the render")
     STRUCT_FIELD(bool, forceOpaqueOutput, true, "If true, it will force all output pixels to be opaque. False to let transparency be output.")
+
+    STRUCT_FIELD(uint32_t, samplesPerPixel, 1, "The number of samples taken per pixel, increase for better anti aliasing but increased rendering cost.")
+    STRUCT_FIELD(SamplesType2D, jitterSequenceType, SamplesType2D::MitchellsBlueNoise, "The jitter sequence to use for the samples in samplesPerPixel.")
+    STRUCT_FIELD_NO_SERIALIZE(Point2DArray, jitterSequence, Point2DArray(), "The actual jitter sequence used per pixel")
+
     STRUCT_DYNAMIC_ARRAY(Entity, entities, "")
     STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")
 STRUCT_END()
