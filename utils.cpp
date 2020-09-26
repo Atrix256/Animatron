@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <random>
 
 void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY)
 {
@@ -159,25 +160,53 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
     }
 }
 
-void MakeJitterSequence_(Data::Document& document)
+void MakeJitterSequence_MitchellsBlueNoise(Data::Document& document)
 {
-    // TODO: this
+    std::mt19937 rng;
+    static std::uniform_real_distribution<float> dist(0, 1);
+
+    for (uint32_t i = 1; i <= document.samplesPerPixel; ++i)
+    {
+        // keep the candidate that is farthest from it's closest point
+        size_t numCandidates = i;
+        float bestDistance = 0.0f;
+        Data::Point2D bestCandidatePos = Data::Point2D{ 0.0f, 0.0f };
+        for (size_t candidate = 0; candidate < numCandidates; ++candidate)
+        {
+            Data::Point2D candidatePos = Data::Point2D{ dist(rng), dist(rng) };
+
+            // calculate the closest distance from this point to an existing sample
+            float minDist = FLT_MAX;
+            for (const Data::Point2D& samplePos : document.jitterSequence.points)
+            {
+                float dist = DistanceUnitTorroidal(vec2{ samplePos.X, samplePos.Y }, vec2{ candidatePos.X, candidatePos.Y });
+                if (dist < minDist)
+                    minDist = dist;
+            }
+
+            if (minDist > bestDistance)
+            {
+                bestDistance = minDist;
+                bestCandidatePos = candidatePos;
+            }
+        }
+        document.jitterSequence.points.push_back(bestCandidatePos);
+    }
 }
 
 bool MakeJitterSequence(Data::Document& document)
 {
-    // TODO: review how you are rendering, see if half a pixel offset is correct or if it should be 0. If zero, jitter should be +/- 0.5.
     if (document.samplesPerPixel == 1)
     {
         document.jitterSequence.points.push_back(Data::Point2D{0.5f, 0.5f});
-        return;
+        return true;
     }
 
     switch (document.jitterSequenceType)
     {
         case Data::SamplesType2D::MitchellsBlueNoise:
         {
-            MakeJitterSequence_(document);
+            MakeJitterSequence_MitchellsBlueNoise(document);
             break;
         }
         default:

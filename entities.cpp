@@ -3,6 +3,8 @@
 #include "utils.h"
 #include <unordered_map>
 
+// TODO: need to look at samplesPerPixel and jitterSequenceType
+
 void EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill)
 {
 }

@@ -4,6 +4,7 @@
   "renderSizeX": 4096,
   "renderSizeY": 3072,
   "FPS": 30,
+  "samplesPerPixel": 16,
   "duration": 2,
   "entities": [
     {
@@ -57,33 +58,33 @@
       }
     },
     {
-        "id": "Circle1",
-        "zorder": 1.0,
-        "data": {
-            "circle": {
-                "center": {
-                    "X": -15.0,
-                    "Y": 0.0
-                },
-                "innerRadius": 12.0,
-                "outerRadius": 3.0,
-                "color": {
-                    "R": 1.0,
-                    "G": 0.2,
-                    "B": 0.1,
-                    "A": 1.0
-                }
-            }
+      "id": "Circle1",
+      "zorder": 1.0,
+      "data": {
+        "circle": {
+          "center": {
+            "X": -15.0,
+            "Y": 0.0
+          },
+          "innerRadius": 12.0,
+          "outerRadius": 3.0,
+          "color": {
+            "R": 1.0,
+            "G": 0.2,
+            "B": 0.1,
+            "A": 1.0
+          }
         }
+      }
     },
     // TODO: MAKE THIS CLIP BE THE INTRO CLIP! CAN SAVE / REUSE THIS AND IMPROVE IT. fusion can put the various clips and audio together.
     {
-        "id": "Camera",
-        "data": {
-            "camera": {
+      "id": "Camera",
+      "data": {
+        "camera": {
 
-            }
         }
+      }
     }
   ],
   "keyFrames": [

@@ -256,8 +256,8 @@ int main(int argc, char** argv)
     printf("Rendering with %i threads...\n", omp_get_max_threads());
     printf("  input: %s\n", fileName);
     printf("  output: %s\n", outFilePath);
-    printf("  %i frames rendered at %i x %i, output to %i x %i\n",
-        framesTotal, document.renderSizeX, document.renderSizeY,
+    printf("  %i frames rendered at %i x %i with %i samples per pixel, output to %i x %i\n",
+        framesTotal, document.renderSizeX, document.renderSizeY, document.samplesPerPixel,
         document.outputSizeX, document.outputSizeY);
 
     // start the timer
@@ -335,6 +335,8 @@ int main(int argc, char** argv)
 
 /*
 TODO:
+
+! compare perf with multisampling vs resizing image. put difference / details in checkin notes
 
 ! flatten checkins for v1
 
