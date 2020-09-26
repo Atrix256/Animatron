@@ -150,6 +150,39 @@ inline Data::Color operator / (const Data::Color& A, float B)
     return ret;
 }
 
+inline Data::ColorPMA ToPremultipliedAlpha(const Data::Color& color)
+{
+    Data::ColorPMA ret;
+    ret.R = color.R * color.A;
+    ret.G = color.G * color.A;
+    ret.B = color.B * color.A;
+    ret.A = color.A;
+    return ret;
+}
+
+inline Data::Color FromPremultipliedAlpha(const Data::ColorPMA& color)
+{
+    if (color.A == 0.0f)
+        return Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f };
+
+    Data::Color ret;
+    ret.R = color.R / color.A;
+    ret.G = color.G / color.A;
+    ret.B = color.B / color.A;
+    ret.A = color.A;
+    return ret;
+}
+
+inline Data::ColorPMA Blend(const Data::ColorPMA& out, const Data::ColorPMA& in)
+{
+    Data::ColorPMA ret;
+    ret.R = in.R + out.R * (1.0f - in.A);
+    ret.G = in.G + out.G * (1.0f - in.A);
+    ret.B = in.B + out.B * (1.0f - in.A);
+    ret.A = in.A + out.A * (1.0f - in.A);
+    return ret;
+}
+
 void Resize(std::vector<Data::Color>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY);
 
 bool MakeJitterSequence(Data::Document& document);

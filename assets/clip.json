@@ -1,8 +1,8 @@
 {
   "outputSizeX": 1024,
   "outputSizeY": 768,
-  "renderSizeX": 4096,
-  "renderSizeY": 3072,
+  //"renderSizeX": 4096,
+  //"renderSizeY": 3072,
   "FPS": 30,
   "samplesPerPixel": 16,
   "duration": 2,

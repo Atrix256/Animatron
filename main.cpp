@@ -27,7 +27,7 @@
     void _TYPE##_DoAction( \
         const Data::Document& document, \
         const std::unordered_map<std::string, Data::EntityVariant>& entityMap, \
-        std::vector<Data::Color>& pixels, \
+        std::vector<Data::ColorPMA>& pixels, \
         const Data::##_TYPE& _NAME); \
    void _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME);
 #include "df_serialize/df_serialize/_fillunsetdefines.h"
@@ -49,12 +49,12 @@ struct EntityTimeline
     std::vector<EntityTimelineKeyframe> keyFrames;
 };
 
-bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::Color>& pixels, int frameIndex)
+bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::ColorPMA>& pixels, int frameIndex)
 {
     // setup for the frame
     float frameTime = float(frameIndex) / float(document.FPS);
     pixels.resize(document.renderSizeX*document.renderSizeY);
-    std::fill(pixels.begin(), pixels.end(), Data::Color{ 0.0f, 0.0f, 0.0f, 0.0f });
+    std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 0.0f });
 
     // Get the key frame interpolated state of each entity first, so that they can look at eachother (like 3d objects looking at their camera)
     std::unordered_map<std::string, Data::EntityVariant> entityMap;
@@ -267,6 +267,7 @@ int main(int argc, char** argv)
     struct ThreadData
     {
         char outFileName[1024];
+        std::vector<Data::ColorPMA> pixelsPMA;
         std::vector<Data::Color> pixels;
         std::vector<Data::ColorU8> pixelsU8;
     };
@@ -293,11 +294,16 @@ int main(int argc, char** argv)
         }
 
         // render a frame
-        if (!GenerateFrame(document, entityTimelines, threadData.pixels, frameIndex))
+        if (!GenerateFrame(document, entityTimelines, threadData.pixelsPMA, frameIndex))
         {
             wasError = true;
             break;
         }
+        
+        // convert from PMA to non PMA
+        threadData.pixels.resize(threadData.pixelsPMA.size());
+        for (size_t index = 0; index < threadData.pixelsPMA.size(); ++index)
+            threadData.pixels[index] = FromPremultipliedAlpha(threadData.pixelsPMA[index]);
 
         // resize from the rendered size to the output size
         Resize(threadData.pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);

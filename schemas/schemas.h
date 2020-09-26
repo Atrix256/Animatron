@@ -10,6 +10,13 @@ STRUCT_BEGIN(Data, Color, "A linear floating point color")
     STRUCT_FIELD(float, A, 0.0f, "Alpha")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, ColorPMA, "A pre multiplied alpha version of Color")
+    STRUCT_FIELD(float, R, 0.0f, "Red")
+    STRUCT_FIELD(float, G, 0.0f, "Green")
+    STRUCT_FIELD(float, B, 0.0f, "Blue")
+    STRUCT_FIELD(float, A, 0.0f, "Alpha")
+STRUCT_END()
+
 STRUCT_BEGIN(Data, ColorU8, "An sRGB U8 color")
     STRUCT_FIELD(uint8_t, R, 0, "Red")
     STRUCT_FIELD(uint8_t, G, 0, "Green")
