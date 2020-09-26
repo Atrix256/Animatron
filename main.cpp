@@ -210,12 +210,12 @@ int main(int argc, char** argv)
 
     // Render and write out each frame
     printf("Rendering clip...\n");
-    char outFileName[1024];
 
     int framesTotal = int(document.duration * float(document.FPS));
 
     struct ThreadData
     {
+        char outFileName[1024];
         std::vector<Data::Color> pixels;
         std::vector<Data::ColorU8> pixelsU8;
     };
@@ -262,8 +262,8 @@ int main(int argc, char** argv)
         }
 
         // write it out
-        sprintf_s(outFileName, "%s%i.png", outFilePath, frameIndex);
-        stbi_write_png(outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+        sprintf_s(threadData.outFileName, "%s%i.png", outFilePath, frameIndex);
+        stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
 
         framesDone++;
     }
