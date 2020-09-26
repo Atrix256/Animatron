@@ -59,7 +59,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
                     while (srcPixelStart < srcPixelEnd)
                     {
                         // find how much of this pixel the foot print covers
-                        float pixelEnd = Min(floor(srcPixelStart) + 1.0f, srcPixelEnd);
+                        float pixelEnd = Min((float)floor(srcPixelStart) + 1.0f, srcPixelEnd);
                         float pixelWeight = pixelEnd - srcPixelStart;
 
                         // read pixel, keep a sum of weight and color*weight 
@@ -135,7 +135,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
                     while (srcPixelStart < srcPixelEnd)
                     {
                         // find how much of this pixel the foot print covers
-                        float pixelEnd = Min(floor(srcPixelStart) + 1.0f, srcPixelEnd);
+                        float pixelEnd = Min((float)floor(srcPixelStart) + 1.0f, srcPixelEnd);
                         float pixelWeight = pixelEnd - srcPixelStart;
 
                         // read pixel, keep a sum of weight and color*weight 

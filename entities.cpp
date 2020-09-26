@@ -51,7 +51,7 @@ void HandleEntity_EntityCircle(const Data::Document& document, std::vector<Data:
             float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
             float distX = abs(canvasX - circle.center.X);
 
-            float dist = sqrt(distX*distX + distY * distY);
+            float dist = (float)sqrt(distX*distX + distY * distY);
             dist -= circle.innerRadius;
             if (dist > 0.0f && dist <= circle.outerRadius)
                 *pixel = circle.color;

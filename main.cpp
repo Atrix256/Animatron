@@ -6,6 +6,7 @@
 #include <array>
 #include <unordered_map>
 #include <omp.h>
+#include <atomic>
 
 #include "schemas/types.h"
 #include "schemas/json.h"
@@ -207,8 +208,6 @@ int main(int argc, char** argv)
         );
     }
 
-    // TODO: use OMP to go multithreaded. probably need a per thread structure to hold pixels (to avoid alloc churn!) etc.
-
     // Render and write out each frame
     printf("Rendering clip...\n");
     char outFileName[1024];
@@ -220,7 +219,10 @@ int main(int argc, char** argv)
         std::vector<Data::Color> pixels;
         std::vector<Data::ColorU8> pixelsU8;
     };
-    std::vector<ThreadData> threadsData(omp_get_num_threads());
+    std::vector<ThreadData> threadsData(omp_get_max_threads());
+
+    bool wasError = false;
+    std::atomic<int> framesDone(0);
 
     #pragma omp parallel for
     for (int frameIndex = 0; frameIndex < framesTotal; ++frameIndex)
@@ -231,7 +233,7 @@ int main(int argc, char** argv)
         if (omp_get_thread_num() == 0)
         {
             static int lastPercent = -1;
-            int percent = int(100.0f * float(frameIndex) / float(framesTotal - 1));
+            int percent = int(100.0f * float(framesDone) / float(framesTotal - 1));
             if (lastPercent != percent)
             {
                 lastPercent = percent;
@@ -241,7 +243,10 @@ int main(int argc, char** argv)
 
         // render a frame
         if (!GenerateFrame(document, entityTimelines, threadData.pixels, frameIndex))
-            return 4;
+        {
+            wasError = true;
+            break;
+        }
 
         // resize from the rendered size to the output size
         Resize(threadData.pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
@@ -259,8 +264,13 @@ int main(int argc, char** argv)
         // write it out
         sprintf_s(outFileName, "%s%i.png", outFilePath, frameIndex);
         stbi_write_png(outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+
+        framesDone++;
     }
     printf("\r100%%\n");
+
+    if (wasError)
+        return 4;
 
     return 0;
 }

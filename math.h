@@ -23,7 +23,7 @@ inline float LinearToSRGB(float x)
     if (x < 0.0031308f)
         return x * 12.92f;
     else
-        return pow(x * 1.055f, 1.0f / 2.4f) - 0.055f;
+        return (float)pow(x * 1.055f, 1.0f / 2.4f) - 0.055f;
 }
 
 inline float SRGBToLinear(float x)
@@ -32,12 +32,12 @@ inline float SRGBToLinear(float x)
     if (x < 0.04045f)
         return x / 12.92f;
     else
-        return pow((x + 0.055f) / 1.055f, 2.4f);
+        return (float)pow((x + 0.055f) / 1.055f, 2.4f);
 }
 
 inline float Fract(float f)
 {
-    return f - floor(f);
+    return f - (float)floor(f);
 }
 
 inline float Lerp(float A, float B, float t)
