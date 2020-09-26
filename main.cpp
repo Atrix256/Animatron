@@ -278,6 +278,9 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+* parenting and transforms next?
+
+
 * add a program and version number to the document, and verify it on load
 
 * make it spit out a text file that says the ffmpeg command to combine it into a movie
@@ -302,6 +305,8 @@ TODO:
 * Bloom?
 * Tone map.
 * cube maps
+
+* there are more 2d sdf's here: https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 
 ! generate documentation from schemas?
 * should document that +/-50 canvas units is the largest square that fits in the center.

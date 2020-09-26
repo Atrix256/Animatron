@@ -3,6 +3,45 @@
 #include "schemas/types.h"
 #include "math.h"
 
+// TODO: put this vector math in it's own file?
+
+typedef std::array<float, 2> vec2;
+
+template <size_t N>
+std::array<float, N> operator * (const std::array<float, N>& A,float B)
+{
+    std::array<float, N> ret;
+    for (size_t i = 0; i < N; ++i)
+        ret[i] = A[i] * B;
+    return ret;
+}
+
+template <size_t N>
+std::array<float, N> operator - (const std::array<float, N>& A, const std::array<float, N>& B)
+{
+    std::array<float, N> ret;
+    for (size_t i = 0; i < N; ++i)
+        ret[i] = A[i] - B[i];
+    return ret;
+}
+
+template <size_t N>
+float Dot(const std::array<float, N>& A, const std::array<float, N>& B)
+{
+    float ret = 0.0f;
+    for (size_t i = 0; i < N; ++i)
+        ret += A[i] * B[i];
+    return ret;
+}
+
+template <size_t N>
+float Length(const std::array<float, N>& A)
+{
+    return (float)sqrt(Dot(A, A));
+}
+
+
+
 inline Data::ColorU8 ColorToColorU8(const Data::Color& color)
 {
     Data::ColorU8 ret;

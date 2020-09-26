@@ -35,6 +35,20 @@ STRUCT_BEGIN(Data, EntityCircle, "Draw a circle")
     STRUCT_FIELD(Color, color, Color{}, "The color of the circle")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, EntityRectangle, "Draw a rectangle")
+    STRUCT_FIELD(Point2D, center, Point2D(), "The location of the rectangle")
+    STRUCT_FIELD(float, width, 10.0f, "Rectangle width")
+    STRUCT_FIELD(float, height, 10.0f, "Rectangle height")
+    STRUCT_FIELD(Color, color, Color{}, "The color of the rectangle")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, EntityLine, "Draw a line")
+    STRUCT_FIELD(Point2D, A, Point2D(), "One point of the line")
+    STRUCT_FIELD(Point2D, B, Point2D(), "The other point of the line")
+    STRUCT_FIELD(float, width, 1.0f, "Line width")
+    STRUCT_FIELD(Color, color, Color{}, "The color of the line")
+STRUCT_END()
+
 // ----------------------------- Entity Types -----------------------------
 
 #include "schemas_entities.h"

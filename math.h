@@ -17,6 +17,12 @@ T Min(T a, T b)
     return (a < b) ? a : b;
 }
 
+template <typename T>
+T Max(T a, T b)
+{
+    return (a > b) ? a : b;
+}
+
 inline float LinearToSRGB(float x)
 {
     x = Clamp(x, 0.0f, 1.0f);
