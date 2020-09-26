@@ -235,6 +235,13 @@ int main(int argc, char** argv)
         // Convert it to RGBAU8
         ColorToColorU8(pixels, pixelsU8);
 
+        // force to opaque if we should
+        if (document.forceOpaqueOutput)
+        {
+            for (Data::ColorU8& pixel : pixelsU8)
+                pixel.A = 255;
+        }
+
         // write it out
         sprintf_s(outFileName, "%s%i.png", outFilePath, frameIndex);
         stbi_write_png(outFileName, document.outputSizeX, document.outputSizeY, 4, pixelsU8.data(), document.outputSizeX * 4);
@@ -246,7 +253,11 @@ int main(int argc, char** argv)
 
 /*
 TODO:
-* profile!
+
+* make it spit out a text file that says the ffmpeg command to combine it into a movie
+* make this operate via command line
+
+* profile?
 
 ! generate documentation from schemas?
 * should document that +/-50 canvas units is the largest square that fits in the center.

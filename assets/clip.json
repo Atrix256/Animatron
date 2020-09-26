@@ -1,8 +1,8 @@
 {
-  "outputSizeX": 200,
-  "outputSizeY": 200,
-  "renderSizeX": 800,
-  "renderSizeY": 800,
+  "outputSizeX": 1024,
+  "outputSizeY": 768,
+  "renderSizeX": 4096,
+  "renderSizeY": 3072,
   "FPS": 30,
   "duration": 2,
   "entities": [
@@ -135,13 +135,13 @@
     {
       "entityId": "Circle1",
       "time": 1,
-      "blendControlPoints": [ 0.2, 0.9 ],
+      "blendControlPoints": [ 0.9, 0.2 ],
       "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}}}"
     },
     {
       "entityId": "Circle1",
       "time": 2,
-      "blendControlPoints": [ 0.2, 0.9 ],
+      "blendControlPoints": [ 0.9, 0.1 ],
       "newValue": "{\"circle\":{\"center\":{\"X\":50.0, \"Y\":-20.0}}}"
     }
   ]
