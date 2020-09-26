@@ -57,91 +57,40 @@
       }
     },
     {
-      "id": "Circle1",
-      "zorder": 1.0,
-      "data": {
-        "circle": {
-          "center": {
-            "X": -15.0,
-            "Y": 0.0
-          },
-          "innerRadius": 12.0,
-          "outerRadius": 3.0,
-          "color": {
-            "R": 1.0,
-            "G": 0.2,
-            "B": 0.1,
-            "A": 1.0
-          }
+        "id": "Circle1",
+        "zorder": 1.0,
+        "data": {
+            "circle": {
+                "center": {
+                    "X": -15.0,
+                    "Y": 0.0
+                },
+                "innerRadius": 12.0,
+                "outerRadius": 3.0,
+                "color": {
+                    "R": 1.0,
+                    "G": 0.2,
+                    "B": 0.1,
+                    "A": 1.0
+                }
+            }
         }
-      }
     },
+    // TODO: MAKE THIS CLIP BE THE INTRO CLIP! CAN SAVE / REUSE THIS AND IMPROVE IT. fusion can put the various clips and audio together.
     {
-      "id": "Circle2",
-      "zorder": 2.0,
-      "data": {
-        "circle": {
-          "center": {
-            "X": 0.0,
-            "Y": 0.0
-          },
-          "innerRadius": 12.0,
-          "outerRadius": 3.0,
-          "color": {
-            "R": 0.2,
-            "G": 1.0,
-            "B": 0.1,
-            "A": 1.0
-          }
+        "id": "Camera",
+        "data": {
+            "camera": {
+
+            }
         }
-      }
-    },
-    {
-      "id": "Circle3",
-      "zorder": 3.0,
-      "data": {
-        "circle": {
-          "center": {
-            "X": 15.0,
-            "Y": 0.0
-          },
-          "innerRadius": 12.0,
-          "outerRadius": 3.0,
-          "color": {
-            "R": 0.1,
-            "G": 0.2,
-            "B": 1.0,
-            "A": 1.0
-          }
-        }
-      }
-    },
-    {
-      "id": "Circle4",
-      "zorder": 4.0,
-      "data": {
-        "circle": {
-          "center": {
-            "X": 0.0,
-            "Y": 15.0
-          },
-          "innerRadius": 12.0,
-          "outerRadius": 3.0,
-          "color": {
-            "R": 1.0,
-            "G": 0.2,
-            "B": 1.0,
-            "A": 1.0
-          }
-        }
-      }
     }
   ],
   "keyFrames": [
     {
       "entityId": "Circle1",
       "time": 1,
-      "blendControlPoints": [ 0.9, 0.2 ],
+      "blendControlPoints": [ 2.0, -1.0 ],
       "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}, \"innerRadius\": 1.0, \"outerRadius\": 5.0}}"
     },
     {

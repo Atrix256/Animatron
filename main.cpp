@@ -86,7 +86,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                     float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
                     float CPD = 1.0f;
 
-                    blendPercent = CubicBezierInterpolation(CPA, CPB, CPC, CPD, t);
+                    blendPercent = Clamp(CubicBezierInterpolation(CPA, CPB, CPC, CPD, t), 0.0f, 1.0f);
                 }
 
                 // Get the entity(ies) involved
@@ -322,6 +322,17 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+! flatten checkins for v1
+
+* multi sample ought to be way faster than resizing.
+ * don't need multiple buffers. Take the multiple samples per pixel right there and average em!
+ * Fill just does one.
+ * Circle and similar could do each row N times with a subpixel offset.
+ * Have a function to return an offset based on an index.
+ * Probably use Mitchell's best candidate to make blue noise offsets to minimize the impact of the noise? Or maybe choose. Cause a path tracer would use this and probably would want a different jitter sequence!
+
+? get ffmpeg.exe into the out folder from your laptop?
+
 ! probably want some storage space on those schemas... fields defined but not serialized
  * for the camera, I want to have a matrix there.
  * entities can have a "initialize" call to go along with the action call. the camera would calculate the matrix there. it should get no information about the outside world.
@@ -331,6 +342,7 @@ TODO:
  * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
 
 * camera needs ortho vs perspective ability and parameters
+ * test both!
 
 * parenting and transforms next? after intro screen, should start making the video itself
 
