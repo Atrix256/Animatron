@@ -331,7 +331,7 @@ TODO:
  * Have a function to return an offset based on an index.
  * Probably use Mitchell's best candidate to make blue noise offsets to minimize the impact of the noise? Or maybe choose. Cause a path tracer would use this and probably would want a different jitter sequence!
 
-? get ffmpeg.exe into the out folder from your laptop?
+! other subpixel jitter types to implement: white noise, projective blue noise, R2, sobol.
 
 ! probably want some storage space on those schemas... fields defined but not serialized
  * for the camera, I want to have a matrix there.
