@@ -7,32 +7,14 @@
   "duration": 2,
   "entities": [
     {
-      "id": "Background Color 1",
-      "createTime": 0.1,
-      "destroyTime": 1.0,
+      "id": "Background",
       "zorder": -1000.0,
       "data": {
         "fill": {
           "color": {
-            "R": 0.2,
-            "G": 0.4,
-            "B": 0.8,
-            "A": 1.0
-          }
-        }
-      }
-    },
-    {
-      "id": "Background Color 2",
-      "createTime": 1.1,
-      "destroyTime": -1.0,
-      "zorder": -1000.0,
-      "data": {
-        "fill": {
-          "color": {
-            "R": 0.8,
-            "G": 0.4,
-            "B": 0.2,
+            "R": 0.0,
+            "G": 0.0,
+            "B": 0.0,
             "A": 1.0
           }
         }
@@ -121,28 +103,16 @@
   ],
   "keyFrames": [
     {
-      "entityId": "Background Color 2",
-      "time": 1.5,
-      "blendControlPoints": [ 0.1, 0.2 ],
-      "newValue": "{\"fill\":{\"color\":{\"R\":0.5, \"G\":0.5, \"B\":0.5}}}"
-    },
-    {
-      "entityId": "Background Color 2",
-      "time": 1.75,
-      "blendControlPoints": [ 0.2, 0.9 ],
-      "newValue": "{\"fill\":{\"color\":{\"G\":1.0}}}"
-    },
-    {
       "entityId": "Circle1",
       "time": 1,
       "blendControlPoints": [ 0.9, 0.2 ],
-      "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}}}"
+      "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}, \"innerRadius\": 1.0, \"outerRadius\": 5.0}}"
     },
     {
       "entityId": "Circle1",
       "time": 2,
       "blendControlPoints": [ 0.9, 0.1 ],
-      "newValue": "{\"circle\":{\"center\":{\"X\":50.0, \"Y\":-20.0}}}"
+      "newValue": "{\"circle\":{\"center\":{\"X\":50.0, \"Y\":-20.0}, \"innerRadius\": 12.0, \"outerRadius\": 1.0}}"
     }
   ]
 }

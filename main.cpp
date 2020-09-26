@@ -5,6 +5,7 @@
 #include <string>
 #include <array>
 #include <unordered_map>
+#include <omp.h>
 
 #include "schemas/types.h"
 #include "schemas/json.h"
@@ -211,40 +212,53 @@ int main(int argc, char** argv)
     // Render and write out each frame
     printf("Rendering clip...\n");
     char outFileName[1024];
-    std::vector<Data::Color> pixels;
-    std::vector<Data::ColorU8> pixelsU8;
+
     int framesTotal = int(document.duration * float(document.FPS));
-    int lastPercent = -1;
+
+    struct ThreadData
+    {
+        std::vector<Data::Color> pixels;
+        std::vector<Data::ColorU8> pixelsU8;
+    };
+    std::vector<ThreadData> threadsData(omp_get_num_threads());
+
+    #pragma omp parallel for
     for (int frameIndex = 0; frameIndex < framesTotal; ++frameIndex)
     {
+        ThreadData& threadData = threadsData[omp_get_thread_num()];
+
         // report progress
-        int percent = int(100.0f * float(frameIndex) / float(framesTotal-1));
-        if (lastPercent != percent)
+        if (omp_get_thread_num() == 0)
         {
-            lastPercent = percent;
-            printf("\r%i%%", lastPercent);
+            static int lastPercent = -1;
+            int percent = int(100.0f * float(frameIndex) / float(framesTotal - 1));
+            if (lastPercent != percent)
+            {
+                lastPercent = percent;
+                printf("\r%i%%", lastPercent);
+            }
         }
 
         // render a frame
-        if (!GenerateFrame(document, entityTimelines, pixels, frameIndex))
+        if (!GenerateFrame(document, entityTimelines, threadData.pixels, frameIndex))
             return 4;
 
         // resize from the rendered size to the output size
-        Resize(pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
+        Resize(threadData.pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
 
         // Convert it to RGBAU8
-        ColorToColorU8(pixels, pixelsU8);
+        ColorToColorU8(threadData.pixels, threadData.pixelsU8);
 
         // force to opaque if we should
         if (document.forceOpaqueOutput)
         {
-            for (Data::ColorU8& pixel : pixelsU8)
+            for (Data::ColorU8& pixel : threadData.pixelsU8)
                 pixel.A = 255;
         }
 
         // write it out
         sprintf_s(outFileName, "%s%i.png", outFilePath, frameIndex);
-        stbi_write_png(outFileName, document.outputSizeX, document.outputSizeY, 4, pixelsU8.data(), document.outputSizeX * 4);
+        stbi_write_png(outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
     }
     printf("\r100%%\n");
 
@@ -254,14 +268,40 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+* add a program and version number to the document, and verify it on load
+
 * make it spit out a text file that says the ffmpeg command to combine it into a movie
 * make this operate via command line
 
 * profile?
 
+* add object parenting and getting transforms from parents.
+ * a transform is probably a parent all it's own. local / global rotation pivot?
+
+ * textures
+ * text
+
+ * Parent off of a layer to render into a sublayer which is then merged back into the main image with alpha blending.
+
+ * 3d lines to do fireframes, with 3d transforms. Projection is a parented transform too.
+  * do the same with triangles. convert to 2d and render (with zbuffer)
+  * no lights in scene = unlit. else, do diffuse only lighting.
+  * whitted raytracing
+  * path tracing
+* Gaussian blur.
+* Bloom?
+* Tone map.
+* cube maps
+
 ! generate documentation from schemas?
 * should document that +/-50 canvas units is the largest square that fits in the center.
 * rename project / solution to animatron. typod
+
+* For aa, could also just render N frames at different (random? Lds?) Subpixel offsets and average them together. simpler interface than resizing.
+
+* be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
+ * should probably have a bitset of what fields are present in json data.
+ * this could be a feature of df_serialize to reflect out this parallel object of bools and also fill it in.
 
 TODO:
 * pre multiplied alpha
@@ -275,5 +315,6 @@ Low priority:
 
 TODO: 's for later
 * option for different image shrink / grow operations. right now it box filters down and bicubics up.
+* audio synth.. wave forms, envelopes, per channel operations, FIR, IIR. karplus strong, etc.
 
 */
