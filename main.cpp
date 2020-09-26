@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <omp.h>
 #include <atomic>
+#include <chrono>
 
 #include "schemas/types.h"
 #include "schemas/json.h"
@@ -255,8 +256,10 @@ int main(int argc, char** argv)
         framesTotal, document.renderSizeX, document.renderSizeY,
         document.outputSizeX, document.outputSizeY);
 
-    // Render and write out each frame multithreadedly
+    // start the timer
+    std::chrono::high_resolution_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
 
+    // Render and write out each frame multithreadedly
     struct ThreadData
     {
         char outFileName[1024];
@@ -312,6 +315,13 @@ int main(int argc, char** argv)
         framesDone++;
     }
     printf("\r100%%\n");
+
+    // report how long it took
+    {
+        std::chrono::duration<float> seconds = (std::chrono::high_resolution_clock::now() - timeStart);
+        float secondsPerFrame = seconds.count() / float(framesTotal);
+        printf("Render Time: %0.3f seconds.\n  %0.3f seconds per frame average wall time (more threads make this lower)\n  %0.3f seconds per frame average actual computation time\n", seconds.count(), secondsPerFrame, secondsPerFrame * float(threadsData.size()));
+    }
 
     if (wasError)
         return 4;
@@ -386,8 +396,6 @@ TODO:
 * be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
  * should probably have a bitset of what fields are present in json data.
  * this could be a feature of df_serialize to reflect out this parallel object of bools and also fill it in.
-
- * report how long it took to render, and an average render time per frame
 
 TODO:
 * pre multiplied alpha
