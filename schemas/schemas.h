@@ -28,6 +28,31 @@ STRUCT_BEGIN(Data, Point3D, "A 3d Point")
     STRUCT_FIELD(float, Z, 0.0f, "Z")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, Point4D, "A 4d Point")
+    STRUCT_FIELD(float, X, 0.0f, "X")
+    STRUCT_FIELD(float, Y, 0.0f, "Y")
+    STRUCT_FIELD(float, Z, 0.0f, "Z")
+    STRUCT_FIELD(float, W, 0.0f, "W")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, Matrix2x2, "A 2x2 matrix")
+    STRUCT_FIELD(Point2D, X, Point2D{1.0f COMMA 0.0f}, "X axis")
+    STRUCT_FIELD(Point2D, Y, Point2D{0.0f COMMA 1.0f}, "Y axis")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, Matrix3x3, "A 3x3 matrix")
+    STRUCT_FIELD(Point3D, X, Point3D{1.0f COMMA 0.0f COMMA  0.0f}, "X axis")
+    STRUCT_FIELD(Point3D, Y, Point3D{0.0f COMMA 1.0f COMMA  0.0f}, "Y axis")
+    STRUCT_FIELD(Point3D, Z, Point3D{0.0f COMMA 0.0f COMMA  1.0f}, "Z axis")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, Matrix4x4, "A 4x4 matrix")
+    STRUCT_FIELD(Point4D, X, Point4D{1.0f COMMA 0.0f COMMA  0.0f COMMA 0.0f}, "X axis")
+    STRUCT_FIELD(Point4D, Y, Point4D{0.0f COMMA 1.0f COMMA  0.0f COMMA 0.0f}, "Y axis")
+    STRUCT_FIELD(Point4D, Z, Point4D{0.0f COMMA 0.0f COMMA  1.0f COMMA 0.0f}, "Z axis")
+    STRUCT_FIELD(Point4D, W, Point4D{0.0f COMMA 0.0f COMMA  0.0f COMMA 1.0f}, "W axis")
+STRUCT_END()
+
 // ----------------------------- Specific Entity Types -----------------------------
 
 STRUCT_BEGIN(Data, EntityFill, "Fills the screen")
@@ -66,6 +91,10 @@ STRUCT_BEGIN(Data, EntityCamera, "A camera, used to turn 3d objects into 2d")
     STRUCT_FIELD(Point3D, position, Point3D(), "The position of the camera")
     STRUCT_FIELD(Point3D, at, Point3D{ 0.0f COMMA 0.0f COMMA 1.0f }, "The point the camera is aimed at")
     STRUCT_FIELD(Point3D, up, Point3D{ 0.0f COMMA 1.0f COMMA 0.0f }, "The up direction for the camera's orientation")
+    STRUCT_FIELD(bool, perspective, true, "If true, uses a perspective projection, else an orthographic projection. The perspective projection uses reversed z, infinite far plane projection.")
+    STRUCT_FIELD(float, fieldOfView, 45.0f, "Vertical field of view, in degrees. Used by perspective projection.")
+    STRUCT_FIELD(float, near, 0.1f, "The near plane distance. Used by perspective projection.")
+    STRUCT_FIELD_NO_SERIALIZE(Matrix4x4, viewProj, Matrix4x4(), "The view projection matrix of the camera. Calculated each frame in the initialization function.")
 STRUCT_END()
 
 // ----------------------------- Entity Types -----------------------------

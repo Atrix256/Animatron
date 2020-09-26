@@ -3,7 +3,11 @@
 #include "utils.h"
 #include <unordered_map>
 
-void HandleEntity_EntityFill(
+void EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill)
+{
+}
+
+void EntityFill_DoAction(
     const Data::Document& document, 
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::Color>& pixels,
@@ -20,7 +24,11 @@ void HandleEntity_EntityFill(
     std::fill(pixels.begin(), pixels.end(), fill.color);
 }
 
-void HandleEntity_EntityCircle(
+void EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle)
+{
+}
+
+void EntityCircle_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string,
     Data::EntityVariant>& entityMap, std::vector<Data::Color>& pixels,
@@ -69,7 +77,11 @@ void HandleEntity_EntityCircle(
     }
 }
 
-void HandleEntity_EntityRectangle(
+void EntityRectangle_Initialize(const Data::Document& document, Data::EntityRectangle& rectangle)
+{
+}
+
+void EntityRectangle_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::Color>& pixels,
@@ -104,7 +116,11 @@ void HandleEntity_EntityRectangle(
     }
 }
 
-void HandleEntity_EntityLine(
+void EntityLine_Initialize(const Data::Document& document, Data::EntityLine& line)
+{
+}
+
+void EntityLine_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::Color>& pixels,
@@ -146,7 +162,13 @@ void HandleEntity_EntityLine(
     }
 }
 
-void HandleEntity_EntityCamera(
+void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera)
+{
+    // TODO: calculate view/proj matrix!
+    int ijkl = 0;
+}
+
+void EntityCamera_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::Color>& pixels,
@@ -155,11 +177,16 @@ void HandleEntity_EntityCamera(
     // nothing to do for a camera
 }
 
-void HandleEntity_EntityLines3D(
+void EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d)
+{
+}
+
+void EntityLines3D_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap, 
     std::vector<Data::Color>& pixels,
-    const Data::EntityLines3D& lines)
+    const Data::EntityLines3D& lines3d)
 {
     // TODO: The lines want a camera, to be able to turn 3d lines into 2d. We probably need to make a map of all the entities and their correct state for this frame and pass it to each of these functions.
+    // TODO: get the viewProj matrix from the camera
 }

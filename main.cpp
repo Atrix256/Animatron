@@ -23,11 +23,12 @@
 // prototypes for entity handler functions. These are implemented in entities.cpp
 #include "df_serialize/df_serialize/_common.h"
 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-    void HandleEntity_##_TYPE( \
+    void _TYPE##_DoAction( \
         const Data::Document& document, \
         const std::unordered_map<std::string, Data::EntityVariant>& entityMap, \
         std::vector<Data::Color>& pixels, \
-        const Data::##_TYPE& _NAME);
+        const Data::##_TYPE& _NAME); \
+   void _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME);
 #include "df_serialize/df_serialize/_fillunsetdefines.h"
 #include "schemas/schemas_entities.h"
 
@@ -101,6 +102,21 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                 entity = timeline.keyFrames[cursorIndex].entity;
             }
 
+            // do per frame entity initialization
+            switch (entity._index)
+            {
+                #include "df_serialize/df_serialize/_common.h"
+                #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
+                    case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_Initialize(document, entity.##_NAME); break;
+                #include "df_serialize/df_serialize/_fillunsetdefines.h"
+                #include "schemas/schemas_entities.h"
+                default:
+                {
+                    printf("unhandled entity type in variant\n");
+                    return false;
+                }
+            }
+
             entityMap[timeline.id] = entity;
         }
     }
@@ -120,7 +136,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: HandleEntity_##_TYPE(document, entityMap, pixels, entity.##_NAME); break;
+                case Data::EntityVariant::c_index_##_NAME: _TYPE##_DoAction(document, entityMap, pixels, entity.##_NAME); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -306,12 +322,21 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+! probably want some storage space on those schemas... fields defined but not serialized
+ * for the camera, I want to have a matrix there.
+ * entities can have a "initialize" call to go along with the action call. the camera would calculate the matrix there. it should get no information about the outside world.
+
+
 * NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
  * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
 
 * camera needs ortho vs perspective ability and parameters
 
-* parenting and transforms next?
+* parenting and transforms next? after intro screen, should start making the video itself
+
+
+* make 3d use a reversed z, infinite z projection matrix. document if it's left or right handed
+
 
 
 * add a program and version number to the document, and verify it on load
@@ -360,7 +385,6 @@ TODO:
 Low priority:
 * maybe generate html documentaion?
 * could do 3d rendering later (path tracing) also whitted raytracing. can have 3d scenes and have defined lights. unlit if no lights defined.
-
 
 TODO: 's for later
 * option for different image shrink / grow operations. right now it box filters down and bicubics up.

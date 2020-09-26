@@ -42,7 +42,7 @@ float Length(const std::array<float, N>& A)
 
 
 
-float sdLine(vec2 a, vec2 b, vec2 p)
+inline float sdLine(vec2 a, vec2 b, vec2 p)
 {
     vec2 pa = p - a;
     vec2 ba = b - a;
