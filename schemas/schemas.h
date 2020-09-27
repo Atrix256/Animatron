@@ -154,6 +154,10 @@ STRUCT_END()
 // ----------------------------- The Document -----------------------------
 
 STRUCT_BEGIN(Data, Document, "A document")
+    STRUCT_FIELD(std::string, program, "animatron", "Identifier to make sure this is a file for Animatron to use")
+    STRUCT_FIELD(uint32_t, versionMajor, 0, "Major version number")
+    STRUCT_FIELD(uint32_t, versionMinor, 1, "Minor version number")
+
     STRUCT_FIELD(int, outputSizeX, 320, "The size of the output render on the X axis")
     STRUCT_FIELD(int, outputSizeY, 200, "The size of the output render on the Y axis")
     STRUCT_FIELD(int, renderSizeX, 0, "The size of the render on the X axis. 0 means use output size. The rendered image will be sized down (for AA) or up to match the output size.")

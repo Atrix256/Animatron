@@ -235,25 +235,16 @@ void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera&
         projMtx.W = Data::Point4D{ 0.0f, 0.0f, 0.0f, 1.0f };
     }
 
-    // TODO: can change the camera settings with keyframes
-
-    // TODO: make view matrix too and multiply it in
-
     Data::Point3D forward = Normalize(camera.at - camera.position);
+    Data::Point3D right = Normalize(Cross(camera.up, forward));
+    Data::Point3D up = Normalize(Cross(forward, right));
 
     Data::Matrix4x4 viewMtx;
-    viewMtx.X = Data::Point4D{ 1.0f, 0.0f, 0.0f, 0.0f }; // TODO: get this with cross product
-    viewMtx.Y = Data::Point4D{ camera.up.X, camera.up.Y, camera.up.Z, 0.0f };
+    viewMtx.X = Data::Point4D{ right.X, right.Y, right.Z, 0.0f };
+    viewMtx.Y = Data::Point4D{ up.X, up.Y, up.Z, 0.0f };
     viewMtx.Z = Data::Point4D{ forward.X, forward.Y, forward.Z, 0.0 };
     viewMtx.W = Data::Point4D{-camera.position.X, -camera.position.Y, -camera.position.Z, 1.0f};
-
-
-    // TODO: use at / up to make x, y , z axis
-
     camera.viewProj = Multiply(viewMtx, projMtx);
-
-    int ijkl = 0;
-    //camera.viewProj = projMtx;
 }
 
 void EntityCamera_DoAction(
@@ -386,11 +377,6 @@ void EntityLines3D_DoAction(
         DrawLine(document, pixels, lastPoint, nextPoint, lines3d.width, ToPremultipliedAlpha(lines3d.color));
         lastPoint = nextPoint;
     }
-
-    int ijkl = 0;
-    // TODO: The lines want a camera, to be able to turn 3d lines into 2d. We probably need to make a map of all the entities and their correct state for this frame and pass it to each of these functions.
-    // TODO: get the viewProj matrix from the camera
-    // TODO: probably need an oriented bounded box? maybe everything needs a transform? i dunno.
 }
 
 void EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform)
@@ -418,7 +404,6 @@ void EntityTransform_DoAction(
 
 // TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
 // TODO: re-profile & see where the time is going
-// TODO: get transform working for both line and lines
 // TODO: need to clip lines against the z plane! can literally just do that, but need z projections in matrices
 
 // TODO: should do versioning soon, cause you are likely to start breaking things! fixup of loaded data would be nice

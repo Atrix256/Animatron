@@ -157,10 +157,29 @@ int main(int argc, char** argv)
     const char* fileName = "./assets/clip.json";
     const char* outFilePath = "./out/";
     Data::Document document;
+    const uint32_t versionMajor = document.versionMajor;
+    const uint32_t versionMinor = document.versionMinor;
     if (!ReadFromJSONFile(document, fileName))
     {
         system("pause");
         return 1;
+    }
+
+    // verify
+    if (document.program != "animatron")
+    {
+        printf("Not an animatron file!\n");
+        system("pause");
+        return 5;
+    }
+
+    // version fixup
+    if (document.versionMajor != versionMajor || document.versionMinor != versionMinor)
+    {
+        // TODO: version fixup
+        printf("Wrong version number: %i.%i, not %i.%i. Version upgrades are TODO\n", document.versionMajor, document.versionMinor, versionMajor, versionMinor);
+        system("pause");
+        return 6;
     }
     
     // data interpretation
@@ -258,6 +277,7 @@ int main(int argc, char** argv)
 
     // report what we are doing
     int framesTotal = int(document.duration * float(document.FPS));
+    printf("Animatron v%i.%i\n", versionMajor, versionMinor);
     printf("Rendering with %i threads...\n", omp_get_max_threads());
     printf("  input: %s\n", fileName);
     printf("  output: %s\n", outFilePath);
@@ -450,5 +470,15 @@ TODO: 's for later
 * multiply by color
 * lerp between things
 * copy?
+
+*/
+
+/*
+
+Notes on the architecture:
+* having a sparse json reader means that keyframe data can be described as sparse json that is read. things are automatically key framable.
+* having df_serialize means i add a field to the schema then... i can add it to the json and it shows up at runtime.  I can also already use it as keyframe data!
+* using macros to define schema means that i can auto expand macros for other uses and turn runtime checks into compile errors. Like wanting a function per entity.
+
 
 */

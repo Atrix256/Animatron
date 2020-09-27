@@ -195,6 +195,16 @@ inline Data::Point3D Normalize(const Data::Point3D& V)
     return p;
 }
 
+inline Data::Point3D Cross(const Data::Point3D& a, const Data::Point3D& b)
+{
+    return
+    {
+        a.Y * b.Z - a.Z * b.Y,
+        a.Z * b.X - a.X * b.Z,
+        a.X * b.Y - a.Y * b.X
+    };
+}
+
 
 
 
