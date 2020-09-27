@@ -342,27 +342,17 @@ int main(int argc, char** argv)
 /*
 TODO:
 
-* test semi transparency
-
-! compare perf with multisampling vs resizing image. put difference / details in checkin notes
-
 ! flatten checkins for v1
 
-* multi sample ought to be way faster than resizing.
- * don't need multiple buffers. Take the multiple samples per pixel right there and average em!
- * Fill just does one.
- * Circle and similar could do each row N times with a subpixel offset.
- * Have a function to return an offset based on an index.
- * Probably use Mitchell's best candidate to make blue noise offsets to minimize the impact of the noise? Or maybe choose. Cause a path tracer would use this and probably would want a different jitter sequence!
 
-* jittering also support uniform and jittered grid
+* NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
+ * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
+
 
 * be able to change size of rendering at runtime and get rid of the render vs output size too
  * I think this could work by just having a canvas be an entity that can be parented off of, and it's always resized to the target when mering.
  * In this way, I think you can get rid of render/output size and just make that be supported through this canvas mechanism.
-
-* Let all 4 blend control points be changed. This lets you do stuff like flip immediately instead of blend. but other things too.
-
+\
 * add option for dithering before quantizing
  * Blue noise by default but IGN, Bayer and some other options available.
  * Probably could have a setting to over-quantize.
@@ -374,13 +364,6 @@ TODO:
 
 ! could show an estimated time remaining along with the percent!
 
-! probably want some storage space on those schemas... fields defined but not serialized
- * for the camera, I want to have a matrix there.
- * entities can have a "initialize" call to go along with the action call. the camera would calculate the matrix there. it should get no information about the outside world.
-
-
-* NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
- * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
 
 * camera needs ortho vs perspective ability and parameters
  * test both!
@@ -436,6 +419,7 @@ TODO:
 Low priority:
 * maybe generate html documentaion?
 * could do 3d rendering later (path tracing) also whitted raytracing. can have 3d scenes and have defined lights. unlit if no lights defined.
+* other 2d sample sequences: R2, white noise, regular, jittered grid.
 
 TODO: 's for later
 * option for different image shrink / grow operations. right now it box filters down and bicubics up.
@@ -448,5 +432,9 @@ TODO: 's for later
  * Allow file includes in general where an included json could have any of the data a regular file could. Prefabs included but not limited to.
  * When you make an entity of type prefab, it makes objects with a name prefix (name. Or name::) before the name.
  * This lets you make dice etc that are reusable.
+* convert to greyscale.
+* multiply by color
+* lerp between things
+* copy?
 
 */

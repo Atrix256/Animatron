@@ -69,7 +69,7 @@
             "R": 1.0,
             "G": 0.2,
             "B": 0.1,
-            "A": 1.0
+            "A": 0.5
           }
         }
       }
@@ -88,7 +88,7 @@
     {
       "entityId": "Circle1",
       "time": 1,
-      "blendControlPoints": [ 0.0, 2.0, -1.0, 1.0 ],
+      "blendControlPoints": [ 0.0, 0.1, 0.9, 1.0 ],
       "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}, \"innerRadius\": 1.0, \"outerRadius\": 5.0}}"
     },
     {
