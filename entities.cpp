@@ -245,7 +245,7 @@ void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera&
     viewMtx.X = Data::Point4D{ 1.0f, 0.0f, 0.0f, 0.0f }; // TODO: get this with cross product
     viewMtx.Y = Data::Point4D{ camera.up.X, camera.up.Y, camera.up.Z, 0.0f };
     viewMtx.Z = Data::Point4D{ forward.X, forward.Y, forward.Z, 0.0 };
-    viewMtx.W = Data::Point4D{camera.position.X, camera.position.Y, camera.position.Z, 1.0f};
+    viewMtx.W = Data::Point4D{-camera.position.X, -camera.position.Y, -camera.position.Z, 1.0f};
 
 
     // TODO: use at / up to make x, y , z axis
