@@ -1,5 +1,7 @@
 #pragma once
 
+static const float c_pi = 3.14159265359f;
+
 template <typename T>
 T Clamp(T value, T min, T max)
 {
@@ -85,4 +87,9 @@ inline float CubicHermite(float A, float B, float C, float D, float t)
     float d = B;
 
     return a * t*t*t + b * t*t + c * t + d;
+}
+
+inline float DegreesToRadians(float x)
+{
+    return x * c_pi / 180.0f;
 }

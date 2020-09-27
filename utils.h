@@ -151,6 +151,50 @@ inline Data::Matrix4x4 Multiply(const Data::Matrix4x4& A, const Data::Matrix4x4&
     return ret;
 }
 
+inline const Data::Matrix4x4 RotationX(float x)
+{
+    float cosTheta = (float)cos(x);
+    float sinTheta = (float)sin(x);
+
+    Data::Matrix4x4 ret;
+    ret.X = Data::Point4D{ 1.0f, 0.0f, 0.0f, 0.0f };
+    ret.Y = Data::Point4D{ 0.0f, cosTheta, -sinTheta, 0.0f };
+    ret.Z = Data::Point4D{ 0.0f, sinTheta, cosTheta, 0.0f };
+    ret.W = Data::Point4D{ 0.0f, 0.0f, 0.0f, 1.0f };
+    return ret;
+}
+
+inline const Data::Matrix4x4 RotationY(float x)
+{
+    float cosTheta = (float)cos(x);
+    float sinTheta = (float)sin(x);
+
+    Data::Matrix4x4 ret;
+    ret.X = Data::Point4D{ cosTheta, 0.0f, sinTheta, 0.0f };
+    ret.Y = Data::Point4D{ 0.0f, 1.0f, 0.0f, 0.0f };
+    ret.Z = Data::Point4D{ -sinTheta, 0.0f, cosTheta, 0.0f };
+    ret.W = Data::Point4D{ 0.0f, 0.0f, 0.0f, 1.0f };
+    return ret;
+}
+
+inline const Data::Matrix4x4 RotationZ(float x)
+{
+    float cosTheta = (float)cos(x);
+    float sinTheta = (float)sin(x);
+
+    Data::Matrix4x4 ret;
+    ret.X = Data::Point4D{ cosTheta, -sinTheta, 0.0f, 0.0f };
+    ret.Y = Data::Point4D{ sinTheta, cosTheta, 0.0f, 0.0f };
+    ret.Z = Data::Point4D{ 0.0f, 0.0f, 1.0f, 0.0f };
+    ret.W = Data::Point4D{ 0.0f, 0.0f, 0.0f, 1.0f };
+    return ret;
+}
+
+inline const Data::Matrix4x4 Rotation(float x, float y, float z)
+{
+    return Multiply(Multiply(RotationX(x), RotationY(y)), RotationZ(z));
+}
+
 inline Data::Point2D ProjectPoint3DToPoint2D(const Data::Point3D& point_, const Data::Matrix4x4& mtx)
 {
     Data::Point4D point = Data::Point4D{ point_.X, point_.Y, point_.Z, 1.0f };

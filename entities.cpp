@@ -389,9 +389,9 @@ void EntityTransform_Initialize(const Data::Document& document, Data::EntityTran
     scale.Y.Y = transform.scale.Y;
     scale.Z.Z = transform.scale.Z;
 
-    transform.mtx = Multiply(translation, scale);
+    Data::Matrix4x4 rotation = Rotation(DegreesToRadians(transform.rotation.X), DegreesToRadians(transform.rotation.Y), DegreesToRadians(transform.rotation.Z));
 
-    // TODO: rotation!
+    transform.mtx = Multiply(rotation, Multiply(translation, scale));
 }
 
 void EntityTransform_DoAction(

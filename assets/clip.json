@@ -259,7 +259,7 @@
           "translation": {
             "X": 0,
             "Y": -2,
-            "Z": 0
+            "Z": 2
           },
           "scale": {
             "X": 2,
@@ -276,7 +276,7 @@
           "translation": {
             "X": 0,
             "Y": 2,
-            "Z": 0
+            "Z": 2
           },
           "scale": {
             "X": 2,
@@ -295,10 +295,40 @@
       "newValue": "{\"camera\":{\"position\":{\"X\":0.0, \"Y\":0.0, \"Z\":-10}}}"
     },
     {
-      "entityId": "Camera",
+      "entityId": "TetrahedronTransform",
+      "time": 2,
+      "blendControlPoints": [ 1.0, 1.0, 1.0, 1.0 ],
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0.0, \"Z\":0}}}"
+    },
+    {
+      "entityId": "TetrahedronTransform2",
+      "time": 2,
+      "blendControlPoints": [ 1.0, 1.0, 1.0, 1.0 ],
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0.0, \"Z\":0}}}"
+    },
+    {
+      "entityId": "TetrahedronTransform",
+      "time": 4,
+      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":100.0, \"Z\":0}}}"
+    },
+    {
+      "entityId": "TetrahedronTransform2",
+      "time": 4,
+      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":-100.0, \"Z\":0}}}"
+    },
+    {
+      "entityId": "TetrahedronTransform",
       "time": 5,
       "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
-      "newValue": "{\"camera\":{\"position\":{\"X\":-10.0, \"Y\":50.0, \"Z\":-10}}}"
+      "newValue": "{\"transform\":{\"translation\":{\"X\":-2, \"Y\":2, \"Z\":0}}}"
+    },
+    {
+      "entityId": "TetrahedronTransform2",
+      "time": 5,
+      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
+      "newValue": "{\"transform\":{\"translation\":{\"X\":2, \"Y\":-2, \"Z\":0}}}"
     }
   ]
 }

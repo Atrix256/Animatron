@@ -126,7 +126,7 @@ STRUCT_END()
 STRUCT_BEGIN(Data, EntityTransform, "")
     STRUCT_FIELD(Point3D, translation, Point3D(), "Translation")
     STRUCT_FIELD(Point3D, scale, Point3D{ 1.0f COMMA 1.0f COMMA 1.0f }, "Scale")
-    STRUCT_FIELD(Point3D, rotation, Point3D(), "Rotation")
+    STRUCT_FIELD(Point3D, rotation, Point3D(), "Rotation on each axis, in degrees")
     STRUCT_FIELD_NO_SERIALIZE(Matrix4x4, mtx, Matrix4x4(),"The transform matrix. Calculated each frame in the initialization function.")
 STRUCT_END()
 
