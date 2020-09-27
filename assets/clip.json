@@ -2,7 +2,7 @@
   "outputSizeX": 1024,
   "outputSizeY": 768,
   "FPS": 30,
-  "duration": 2,
+  "duration": 5,
   "entities": [
     {
       "id": "Background",
@@ -42,6 +42,7 @@
           },
           "width": 0.1,
           "camera": "Camera",
+          "transform": "TetrahedronTransform",
           "A": {
             "X": -1,
             "Y": -1,
@@ -67,6 +68,7 @@
           },
           "width": 0.1,
           "camera": "Camera",
+          "transform": "TetrahedronTransform",
           "A": {
             "X": -1,
             "Y": 1,
@@ -92,6 +94,7 @@
           },
           "width": 0.1,
           "camera": "Camera",
+          "transform": "TetrahedronTransform",
           "A": {
             "X": 1,
             "Y": -1,
@@ -117,6 +120,7 @@
           },
           "width": 0.1,
           "camera": "Camera",
+          "transform": "TetrahedronTransform",
           "A": {
             "X": 1,
             "Y": 1,
@@ -142,6 +146,7 @@
           },
           "width": 0.1,
           "camera": "Camera",
+          "transform": "TetrahedronTransform",
           "A": {
             "X": 1,
             "Y": 1,
@@ -167,6 +172,7 @@
           },
           "width": 0.1,
           "camera": "Camera",
+          "transform": "TetrahedronTransform",
           "A": {
             "X": 1,
             "Y": 1,
@@ -192,6 +198,7 @@
           },
           "width": 0.1,
           "camera": "Camera",
+          "transform": "TetrahedronTransform2",
           "points": [
             {
               // A
@@ -244,14 +251,54 @@
           ]
         }
       }
+    },
+    {
+      "id": "TetrahedronTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": 0,
+            "Y": -2,
+            "Z": 0
+          },
+          "scale": {
+            "X": 2,
+            "Y": 2,
+            "Z": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "TetrahedronTransform2",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": 0,
+            "Y": 2,
+            "Z": 0
+          },
+          "scale": {
+            "X": 2,
+            "Y": 2,
+            "Z": 2
+          }
+        }
+      }
     }
   ],
   "keyFrames": [
     {
       "entityId": "Camera",
       "time": 2,
-      "blendControlPoints": [ 0.0, 0.3, 0.6, 1.0 ],
+      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
       "newValue": "{\"camera\":{\"position\":{\"X\":0.0, \"Y\":0.0, \"Z\":-10}}}"
+    },
+    {
+      "entityId": "Camera",
+      "time": 2,
+      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
+      "newValue": "{\"camera\":{\"position\":{\"X\":-10.0, \"Y\":5.0, \"Z\":-1}}}"
     }
   ]
 }

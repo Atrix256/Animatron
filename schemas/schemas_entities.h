@@ -8,4 +8,5 @@ VARIANT_BEGIN(Data, EntityVariant, "Storage for entity type specific information
     VARIANT_TYPE(EntityLine3D, line3d, EntityLine3D(), "")
     VARIANT_TYPE(EntityLines3D, lines3d, EntityLines3D(), "")
     VARIANT_TYPE(EntityCamera, camera, EntityCamera(), "")
+    VARIANT_TYPE(EntityTransform, transform, EntityTransform(), "")
 VARIANT_END()

@@ -291,14 +291,34 @@ void EntityLine3D_DoAction(
     }
     const Data::EntityCamera& cameraEntity = it->second.camera;
 
-    // TODO: need a world matrix!
-    auto Transform = [](const Data::Point3D& point) -> Data::Point3D
+    // Get the world matrix
+    Data::Matrix4x4 transform;
+    if (!line3d.transform.empty())
     {
-        return Data::Point3D{ point.X - 2.0f, point.Y, point.Z };
-    };
+        auto it = entityMap.find(line3d.transform);
+        if (it == entityMap.end())
+        {
+            // TODO: this will be moot when we parent instead of look up by name, so maybe hold off on this
+            // TODO: how to deal with errors better? should probably stop rendering
+            // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
+            printf("Error: could not find lines3d transform %s\n", line3d.transform.c_str());
+            return;
+        }
+        if (it->second._index != Data::EntityVariant::c_index_transform)
+        {
+            printf("Error lines3d camera was not a camera %s\n", line3d.transform.c_str());
+            return;
+        }
+        transform = Multiply(it->second.transform.mtx, cameraEntity.viewProj);
+    }
+    else
+    {
+        transform = cameraEntity.viewProj;
+    }
 
-    Data::Point2D A = ProjectPoint3DToPoint2D(Transform(line3d.A), cameraEntity.viewProj);
-    Data::Point2D B = ProjectPoint3DToPoint2D(Transform(line3d.B), cameraEntity.viewProj);
+    // draw the line
+    Data::Point2D A = ProjectPoint3DToPoint2D(line3d.A, transform);
+    Data::Point2D B = ProjectPoint3DToPoint2D(line3d.B, transform);
     DrawLine(document, pixels, A, B, line3d.width, ToPremultipliedAlpha(line3d.color));
 }
 
@@ -312,10 +332,12 @@ void EntityLines3D_DoAction(
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityLines3D& lines3d)
 {
+    // TODO: make helper for getting an entity of a specific type? could return pointer for failure as null?
     // get the camera
     auto it = entityMap.find(lines3d.camera);
     if (it == entityMap.end())
     {
+        // TODO: this will be moot when we parent instead of look up by name, so maybe hold off on this
         // TODO: how to deal with errors better? should probably stop rendering
         // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
         printf("Error: could not find lines3d camera %s\n", lines3d.camera.c_str());
@@ -332,16 +354,35 @@ void EntityLines3D_DoAction(
     if (lines3d.points.size() < 2)
         return;
 
-    // TODO: need a world matrix!
-    auto Transform = [](const Data::Point3D& point) -> Data::Point3D
+    // Get the world matrix
+    Data::Matrix4x4 transform;
+    if (!lines3d.transform.empty())
     {
-        return Data::Point3D{ point.X + 2.0f, point.Y, point.Z };
-    };
+        auto it = entityMap.find(lines3d.transform);
+        if (it == entityMap.end())
+        {
+            // TODO: how to deal with errors better? should probably stop rendering
+            // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
+            printf("Error: could not find lines3d transform %s\n", lines3d.transform.c_str());
+            return;
+        }
+        if (it->second._index != Data::EntityVariant::c_index_transform)
+        {
+            printf("Error lines3d camera was not a camera %s\n", lines3d.transform.c_str());
+            return;
+        }
+        transform = Multiply(it->second.transform.mtx, cameraEntity.viewProj);
+    }
+    else
+    {
+        transform = cameraEntity.viewProj;
+    }
 
-    Data::Point2D lastPoint = ProjectPoint3DToPoint2D(Transform(lines3d.points[0]), cameraEntity.viewProj);
+    // draw the lines
+    Data::Point2D lastPoint = ProjectPoint3DToPoint2D(lines3d.points[0], transform);
     for (int pointIndex = 1; pointIndex < lines3d.points.size(); ++pointIndex)
     {
-        Data::Point2D nextPoint = ProjectPoint3DToPoint2D(Transform(lines3d.points[pointIndex]), cameraEntity.viewProj);
+        Data::Point2D nextPoint = ProjectPoint3DToPoint2D(lines3d.points[pointIndex], transform);
         DrawLine(document, pixels, lastPoint, nextPoint, lines3d.width, ToPremultipliedAlpha(lines3d.color));
         lastPoint = nextPoint;
     }
@@ -351,3 +392,35 @@ void EntityLines3D_DoAction(
     // TODO: get the viewProj matrix from the camera
     // TODO: probably need an oriented bounded box? maybe everything needs a transform? i dunno.
 }
+
+void EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform)
+{
+    Data::Matrix4x4 translation;
+    translation.W = Data::Point4D{transform.translation.X, transform.translation.Y, transform.translation.Z, 1.0f};
+
+    Data::Matrix4x4 scale;
+    scale.X.X = transform.scale.X;
+    scale.Y.Y = transform.scale.Y;
+    scale.Z.Z = transform.scale.Z;
+
+    transform.mtx = Multiply(translation, scale);
+
+    // TODO: rotation!
+}
+
+void EntityTransform_DoAction(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::EntityTransform& transform)
+{
+}
+
+// TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
+// TODO: re-profile & see where the time is going
+// TODO: get transform working for both line and lines
+// TODO: need to clip lines against the z plane! can literally just do that, but need z projections in matrices
+
+// TODO: should do versioning soon, cause you are likely to start breaking things! fixup of loaded data would be nice
+// TODO: how can the camera get roll etc? is parenting it to a matrix good enough?
+// TOOD: support recursive matrix parenting.
