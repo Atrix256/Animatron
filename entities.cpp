@@ -294,7 +294,7 @@ void EntityLine3D_DoAction(
     // TODO: need a world matrix!
     auto Transform = [](const Data::Point3D& point) -> Data::Point3D
     {
-        return Data::Point3D{ point.X, point.Y, point.Z + 2.0f };
+        return Data::Point3D{ point.X - 2.0f, point.Y, point.Z };
     };
 
     Data::Point2D A = ProjectPoint3DToPoint2D(Transform(line3d.A), cameraEntity.viewProj);
@@ -333,22 +333,18 @@ void EntityLines3D_DoAction(
         return;
 
     // TODO: need a world matrix!
-    auto Transform = [] (const Data::Point3D& point) -> Data::Point3D
+    auto Transform = [](const Data::Point3D& point) -> Data::Point3D
     {
-        return Data::Point3D{ point.X * 1.0f, point.Y * 1.0f, point.Z + 1.2f};
+        return Data::Point3D{ point.X + 2.0f, point.Y, point.Z };
     };
 
     Data::Point2D lastPoint = ProjectPoint3DToPoint2D(Transform(lines3d.points[0]), cameraEntity.viewProj);
     for (int pointIndex = 1; pointIndex < lines3d.points.size(); ++pointIndex)
     {
         Data::Point2D nextPoint = ProjectPoint3DToPoint2D(Transform(lines3d.points[pointIndex]), cameraEntity.viewProj);
-
-        // TODO: need to make some helper function to draw the line, instead of calling into another do action. we don't have a line entity!
         DrawLine(document, pixels, lastPoint, nextPoint, lines3d.width, ToPremultipliedAlpha(lines3d.color));
         lastPoint = nextPoint;
     }
-
-    //ProjectPoint3DToPoint2D
 
     int ijkl = 0;
     // TODO: The lines want a camera, to be able to turn 3d lines into 2d. We probably need to make a map of all the entities and their correct state for this frame and pass it to each of these functions.
