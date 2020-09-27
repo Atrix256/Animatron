@@ -58,6 +58,147 @@ float DistanceUnitTorroidal(const std::array<float, N>& A, const std::array<floa
 
 
 
+// ------- Reflected types math
+
+inline Data::Point4D GetMatrixColumn(const Data::Matrix4x4& mtx, int index)
+{
+    switch (index)
+    {
+        case 0: return Data::Point4D{ mtx.X.X, mtx.Y.X, mtx.Z.X, mtx.W.X };
+        case 1: return Data::Point4D{ mtx.X.Y, mtx.Y.Y, mtx.Z.Y, mtx.W.Y };
+        case 2: return Data::Point4D{ mtx.X.Z, mtx.Y.Z, mtx.Z.Z, mtx.W.Z };
+        case 3:
+        default:
+            return Data::Point4D{ mtx.X.W, mtx.Y.W, mtx.Z.W, mtx.W.W };
+    }
+}
+
+inline Data::Point4D& GetMatrixRow(Data::Matrix4x4& mtx, int index)
+{
+    switch (index)
+    {
+        case 0: return mtx.X;
+        case 1: return mtx.Y;
+        case 2: return mtx.Z;
+        case 3: 
+        default:
+            return mtx.W;
+    }
+}
+
+inline const Data::Point4D& GetMatrixRow(const Data::Matrix4x4& mtx, int index)
+{
+    switch (index)
+    {
+        case 0: return mtx.X;
+        case 1: return mtx.Y;
+        case 2: return mtx.Z;
+        case 3: 
+        default:
+            return mtx.W;
+    }
+}
+
+inline float& GetPointElement(Data::Point4D& point, int index)
+{
+    switch (index)
+    {
+        case 0: return point.X;
+        case 1: return point.Y;
+        case 2: return point.Z;
+        case 3:
+        default:
+            return point.W;
+    }
+}
+
+inline float GetPointElement(const Data::Point4D& point, int index)
+{
+    switch (index)
+    {
+        case 0: return point.X;
+        case 1: return point.Y;
+        case 2: return point.Z;
+        case 3: 
+        default:
+            return point.W;
+    }
+}
+
+inline float Dot(const Data::Point4D& A, const Data::Point4D& B)
+{
+    return A.X * B.X + A.Y * B.Y + A.Z * B.Z + A.W * B.W;
+}
+
+inline float Dot(const Data::Point3D& A, const Data::Point3D& B)
+{
+    return A.X * B.X + A.Y * B.Y + A.Z * B.Z;
+}
+
+inline Data::Matrix4x4 Multiply(const Data::Matrix4x4& A, const Data::Matrix4x4& B)
+{
+    Data::Matrix4x4 ret;
+    for (int i = 0; i < 4; ++i)
+    {
+        const Data::Point4D rowA = GetMatrixRow(A, i);
+        Data::Point4D& rowDest = GetMatrixRow(ret, i);
+        for (int j = 0; j < 4; ++j)
+        {
+            const Data::Point4D& colB = GetMatrixColumn(B, j);
+            GetPointElement(rowDest, j) = Dot(rowA, colB);
+        }
+    }
+    return ret;
+}
+
+inline Data::Point2D ProjectPoint3DToPoint2D(const Data::Point3D& point_, const Data::Matrix4x4& mtx)
+{
+    Data::Point4D point = Data::Point4D{ point_.X, point_.Y, point_.Z, 1.0f };
+
+    // TODO: use Dot and matrix col function
+
+    Data::Point4D result;
+    result.X = point.X * mtx.X.X + point.Y * mtx.Y.X + point.Z * mtx.Z.X + point.W * mtx.W.X;
+    result.Y = point.X * mtx.X.Y + point.Y * mtx.Y.Y + point.Z * mtx.Z.Y + point.W * mtx.W.Y;
+    result.Z = point.X * mtx.X.Z + point.Y * mtx.Y.Z + point.Z * mtx.Z.Z + point.W * mtx.W.Z;
+    result.W = point.X * mtx.X.W + point.Y * mtx.Y.W + point.Z * mtx.Z.W + point.W * mtx.W.W;
+
+    result.X /= result.W;
+    result.Y /= result.W;
+    result.Z /= result.W;
+    result.W = 1.0f;
+
+    return Data::Point2D{result.X, result.Y};
+}
+
+inline Data::Point3D operator - (const Data::Point3D & A, const Data::Point3D & B)
+{
+    Data::Point3D ret;
+    ret.X = A.X - B.X;
+    ret.Y = A.Y - B.Y;
+    ret.Z = A.Z - B.Z;
+    return ret;
+}
+
+inline float Length(const Data::Point3D& V)
+{
+    return (float)sqrtf(Dot(V, V));
+}
+
+inline Data::Point3D Normalize(const Data::Point3D& V)
+{
+    float len = Length(V);
+    Data::Point3D p;
+    p.X = V.X / len;
+    p.Y = V.Y / len;
+    p.Z = V.Z / len;
+    return p;
+}
+
+
+
+
+
 inline float sdLine(vec2 a, vec2 b, vec2 p)
 {
     vec2 pa = p - a;

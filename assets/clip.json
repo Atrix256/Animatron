@@ -41,61 +41,170 @@
       }
     },
     {
-      "id": "Rectangle1",
-      "zorder": 0.0,
-      "data": {
-        "rectangle": {
-          "color": {
-            "R": 0.5,
-            "G": 0.5,
-            "B": 0.5,
-            "A": 1.0
-          }
-        }
-      }
-    },
-    {
-      "id": "Circle1",
-      "zorder": 1.0,
-      "data": {
-        "circle": {
-          "center": {
-            "X": -15.0,
-            "Y": 0.0
-          },
-          "innerRadius": 12.0,
-          "outerRadius": 3.0,
-          "color": {
-            "R": 1.0,
-            "G": 0.2,
-            "B": 0.1,
-            "A": 0.5
-          }
-        }
-      }
-    },
-    // TODO: MAKE THIS CLIP BE THE INTRO CLIP! CAN SAVE / REUSE THIS AND IMPROVE IT. fusion can put the various clips and audio together.
-    {
       "id": "Camera",
       "data": {
         "camera": {
 
         }
       }
-    }
+    },
+    {
+      "id": "Test1",
+      "data": {
+        "line3d": {
+          "color": {
+            "R": 1.0,
+            "G": 0.0,
+            "B": 0.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "A": {
+            "X": -1,
+            "Y": -1,
+            "Z": -1
+          },
+          "B": {
+            "X": -1,
+            "Y": 1,
+            "Z": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "Test2",
+      "data": {
+        "line3d": {
+          "color": {
+            "R": 0.0,
+            "G": 1.0,
+            "B": 0.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "A": {
+            "X": -1,
+            "Y": 1,
+            "Z": 1
+          },
+          "B": {
+            "X": 1,
+            "Y": -1,
+            "Z": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "Test3",
+      "data": {
+        "line3d": {
+          "color": {
+            "R": 0.0,
+            "G": 0.0,
+            "B": 1.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "A": {
+            "X": 1,
+            "Y": -1,
+            "Z": 1
+          },
+          "B": {
+            "X": -1,
+            "Y": -1,
+            "Z": -1
+          }
+        }
+      }
+    },
+    {
+      "id": "Test4",
+      "data": {
+        "line3d": {
+          "color": {
+            "R": 0.0,
+            "G": 1.0,
+            "B": 1.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "A": {
+            "X": 1,
+            "Y": 1,
+            "Z": -1
+          },
+          "B": {
+            "X": -1,
+            "Y": -1,
+            "Z": -1
+          }
+        }
+      }
+    },
+    {
+      "id": "Test5",
+      "data": {
+        "line3d": {
+          "color": {
+            "R": 1.0,
+            "G": 0.0,
+            "B": 1.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "A": {
+            "X": 1,
+            "Y": 1,
+            "Z": -1
+          },
+          "B": {
+            "X": -1,
+            "Y": 1,
+            "Z": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "Test6",
+      "data": {
+        "line3d": {
+          "color": {
+            "R": 1.0,
+            "G": 1.0,
+            "B": 0.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "A": {
+            "X": 1,
+            "Y": 1,
+            "Z": -1
+          },
+          "B": {
+            "X": 1,
+            "Y": -1,
+            "Z": 1
+          }
+        }
+      }
+    },
   ],
   "keyFrames": [
     {
-      "entityId": "Circle1",
-      "time": 1,
-      "blendControlPoints": [ 0.0, 0.1, 0.9, 1.0 ],
-      "newValue": "{\"circle\":{\"center\":{\"X\":-50.0, \"Y\":20.0}, \"innerRadius\": 1.0, \"outerRadius\": 5.0}}"
-    },
-    {
-      "entityId": "Circle1",
+      "entityId": "Camera",
       "time": 2,
-      "blendControlPoints": [ 0.0, 0.9, 0.1, 1.0 ],
-      "newValue": "{\"circle\":{\"center\":{\"X\":50.0, \"Y\":-20.0}, \"innerRadius\": 12.0, \"outerRadius\": 1.0}}"
+      "blendControlPoints": [ 0.0, 0.3, 0.6, 1.0 ],
+      "newValue": "{\"camera\":{\"position\":{\"X\":0.0, \"Y\":0.0, \"Z\":-10}}}"
     }
   ]
 }

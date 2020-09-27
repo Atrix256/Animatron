@@ -158,8 +158,11 @@ int main(int argc, char** argv)
     const char* outFilePath = "./out/";
     Data::Document document;
     if (!ReadFromJSONFile(document, fileName))
+    {
+        system("pause");
         return 1;
-
+    }
+    
     // data interpretation
     {
         if (document.renderSizeX == 0)
@@ -210,6 +213,7 @@ int main(int argc, char** argv)
         if (it == entityTimelinesMap.end())
         {
             printf("Could not find entity %s for keyframe!\n", keyFrame.entityId.c_str());
+            system("pause");
             return 2;
         }
 
@@ -229,6 +233,7 @@ int main(int argc, char** argv)
         if (!ReadFromJSONBuffer(newKeyFrame.entity, keyFrame.newValue))
         {
             printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
+            system("pause");
             return 3;
         }
         it->second.keyFrames.push_back(newKeyFrame);
@@ -334,7 +339,10 @@ int main(int argc, char** argv)
     }
 
     if (wasError)
+    {
+        system("pause");
         return 4;
+    }
 
     return 0;
 }
@@ -342,7 +350,13 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+TODO: RIGHT NOW: the tetrahedon goes inside out or something. the camera is pointing the wrong way, or moving the wrong way or something
+
 ! flatten checkins for v1
+
+* retest lines3d after you get tetrahedron working
+
+* make some test scene that uses all the features? or meh, use em when you have use of em, just like you'll extend as needed?
 
 
 * NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
