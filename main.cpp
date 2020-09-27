@@ -370,7 +370,16 @@ int main(int argc, char** argv)
 /*
 TODO:
 
-TODO: RIGHT NOW: the tetrahedon goes inside out or something. the camera is pointing the wrong way, or moving the wrong way or something
+
+TITLE SCREEN:
+ * get a point, line, triangle, tetrahedron rotating on the screen.
+ * TODO: have fill support gradients or make a vertical gradient fill node? using cubic hermite interpolation with y values and x values being colors.
+ * make a more interesting than blank white background
+ * make this be a specifically named json clip file. we can keep / reuse / improve this as time goes on
+
+
+
+? latex support -> give it path to latex. have it make a file, run commands, generate images, load and use images. That would help with equations, but also text.
 
 ! flatten checkins for v1
 
