@@ -1,0 +1,8 @@
+{
+  "program": "animatronconfig",
+  "versionMajor": 0,
+  "versionMajor": 1,
+
+  "pdflatexexe": "C:\\Users\\alanw\\AppData\\Local\\Programs\\MiKTeX\\miktex\\bin\\x64\\pdflatex.exe",
+  "magickexe": "C:\\Program Files\\ImageMagick-7.0.10-Q16-HDRI\\magick.exe" 
+}

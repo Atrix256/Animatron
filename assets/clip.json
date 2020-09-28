@@ -1,4 +1,8 @@
 {
+  "program": "animatron",
+  "versionMajor": 0,
+  "versionMajor": 1,
+
   "outputSizeX": 1024,
   "outputSizeY": 768,
   "FPS": 30,

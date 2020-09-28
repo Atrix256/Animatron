@@ -159,6 +159,8 @@ int main(int argc, char** argv)
     Data::Document document;
     const uint32_t versionMajor = document.versionMajor;
     const uint32_t versionMinor = document.versionMinor;
+    const uint32_t configVersionMajor = document.config.versionMajor;
+    const uint32_t configVersionMinor = document.config.versionMinor;
     if (!ReadFromJSONFile(document, fileName))
     {
         system("pause");
@@ -180,6 +182,27 @@ int main(int argc, char** argv)
         printf("Wrong version number: %i.%i, not %i.%i. Version upgrades are TODO\n", document.versionMajor, document.versionMinor, versionMajor, versionMinor);
         system("pause");
         return 6;
+    }
+
+    // read the config if possible
+    if (ReadFromJSONFile(document.config, "config.json"))
+    {
+        // verify
+        if (document.config.program != "animatronconfig")
+        {
+            printf("Not an animatron config file!\n");
+            system("pause");
+            return 5;
+        }
+
+        // version fixup
+        if (document.config.versionMajor != configVersionMajor || document.config.versionMinor != configVersionMinor)
+        {
+            // TODO: version fixup
+            printf("Wrong config version number: %i.%i, not %i.%i. Version upgrades are TODO\n", document.config.versionMajor, document.config.versionMinor, configVersionMajor, configVersionMinor);
+            system("pause");
+            return 6;
+        }
     }
     
     // data interpretation
@@ -370,20 +393,38 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+! probably need a "temp" or "build" directory.
+ * frames can go there before ffmpeg combines em.
+ * tex files go there
+
+! config needs path to ffmpeg, and path to dvipng / latex.
+ * put in docs that miktex is suggested on windows if you don't know what you are doing / don't have a tex thing already installed.
+
+
+
+C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
+
+Latex notes...
+* C:\Users\alanw\AppData\Local\Programs\MiKTeX\miktex\bin\x64\latex.exe
+* export to a png as small as possible: https://tex.stackexchange.com/questions/11866/compile-a-latex-document-into-a-png-image-thats-as-short-as-possible
+* but that uses image magick else to make a png. what format will latex give me without needing something else?
+? dvipng? https://en.wikibooks.org/wiki/LaTeX/Export_To_Other_Formats#Convert_to_image_formats
+ * http://savannah.nongnu.org/projects/dvipng/
+* make pdf then to png https://stackoverflow.com/questions/26354780/how-can-i-generate-good-looking-png-images-out-of-latex
 
 TITLE SCREEN:
  * get a point, line, triangle, tetrahedron rotating on the screen.
  * TODO: have fill support gradients or make a vertical gradient fill node? using cubic hermite interpolation with y values and x values being colors.
  * make a more interesting than blank white background
  * make this be a specifically named json clip file. we can keep / reuse / improve this as time goes on
+ ! get latex support in. Maybe have a settings file that this loads (with a version number etc). it can have a path to latex. use latex to render text, then load those images.
 
+! could also have config point at where ffmpeg.exe lives, to make an actual output video.
 
-
-? latex support -> give it path to latex. have it make a file, run commands, generate images, load and use images. That would help with equations, but also text.
+! miktex: https://miktex.org/download
 
 ! flatten checkins for v1
 
-* retest lines3d after you get tetrahedron working
 
 * make some test scene that uses all the features? or meh, use em when you have use of em, just like you'll extend as needed?
 

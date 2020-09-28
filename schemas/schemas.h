@@ -151,12 +151,29 @@ STRUCT_BEGIN(Data, KeyFrame, "A KeyFrame")
     STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, {0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f}, "Middle two Cubic Bezier control points for blending from the previous value. The endpoints not given are 0.0 and 1.0")
 STRUCT_END()
 
+// ----------------------------- Application Settings File -----------------------------
+
+// TODO: put major/minor version for config and app in a shared header somewhere.
+// TODO: make default version major/minor not be the current version, so it errors if they are omited
+// TODO: make the program read and verify config.  Probably put a no serialize configuration on the document and then manually serialize it in from the other place. yeah!
+
+STRUCT_BEGIN(Data, Configuration, "Application configuration, read from config.json")
+    STRUCT_FIELD(std::string, program, "animatronconfig", "Identifier to make sure this is a file for Animatron to use")
+    STRUCT_FIELD(uint32_t, versionMajor, 0, "Major version number")
+    STRUCT_FIELD(uint32_t, versionMinor, 1, "Minor version number")
+
+    STRUCT_FIELD(std::string, pdflatexexe, "", "The absolute path to where pdflatex.exe is (from latex), used to render text and formulas")
+    STRUCT_FIELD(std::string, magickexe, "", "The absolute path to where magickexe.exe is (from image magick), used to convert pdf to png")
+STRUCT_END()
+
 // ----------------------------- The Document -----------------------------
 
 STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(std::string, program, "animatron", "Identifier to make sure this is a file for Animatron to use")
     STRUCT_FIELD(uint32_t, versionMajor, 0, "Major version number")
     STRUCT_FIELD(uint32_t, versionMinor, 1, "Minor version number")
+
+    STRUCT_FIELD_NO_SERIALIZE(Configuration, config, Configuration(), "Application configuration, read from config.json")
 
     STRUCT_FIELD(int, outputSizeX, 320, "The size of the output render on the X axis")
     STRUCT_FIELD(int, outputSizeY, 200, "The size of the output render on the Y axis")
