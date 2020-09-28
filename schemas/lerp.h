@@ -33,8 +33,8 @@
 #define STRUCT_FIELD(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
         Lerp(A._NAME, B._NAME, Result._NAME, t);
 
-#define STRUCT_FIELD_NO_SERIALIZE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-        Lerp(A._NAME, B._NAME, Result._NAME, t);
+// Note: no serialize also means no lerp
+#define STRUCT_FIELD_NO_SERIALIZE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION)
 
 #define STRUCT_DYNAMIC_ARRAY(_TYPE, _NAME, _DESCRIPTION) \
         { \

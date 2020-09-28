@@ -62,6 +62,10 @@ void EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fil
 {
 }
 
+void EntityFill_FrameInitialize(const Data::Document& document, Data::EntityFill& fill)
+{
+}
+
 void EntityFill_DoAction(
     const Data::Document& document, 
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
@@ -83,6 +87,10 @@ void EntityFill_DoAction(
 }
 
 void EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle)
+{
+}
+
+void EntityCircle_FrameInitialize(const Data::Document& document, Data::EntityCircle& circle)
 {
 }
 
@@ -156,6 +164,10 @@ void EntityRectangle_Initialize(const Data::Document& document, Data::EntityRect
 {
 }
 
+void EntityRectangle_FrameInitialize(const Data::Document& document, Data::EntityRectangle& rectangle)
+{
+}
+
 void EntityRectangle_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
@@ -195,6 +207,10 @@ void EntityLine_Initialize(const Data::Document& document, Data::EntityLine& lin
 {
 }
 
+void EntityLine_FrameInitialize(const Data::Document& document, Data::EntityLine& line)
+{
+}
+
 void EntityLine_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
@@ -205,6 +221,10 @@ void EntityLine_DoAction(
 }
 
 void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera)
+{
+}
+
+void EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCamera& camera)
 {
     // Deal with output z if we ever have a z buffer or similar. It's set to zero in these projection matrices.
     Data::Matrix4x4 projMtx;
@@ -257,6 +277,10 @@ void EntityCamera_DoAction(
 }
 
 void EntityLine3D_Initialize(const Data::Document& document, Data::EntityLine3D& line3d)
+{
+}
+
+void EntityLine3D_FrameInitialize(const Data::Document& document, Data::EntityLine3D& line3d)
 {
 }
 
@@ -314,6 +338,10 @@ void EntityLine3D_DoAction(
 }
 
 void EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d)
+{
+}
+
+void EntityLines3D_FrameInitialize(const Data::Document& document, Data::EntityLines3D& lines3d)
 {
 }
 
@@ -381,6 +409,10 @@ void EntityLines3D_DoAction(
 
 void EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform)
 {
+}
+
+void EntityTransform_FrameInitialize(const Data::Document& document, Data::EntityTransform& transform)
+{
     Data::Matrix4x4 translation;
     translation.W = Data::Point4D{transform.translation.X, transform.translation.Y, transform.translation.Z, 1.0f};
 
@@ -401,6 +433,26 @@ void EntityTransform_DoAction(
     const Data::EntityTransform& transform)
 {
 }
+
+void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& latex)
+{
+    // TODO: render!
+    //latex._pixels latex._width latex._height
+}
+
+void EntityLatex_FrameInitialize(const Data::Document& document, Data::EntityLatex& latex)
+{
+}
+
+void EntityLatex_DoAction(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::EntityLatex& latex)
+{
+}
+
+// TODO: could put each of these types into their own file.
 
 // TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
 // TODO: re-profile & see where the time is going

@@ -29,7 +29,8 @@
         const std::unordered_map<std::string, Data::EntityVariant>& entityMap, \
         std::vector<Data::ColorPMA>& pixels, \
         const Data::##_TYPE& _NAME); \
-   void _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME);
+    void _TYPE##_FrameInitialize(const Data::Document& document, Data::##_TYPE& _NAME); \
+    void _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME);
 #include "df_serialize/df_serialize/_fillunsetdefines.h"
 #include "schemas/schemas_entities.h"
 
@@ -108,7 +109,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
             {
                 #include "df_serialize/df_serialize/_common.h"
                 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_Initialize(document, entity.##_NAME); break;
+                    case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_FrameInitialize(document, entity.##_NAME); break;
                 #include "df_serialize/df_serialize/_fillunsetdefines.h"
                 #include "schemas/schemas_entities.h"
                 default:
@@ -217,6 +218,39 @@ int main(int argc, char** argv)
         MakeJitterSequence(document);
     }
 
+    // report what we are doing
+    int framesTotal = int(document.duration * float(document.FPS));
+    printf("Animatron v%i.%i\n", versionMajor, versionMinor);
+    printf("Rendering with %i threads...\n", omp_get_max_threads());
+    printf("  input: %s\n", fileName);
+    printf("  output: %s\n", outFilePath);
+    printf("  %i frames rendered at %i x %i with %i samples per pixel, output to %i x %i\n",
+        framesTotal, document.renderSizeX, document.renderSizeY, document.samplesPerPixel,
+        document.outputSizeX, document.outputSizeY);
+
+    // start the timer
+    std::chrono::high_resolution_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+
+    // Do one time initialization of entities
+    // TODO: we could multi thread this
+    for (Data::Entity& entity : document.entities)
+    {
+        // do per frame entity initialization
+        switch (entity.data._index)
+        {
+            #include "df_serialize/df_serialize/_common.h"
+            #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
+                case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_Initialize(document, entity.data.##_NAME); break;
+            #include "df_serialize/df_serialize/_fillunsetdefines.h"
+            #include "schemas/schemas_entities.h"
+            default:
+            {
+                printf("unhandled entity type in variant\n");
+                return false;
+            }
+        }
+    }
+
     // make a timeline for each entity by just starting with the entity definition
     std::unordered_map<std::string, EntityTimeline> entityTimelinesMap;
     for (const Data::Entity& entity : document.entities)
@@ -298,19 +332,6 @@ int main(int argc, char** argv)
         );
     }
 
-    // report what we are doing
-    int framesTotal = int(document.duration * float(document.FPS));
-    printf("Animatron v%i.%i\n", versionMajor, versionMinor);
-    printf("Rendering with %i threads...\n", omp_get_max_threads());
-    printf("  input: %s\n", fileName);
-    printf("  output: %s\n", outFilePath);
-    printf("  %i frames rendered at %i x %i with %i samples per pixel, output to %i x %i\n",
-        framesTotal, document.renderSizeX, document.renderSizeY, document.samplesPerPixel,
-        document.outputSizeX, document.outputSizeY);
-
-    // start the timer
-    std::chrono::high_resolution_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
-
     // Render and write out each frame multithreadedly
     struct ThreadData
     {
@@ -387,6 +408,7 @@ int main(int argc, char** argv)
         return 4;
     }
 
+    system("pause");
     return 0;
 }
 

@@ -130,6 +130,15 @@ STRUCT_BEGIN(Data, EntityTransform, "")
     STRUCT_FIELD_NO_SERIALIZE(Matrix4x4, mtx, Matrix4x4(),"The transform matrix. Calculated each frame in the initialization function.")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, EntityLatex, "")
+    STRUCT_FIELD(Point2D, position, Point2D(), "The center of the generated image")
+    STRUCT_FIELD(uint32_t, dpi, 300, "Dots per inch")
+    STRUCT_FIELD(std::string, latex, "", "The actual latex to render.")
+    STRUCT_FIELD_NO_SERIALIZE(uint32_t, _width, 0, "the width of the generated image")
+    STRUCT_FIELD_NO_SERIALIZE(uint32_t, _height, 0, "the height of the generated image")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<Data::ColorPMA>, _pixels, std::vector<Data::ColorPMA>(), "The PMA pixels of the generated image")
+STRUCT_END()
+
 // ----------------------------- Entity Types -----------------------------
 
 #include "schemas_entities.h"
@@ -162,8 +171,7 @@ STRUCT_BEGIN(Data, Configuration, "Application configuration, read from config.j
     STRUCT_FIELD(uint32_t, versionMajor, 0, "Major version number")
     STRUCT_FIELD(uint32_t, versionMinor, 1, "Minor version number")
 
-    STRUCT_FIELD(std::string, pdflatexexe, "", "The absolute path to where pdflatex.exe is (from latex), used to render text and formulas")
-    STRUCT_FIELD(std::string, magickexe, "", "The absolute path to where magickexe.exe is (from image magick), used to convert pdf to png")
+    STRUCT_FIELD(std::string, latexbinaries, "", "The absolute path to where pdflatex.exe and dvipng.exe are. Used to render text and formulas. MikTex suggested!")
 STRUCT_END()
 
 // ----------------------------- The Document -----------------------------
