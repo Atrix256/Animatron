@@ -10,7 +10,7 @@
 // Enums
 
 #define ENUM_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
-    void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
+    inline void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
     { \
         Result = (t < 0.5f) ? A : B; \
     }
@@ -22,11 +22,11 @@
 // Structs
 
 #define STRUCT_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
-    void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
+    inline void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
     { \
 
 #define STRUCT_INHERIT_BEGIN(_NAMESPACE, _NAME, _BASE, _DESCRIPTION) \
-    void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
+    inline void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
     { \
         Lerp((*(_BASE*)&A), (*(_BASE*)&B), (*(_BASE*)&Result), t);
 
@@ -55,7 +55,7 @@
 // Variants
 
 #define VARIANT_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
-    void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
+    inline void Lerp(const _NAMESPACE::_NAME& A, const _NAMESPACE::_NAME& B, _NAMESPACE::_NAME& Result, float t) \
     { \
         typedef _NAMESPACE::_NAME ThisType; \
         if (A._index != B._index) \
@@ -75,7 +75,7 @@
 // Catch all for making easier to understand errors when an unhandled type is encountered
 
 template <typename T>
-void Lerp(const T& A, const T& B, T& Result, float t)
+inline void Lerp(const T& A, const T& B, T& Result, float t)
 {
     static_assert(false, __FUNCSIG__ " : Unhandled type encountered in Lerp()");
 }
@@ -84,14 +84,14 @@ void Lerp(const T& A, const T& B, T& Result, float t)
 
 #define STANDARD_LERP(_TYPE) \
     template<> \
-    void Lerp<_TYPE>(const _TYPE& A, const _TYPE& B, _TYPE& Result, float t) \
+    inline void Lerp<_TYPE>(const _TYPE& A, const _TYPE& B, _TYPE& Result, float t) \
     { \
         Result = (_TYPE)Lerp((float)A, (float)B, t); \
     }
 
 #define BINARY_LERP(_TYPE) \
     template<> \
-    void Lerp<_TYPE>(const _TYPE& A, const _TYPE& B, _TYPE& Result, float t) \
+    inline void Lerp<_TYPE>(const _TYPE& A, const _TYPE& B, _TYPE& Result, float t) \
     { \
         Result = (t < 0.5f) ? A : B; \
     }

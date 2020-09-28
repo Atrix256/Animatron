@@ -23,6 +23,28 @@
       }
     },
     {
+      "id": "Title",
+      "zorder": 10.0,
+      "data": {
+        "latex": {
+          "background": {
+            "R": 0.5,
+            "G": 0.5,
+            "B": 0.5,
+            "A": 0.75
+          },
+          "foreground": {
+            "R": 1,
+            "G": 1,
+            "B": 1,
+            "A": 1
+          },
+          "DPI": 150,
+          "latex": "Hello. This is a new test.\n\\begin{equation}\nL = 3\n\\end{equation}\n"
+        }
+      }
+    },
+    {
       "id": "Camera",
       "data": {
         "camera": {

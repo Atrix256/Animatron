@@ -8,6 +8,7 @@
 #include <omp.h>
 #include <atomic>
 #include <chrono>
+#include <direct.h>
 
 #include "schemas/types.h"
 #include "schemas/json.h"
@@ -30,7 +31,7 @@
         std::vector<Data::ColorPMA>& pixels, \
         const Data::##_TYPE& _NAME); \
     void _TYPE##_FrameInitialize(const Data::Document& document, Data::##_TYPE& _NAME); \
-    void _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME);
+    void _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME, int entityIndex);
 #include "df_serialize/df_serialize/_fillunsetdefines.h"
 #include "schemas/schemas_entities.h"
 
@@ -232,21 +233,25 @@ int main(int argc, char** argv)
     std::chrono::high_resolution_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
 
     // Do one time initialization of entities
-    // TODO: we could multi thread this
-    for (Data::Entity& entity : document.entities)
     {
-        // do per frame entity initialization
-        switch (entity.data._index)
+        _mkdir("build");
+        int entityIndex = -1;
+        for (Data::Entity& entity : document.entities)
         {
-            #include "df_serialize/df_serialize/_common.h"
-            #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_Initialize(document, entity.data.##_NAME); break;
-            #include "df_serialize/df_serialize/_fillunsetdefines.h"
-            #include "schemas/schemas_entities.h"
-            default:
+            entityIndex++;
+            // do per frame entity initialization
+            switch (entity.data._index)
             {
-                printf("unhandled entity type in variant\n");
-                return false;
+                #include "df_serialize/df_serialize/_common.h"
+                #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
+                    case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_Initialize(document, entity.data.##_NAME, entityIndex); break;
+                #include "df_serialize/df_serialize/_fillunsetdefines.h"
+                #include "schemas/schemas_entities.h"
+                default:
+                {
+                    printf("unhandled entity type in variant\n");
+                    return false;
+                }
             }
         }
     }
@@ -526,6 +531,8 @@ Low priority:
 * maybe generate html documentaion?
 * could do 3d rendering later (path tracing) also whitted raytracing. can have 3d scenes and have defined lights. unlit if no lights defined.
 * other 2d sample sequences: R2, white noise, regular, jittered grid.
+* if init times become a problem, could do content addressable storage and cache things like latex images.
+* is there something we can use besides system() which can hide the output of the latex commands?
 
 TODO: 's for later
 * option for different image shrink / grow operations. right now it box filters down and bicubics up.

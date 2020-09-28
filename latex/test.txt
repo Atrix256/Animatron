@@ -1,7 +1,0 @@
-\documentclass[preview]{standalone}
-\begin{document}
-Hello. This is a test.
-\begin{equation}
-L = 2
-\end{equation}
-\end{document}

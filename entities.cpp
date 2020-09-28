@@ -2,6 +2,8 @@
 #include "schemas/types.h"
 #include "utils.h"
 #include <unordered_map>
+#include "stb/stb_image.h"
+#include "schemas/lerp.h"
 
 // TODO: find a home for this?
 
@@ -58,7 +60,7 @@ static void DrawLine(const Data::Document& document, std::vector<Data::ColorPMA>
 
 // ==============================================
 
-void EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill)
+void EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill, int entityIndex)
 {
 }
 
@@ -86,7 +88,7 @@ void EntityFill_DoAction(
         pixel = Blend(pixel, colorPMA);
 }
 
-void EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle)
+void EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle, int entityIndex)
 {
 }
 
@@ -160,7 +162,7 @@ void EntityCircle_DoAction(
     }
 }
 
-void EntityRectangle_Initialize(const Data::Document& document, Data::EntityRectangle& rectangle)
+void EntityRectangle_Initialize(const Data::Document& document, Data::EntityRectangle& rectangle, int entityIndex)
 {
 }
 
@@ -203,7 +205,7 @@ void EntityRectangle_DoAction(
     }
 }
 
-void EntityLine_Initialize(const Data::Document& document, Data::EntityLine& line)
+void EntityLine_Initialize(const Data::Document& document, Data::EntityLine& line, int entityIndex)
 {
 }
 
@@ -220,7 +222,7 @@ void EntityLine_DoAction(
     DrawLine(document, pixels, line.A, line.B, line.width, ToPremultipliedAlpha(line.color));
 }
 
-void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera)
+void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera, int entityIndex)
 {
 }
 
@@ -276,7 +278,7 @@ void EntityCamera_DoAction(
     // nothing to do for a camera
 }
 
-void EntityLine3D_Initialize(const Data::Document& document, Data::EntityLine3D& line3d)
+void EntityLine3D_Initialize(const Data::Document& document, Data::EntityLine3D& line3d, int entityIndex)
 {
 }
 
@@ -337,7 +339,7 @@ void EntityLine3D_DoAction(
     DrawLine(document, pixels, A, B, line3d.width, ToPremultipliedAlpha(line3d.color));
 }
 
-void EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d)
+void EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d, int entityIndex)
 {
 }
 
@@ -407,7 +409,7 @@ void EntityLines3D_DoAction(
     }
 }
 
-void EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform)
+void EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform, int entityIndex)
 {
 }
 
@@ -434,10 +436,65 @@ void EntityTransform_DoAction(
 {
 }
 
-void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& latex)
+void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& latex, int entityIndex)
 {
-    // TODO: render!
-    //latex._pixels latex._width latex._height
+    char buffer[4096];
+
+    // make the latex file
+    {
+        sprintf_s(buffer, "build/latex%i.tex", entityIndex);
+        FILE* file = nullptr;
+        fopen_s(&file, buffer, "wb");
+        if (!file)
+        {
+            // TODO: error etc
+        }
+
+        fprintf(file,
+            "\\documentclass[preview]{standalone}\n"
+            "\\begin{document}\n"
+            "%s\n"
+            "\\end{document}\n",
+            latex.latex.c_str()
+        );
+
+        fclose(file);
+    }
+
+    // make a dvi and then convert it to a png
+    {
+        // dvipng -T tight -D 300 test.dvi
+        sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex", document.config.latexbinaries.c_str(), entityIndex);
+        system(buffer);
+
+        sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", document.config.latexbinaries.c_str(), latex.DPI, entityIndex, entityIndex);
+        system(buffer);
+    }
+
+    // load the image
+    {
+        sprintf_s(buffer, "build/latex%i.png", entityIndex);
+
+        int w, h, channels;
+        stbi_uc* pixels = stbi_load(buffer, &w, &h, &channels, 1);
+
+        // TODO: error if pixels null!
+
+        latex._width = w;
+        latex._height = h;
+        latex._pixels.resize(w * h);
+
+        Data::ColorPMA bg = ToPremultipliedAlpha(latex.background);
+        Data::ColorPMA fg = ToPremultipliedAlpha(latex.foreground);
+
+        for (size_t index = 0; index < size_t(w * h); ++index)
+            Lerp(fg, bg, latex._pixels[index], float(pixels[index]) / 255.0f);
+
+        stbi_image_free(pixels);
+    }
+
+    // TODO: probably should put off the conversion until render time, so bg/fg can change with keyframes? yeah...
+    // Well maybe not actually. a color tint or fade can happen via a color multiply. maybe just a layer composition option to allow those
 }
 
 void EntityLatex_FrameInitialize(const Data::Document& document, Data::EntityLatex& latex)
@@ -450,9 +507,44 @@ void EntityLatex_DoAction(
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityLatex& latex)
 {
+    // Get the box of the latex image
+    int positionX, positionY;
+    CanvasToPixel(document, latex.position.X, latex.position.Y, positionX, positionY);
+    int minPixelX = positionX - latex._width / 2;
+    int minPixelY = positionY - latex._height / 2;
+    int maxPixelX = minPixelX + latex._width;
+    int maxPixelY = minPixelY + latex._height;
+
+    // clip the bounding box to the screen
+    int startPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
+    int endPixelX = Clamp(maxPixelX, 0, document.renderSizeX);
+    int startPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
+    int endPixelY = Clamp(maxPixelY, 0, document.renderSizeY);
+
+    // calculate the offset of the image (like if the first N pixels got clipped, we start N pixels in when copying)
+    int offsetX = startPixelX - minPixelX;
+    int offsetY = startPixelY - minPixelY;
+
+    // Draw the image
+    for (int iy = startPixelY; iy < endPixelY; ++iy)
+    {
+        const Data::ColorPMA* srcPixel = &latex._pixels[(iy - startPixelY + offsetY) * latex._width + offsetX];
+        Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + startPixelX];
+
+        for (int ix = startPixelX; ix < endPixelX; ++ix)
+        {
+            *destPixel = Blend(*destPixel, *srcPixel);
+            srcPixel++;
+            destPixel++;
+        }
+    }
 }
 
+// TODO: could run ffmpeg at the end to make a video!
+
 // TODO: could put each of these types into their own file.
+
+// TODO: could put image support in since you basically already are for latex
 
 // TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
 // TODO: re-profile & see where the time is going
