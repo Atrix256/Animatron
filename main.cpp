@@ -97,6 +97,8 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                 const Data::EntityVariant& entity2 = timeline.keyFrames[cursorIndex + 1].entity;
 
                 // Do the lerp between keyframe entities
+                // Set entity to entity1 first though to catch anything that isn't serialized (and not lerped)
+                entity = entity1;
                 Lerp(entity1, entity2, entity, blendPercent);
             }
             // otherwise we are beyond the last key frame, so just set the value

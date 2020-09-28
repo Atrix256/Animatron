@@ -480,21 +480,14 @@ void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& l
 
         // TODO: error if pixels null!
 
+        // set the width and height and copy the pixels
         latex._width = w;
         latex._height = h;
         latex._pixels.resize(w * h);
-
-        Data::ColorPMA bg = ToPremultipliedAlpha(latex.background);
-        Data::ColorPMA fg = ToPremultipliedAlpha(latex.foreground);
-
-        for (size_t index = 0; index < size_t(w * h); ++index)
-            Lerp(fg, bg, latex._pixels[index], float(pixels[index]) / 255.0f);
+        memcpy(latex._pixels.data(), pixels, w * h);
 
         stbi_image_free(pixels);
     }
-
-    // TODO: probably should put off the conversion until render time, so bg/fg can change with keyframes? yeah...
-    // Well maybe not actually. a color tint or fade can happen via a color multiply. maybe just a layer composition option to allow those
 }
 
 void EntityLatex_FrameInitialize(const Data::Document& document, Data::EntityLatex& latex)
@@ -525,20 +518,33 @@ void EntityLatex_DoAction(
     int offsetX = startPixelX - minPixelX;
     int offsetY = startPixelY - minPixelY;
 
+    Data::ColorPMA bg = ToPremultipliedAlpha(latex.background);
+    Data::ColorPMA fg = ToPremultipliedAlpha(latex.foreground);
+
     // Draw the image
     for (int iy = startPixelY; iy < endPixelY; ++iy)
     {
-        const Data::ColorPMA* srcPixel = &latex._pixels[(iy - startPixelY + offsetY) * latex._width + offsetX];
+        const uint8_t* srcPixel = &latex._pixels[(iy - startPixelY + offsetY) * latex._width + offsetX];
         Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + startPixelX];
 
         for (int ix = startPixelX; ix < endPixelX; ++ix)
         {
-            *destPixel = Blend(*destPixel, *srcPixel);
+            Data::ColorPMA srcColor;
+            Lerp(fg, bg, srcColor, float(*srcPixel) / 255.0f);
+
+            *destPixel = Blend(*destPixel, srcColor);
             srcPixel++;
             destPixel++;
         }
     }
 }
+
+// TODO: the lerp is clearing out all non serialized values in schemas.
+// review them to see what to do.
+// for the latex situation, we could have a cache since it's static. That would make it stop copying those pixels around too.
+// ! could also try setting = before a lerp
+
+// ! tell Apoorva Joshi about the latex later.
 
 // TODO: could run ffmpeg at the end to make a video!
 

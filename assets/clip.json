@@ -14,9 +14,9 @@
       "data": {
         "fill": {
           "color": {
-            "R": 0.0,
-            "G": 0.0,
-            "B": 0.0,
+            "R": 0.3,
+            "G": 0.4,
+            "B": 0.5,
             "A": 1.0
           }
         }
@@ -27,11 +27,9 @@
       "zorder": 10.0,
       "data": {
         "latex": {
-          "background": {
-            "R": 0.5,
-            "G": 0.5,
-            "B": 0.5,
-            "A": 0.75
+          "position": {
+            "X": 0,
+            "Y": -10
           },
           "foreground": {
             "R": 1,
@@ -39,8 +37,8 @@
             "B": 1,
             "A": 1
           },
-          "DPI": 150,
-          "latex": "Hello. This is a new test.\n\\begin{equation}\nL = 3\n\\end{equation}\n"
+          "DPI": 300,
+          "latex": "$L_o(\\omega_o)=L_e(\\omega_o)+\\int_{\\Omega}{f(\\omega_i, \\omega_o)L_i(\\omega_i)(\\omega_i \\cdot n)\\mathrm{d}\\omega_i}$\n"
         }
       }
     },
@@ -314,6 +312,26 @@
     }
   ],
   "keyFrames": [
+    {
+      "entityId": "Title",
+      "time": 1,
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":0,\"B\":0,\"A\":1}}}"
+    },
+    {
+      "entityId": "Title",
+      "time": 2,
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":1,\"B\":0,\"A\":1}}}"
+    },
+    {
+      "entityId": "Title",
+      "time": 3,
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":0,\"B\":1,\"A\":1}}}"
+    },
+    {
+      "entityId": "Title",
+      "time": 4,
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":1,\"B\":1,\"A\":1}}}"
+    },
     {
       "entityId": "Camera",
       "time": 2,

@@ -138,7 +138,7 @@ STRUCT_BEGIN(Data, EntityLatex, "")
     STRUCT_FIELD(std::string, latex, "", "The actual latex to render.")
     STRUCT_FIELD_NO_SERIALIZE(uint32_t, _width, 0, "the width of the generated image")
     STRUCT_FIELD_NO_SERIALIZE(uint32_t, _height, 0, "the height of the generated image")
-    STRUCT_FIELD_NO_SERIALIZE(std::vector<Data::ColorPMA>, _pixels, std::vector<Data::ColorPMA>(), "The PMA pixels of the generated image")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<uint8_t>, _pixels, std::vector<uint8_t>(), "The PMA pixels of the generated image")
 STRUCT_END()
 
 // ----------------------------- Entity Types -----------------------------
