@@ -559,3 +559,5 @@ void EntityLatex_DoAction(
 // TODO: should do versioning soon, cause you are likely to start breaking things! fixup of loaded data would be nice
 // TODO: how can the camera get roll etc? is parenting it to a matrix good enough?
 // TOOD: support recursive matrix parenting.
+// TODO: have a to grey scale operation, a multiply by color operation (and other target?) and an add color operation (and other target?), and a copy operation
+// TODO: a gradient fill.. Make the gradient define a plane for the gradient, and the data points are the curve for the projected value. Probably should have "hermite" interpolation option, and custom which uses a per section curve? Not sure which is better.
