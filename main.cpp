@@ -435,9 +435,10 @@ int main(int argc, char** argv)
         // TODO: make frames be in the build folder
         // TODO: make this command line respect settings in the file, and also make them configurable
         // TODO: make output file name configurable?
+        // Youtube recomended settings (https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
         printf("Assembling frames...\n");
         char buffer[1024];
-        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -pix_fmt yuv420p -vb 20M -vframes %i %s", document.config.ffmpeg.c_str(), document.FPS, framesTotal, destFile);
+        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -vframes %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p %s", document.config.ffmpeg.c_str(), document.FPS, framesTotal, destFile);
         system(buffer);
     }
 

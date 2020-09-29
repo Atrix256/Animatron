@@ -3,8 +3,8 @@
   "versionMajor": 0,
   "versionMajor": 1,
 
-  "outputSizeX": 1024,
-  "outputSizeY": 768,
+  "outputSizeX": 1920,
+  "outputSizeY": 1080,
   "FPS": 30,
   "duration": 5,
   "entities": [
