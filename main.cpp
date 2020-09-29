@@ -395,12 +395,24 @@ int main(int argc, char** argv)
         }
 
         // write it out
-        sprintf_s(threadData.outFileName, "%s%i.png", outFilePath, frameIndex);
+        sprintf_s(threadData.outFileName, "build/%i.png", frameIndex);
         stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
 
         framesDone++;
     }
     printf("\r100%%\n");
+
+    // assemble the frames into a movie
+    if (!wasError)
+    {
+        // TODO: make frames be in the build folder
+        // TODO: make this command line respect settings in the file, and also make them configurable
+        // TODO: make output file name configurable?
+        printf("Assembling frames...\n");
+        char buffer[1024];
+        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -pix_fmt yuv420p -vb 20M %s/out.mp4", document.config.ffmpeg.c_str(), document.FPS, outFilePath);
+        system(buffer);
+    }
 
     // report how long it took
     {

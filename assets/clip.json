@@ -23,6 +23,26 @@
       }
     },
     {
+      "id": "Title2",
+      "zorder": 10.0,
+      "data": {
+        "latex": {
+          "position": {
+            "X": 0,
+            "Y": -20
+          },
+          "foreground": {
+            "R": 1,
+            "G": 1,
+            "B": 1,
+            "A": 1
+          },
+          "DPI": 600,
+          "latex": "The Rendering Equation\n"
+        }
+      }
+    },
+    {
       "id": "Title",
       "zorder": 10.0,
       "data": {
@@ -32,10 +52,10 @@
             "Y": -10
           },
           "foreground": {
-            "R": 1,
-            "G": 1,
-            "B": 1,
-            "A": 1
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 0
           },
           "DPI": 300,
           "latex": "$L_o(\\omega_o)=L_e(\\omega_o)+\\int_{\\Omega}{f(\\omega_i, \\omega_o)L_i(\\omega_i)(\\omega_i \\cdot n)\\mathrm{d}\\omega_i}$\n"
@@ -315,22 +335,27 @@
     {
       "entityId": "Title",
       "time": 1,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":0,\"B\":0,\"A\":1}}}"
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":0,\"B\":0,\"A\":0}}}"
     },
     {
       "entityId": "Title",
       "time": 2,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":1,\"B\":0,\"A\":1}}}"
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":0,\"B\":0,\"A\":1}}}"
     },
     {
       "entityId": "Title",
       "time": 3,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":0,\"B\":1,\"A\":1}}}"
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":1,\"B\":0,\"A\":1}}}"
     },
     {
       "entityId": "Title",
       "time": 4,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":1,\"B\":1,\"A\":1}}}"
+      "newValue": "{\"latex\":{\"background\":{\"R\":0,\"G\":0,\"B\":0,\"A\":0},\"foreground\":{\"R\":0,\"G\":0,\"B\":1,\"A\":1}}}"
+    },
+    {
+      "entityId": "Title",
+      "time": 5,
+      "newValue": "{\"latex\":{\"background\":{\"R\":0.8,\"G\":0.2,\"B\":0.4,\"A\":0.5},\"foreground\":{\"R\":1,\"G\":1,\"B\":1,\"A\":1}}}"
     },
     {
       "entityId": "Camera",

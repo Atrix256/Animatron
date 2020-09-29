@@ -542,11 +542,10 @@ void EntityLatex_DoAction(
 // TODO: the lerp is clearing out all non serialized values in schemas.
 // review them to see what to do.
 // for the latex situation, we could have a cache since it's static. That would make it stop copying those pixels around too.
-// ! could also try setting = before a lerp
+// ! could also try setting = before a lerp (did this temporarily)
 
 // ! tell Apoorva Joshi about the latex later.
 
-// TODO: could run ffmpeg at the end to make a video!
 
 // TODO: could put each of these types into their own file.
 

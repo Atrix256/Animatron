@@ -173,7 +173,8 @@ STRUCT_BEGIN(Data, Configuration, "Application configuration, read from config.j
     STRUCT_FIELD(uint32_t, versionMajor, 0, "Major version number")
     STRUCT_FIELD(uint32_t, versionMinor, 1, "Minor version number")
 
-    STRUCT_FIELD(std::string, latexbinaries, "", "The absolute path to where pdflatex.exe and dvipng.exe are. Used to render text and formulas. MikTex suggested!")
+    STRUCT_FIELD(std::string, latexbinaries, "", "The path to where pdflatex.exe and dvipng.exe are. Used to render text and formulas. MikTex suggested!")
+    STRUCT_FIELD(std::string, ffmpeg, "", "The path to where ffmpeg.exe is, including the exe name. Used to assemble frames into the final video. ")
 STRUCT_END()
 
 // ----------------------------- The Document -----------------------------
