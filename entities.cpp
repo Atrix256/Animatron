@@ -258,8 +258,8 @@ void EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCa
     }
 
     Data::Point3D forward = Normalize(camera.at - camera.position);
-    Data::Point3D right = Normalize(Cross(camera.up, forward));
-    Data::Point3D up = Normalize(Cross(forward, right));
+    Data::Point3D right = Normalize(Cross(forward, camera.up));
+    Data::Point3D up = Normalize(Cross(right, forward));
 
     Data::Matrix4x4 viewMtx;
     viewMtx.X = Data::Point4D{ right.X, right.Y, right.Z, 0.0f };
@@ -425,7 +425,7 @@ void EntityTransform_FrameInitialize(const Data::Document& document, Data::Entit
 
     Data::Matrix4x4 rotation = Rotation(DegreesToRadians(transform.rotation.X), DegreesToRadians(transform.rotation.Y), DegreesToRadians(transform.rotation.Z));
 
-    transform.mtx = Multiply(rotation, Multiply(translation, scale));
+    transform.mtx = Multiply(Multiply(scale, rotation), translation);
 }
 
 void EntityTransform_DoAction(
@@ -539,15 +539,16 @@ void EntityLatex_DoAction(
     }
 }
 
+// TODO: there is a lot of distortion at the edges. the fov is too high, need to fix that.
+
+// TODO: problem with ffmpeg. if you decrease time of video, there are old frames laying around that it will still include. can you tell ffmpeg how many to include?
+
+// TODO: apparently dithering should help video not compress so hard. it'll help banding so maybe do it soon?
+
 // TODO: the lerp is clearing out all non serialized values in schemas.
 // review them to see what to do.
 // for the latex situation, we could have a cache since it's static. That would make it stop copying those pixels around too.
 // ! could also try setting = before a lerp (did this temporarily)
-
-// ! tell Apoorva Joshi about the latex later.
-
-
-// TODO: could put each of these types into their own file.
 
 // TODO: could put image support in since you basically already are for latex
 

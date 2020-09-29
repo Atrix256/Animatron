@@ -157,15 +157,20 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
 
 int main(int argc, char** argv)
 {
+    if (argc < 2)
+    {
+        printf("Usage:\n    animatron <sourcefile> <destfile>\n\n    <sourcefile> is a json file describing the animation.\n    <destfile> is the name and location of the mp4 output file.\n\n");
+        return 6;
+    }
     // Read the data in
-    const char* fileName = "./assets/clip.json";
-    const char* outFilePath = "./out/";
+    const char* srcFile = argv[1];
+    const char* destFile = (argc < 3) ? "out.mp4" : argv[2];
     Data::Document document;
     const uint32_t versionMajor = document.versionMajor;
     const uint32_t versionMinor = document.versionMinor;
     const uint32_t configVersionMajor = document.config.versionMajor;
     const uint32_t configVersionMinor = document.config.versionMinor;
-    if (!ReadFromJSONFile(document, fileName))
+    if (!ReadFromJSONFile(document, srcFile))
     {
         system("pause");
         return 1;
@@ -225,8 +230,8 @@ int main(int argc, char** argv)
     int framesTotal = int(document.duration * float(document.FPS));
     printf("Animatron v%i.%i\n", versionMajor, versionMinor);
     printf("Rendering with %i threads...\n", omp_get_max_threads());
-    printf("  input: %s\n", fileName);
-    printf("  output: %s\n", outFilePath);
+    printf("  srcFile: %s\n", srcFile);
+    printf("  destFile: %s\n", destFile);
     printf("  %i frames rendered at %i x %i with %i samples per pixel, output to %i x %i\n",
         framesTotal, document.renderSizeX, document.renderSizeY, document.samplesPerPixel,
         document.outputSizeX, document.outputSizeY);
@@ -410,7 +415,7 @@ int main(int argc, char** argv)
         // TODO: make output file name configurable?
         printf("Assembling frames...\n");
         char buffer[1024];
-        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -pix_fmt yuv420p -vb 20M %s/out.mp4", document.config.ffmpeg.c_str(), document.FPS, outFilePath);
+        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -pix_fmt yuv420p -vb 20M %s", document.config.ffmpeg.c_str(), document.FPS, destFile);
         system(buffer);
     }
 

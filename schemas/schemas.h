@@ -78,9 +78,9 @@ STRUCT_END()
 
 STRUCT_BEGIN(Data, EntityCircle, "Draw a circle")
     STRUCT_FIELD(Point2D, center, Point2D(), "The location of the circle")
-    STRUCT_FIELD(float, innerRadius, 0.9f, "The distance from the center that is not filled in.")
-    STRUCT_FIELD(float, outerRadius, 1.0f, "The distance beyond that distance that is filled in.")
-    STRUCT_FIELD(Color, color, Color{}, "The color of the circle")
+    STRUCT_FIELD(float, innerRadius, 9.0f, "The distance from the center that is not filled in.")
+    STRUCT_FIELD(float, outerRadius, 10.0f, "The distance beyond that distance that is filled in.")
+    STRUCT_FIELD(Color, color, Color{0.0f COMMA 0.0f COMMA 0.0f COMMA 1.0f}, "The color of the circle")
 STRUCT_END()
 
 STRUCT_BEGIN(Data, EntityRectangle, "Draw a rectangle")

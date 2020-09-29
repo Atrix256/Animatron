@@ -1,0 +1,300 @@
+{
+  "program": "animatron",
+  "versionMajor": 0,
+  "versionMajor": 1,
+
+  "outputSizeX": 1024,
+  "outputSizeY": 768,
+  "FPS": 30,
+  "duration": 10,
+  "entities": [
+    {
+      "id": "Background",
+      "zorder": -1000.0,
+      "data": {
+        "fill": {
+          "color": {
+            "R": 0.3,
+            "G": 0.4,
+            "B": 0.5,
+            "A": 1.0
+          }
+        }
+      }
+    },
+    {
+      "id": "Title",
+      "zorder": 10.0,
+      "data": {
+        "latex": {
+          "position": {
+            "X": 0,
+            "Y": -10
+          },
+          "foreground": {
+            "R": 1,
+            "G": 1,
+            "B": 1,
+            "A": 1
+          },
+          "DPI": 600,
+          "latex": "simplexplanations\n"
+        }
+      }
+    },
+    {
+      "id": "subtitle",
+      "zorder": 10.0,
+      "data": {
+        "latex": {
+          "position": {
+            "X": 0,
+            "Y": 0
+          },
+          "foreground": {
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 0
+          },
+          "DPI": 300,
+          "latex": "Ep2: Flattening A Dependency Graph\n"
+        }
+      }
+    },
+    {
+      "id": "Point",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": -50,
+            "Y": -35
+          },
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "Camera",
+      "data": {
+        "camera": {
+          "position": {
+            "X": 0,
+            "Y": 0,
+            "Z": -1
+          }
+        }
+      }
+    },
+    {
+      "id": "Line",
+      "data": {
+        "line3d": {
+          "A": {
+            "X": 5,
+            "Y": 0,
+            "Z": 5
+          },
+          "B": {
+            "X": -5,
+            "Y": 0,
+            "Z": 5
+          },
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          },
+          "camera": "Camera",
+          "width": 0.25,
+          "transform": "LineTransform"
+        }
+      }
+    },
+    {
+      "id": "LineTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": 40,
+            "Y": 30,
+            "Z": 10
+          }
+        }
+      }
+    },
+    {
+      "id": "Triangle",
+      "data": {
+        "lines3d": {
+          "points": [
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 5
+            },
+            {
+              "X": 0,
+              "Y": 1.5,
+              "Z": 5
+            },
+            {
+              "X": 2,
+              "Y": -1.5,
+              "Z": 5
+            },
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 5
+            }
+          ],
+          "color": {
+            "R": 0,
+            "G": 0,
+            "B": 1,
+            "A": 1
+          },
+          "camera": "Camera",
+          "width": 0.25,
+          "transform": "TriangleTransform"
+        }
+      }
+    },
+    {
+      "id": "TriangleTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": -40,
+            "Y": -30,
+            "Z": 10
+          },
+          "scale": {
+            "X": 3,
+            "Y": 3,
+            "Z": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "Tetrahedron",
+      "data": {
+        "lines3d": {
+          "color": {
+            "R": 1.0,
+            "G": 1.0,
+            "B": 0.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "transform": "TetrahedronTransform",
+          "points": [
+            {
+              // A
+              "X": -1,
+              "Y": -1,
+              "Z": -1
+            },
+            {
+              // B
+              "X": -1,
+              "Y": 1,
+              "Z": 1
+            },
+            {
+              // C
+              "X": 1,
+              "Y": -1,
+              "Z": 1
+            },
+            {
+              // A
+              "X": -1,
+              "Y": -1,
+              "Z": -1
+            },
+            {
+              // D
+              "X": 1,
+              "Y": 1,
+              "Z": -1
+            },
+            {
+              // B
+              "X": -1,
+              "Y": 1,
+              "Z": 1
+            },
+            {
+              // C
+              "X": 1,
+              "Y": -1,
+              "Z": 1
+            },
+            {
+              // D
+              "X": 1,
+              "Y": 1,
+              "Z": -1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "TetrahedronTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": 45,
+            "Y": -35,
+            "Z": 20
+          },
+          "scale": {
+            "X": 5,
+            "Y": 5,
+            "Z": 5
+          }
+        }
+      }
+    }
+  ],
+  "keyFrames": [
+    {
+      "entityId": "subtitle",
+      "time": 1,
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":0,\"B\":0,\"A\":0}}}"
+    },
+    {
+      "entityId": "subtitle",
+      "time": 2,
+      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":1,\"B\":1,\"A\":1}}}"
+    },
+    {
+      "entityId": "LineTransform",
+      "time": 10,
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}}"
+    },
+    {
+      "entityId": "TriangleTransform",
+      "time": 10,
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}}"
+    },
+    {
+      "entityId": "TetrahedronTransform",
+      "time": 10,
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}}"
+    }
+  ]
+}
