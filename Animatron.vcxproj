@@ -135,7 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json" />
-    <None Include="assets\simplexplanations2_intro.json" />
+    <None Include="assets\se2_intro.json" />
     <None Include="config.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

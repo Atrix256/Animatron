@@ -39,7 +39,7 @@
     <None Include="config.json">
       <Filter>assets</Filter>
     </None>
-    <None Include="assets\simplexplanations2_intro.json">
+    <None Include="assets\se2_intro.json">
       <Filter>assets</Filter>
     </None>
   </ItemGroup>

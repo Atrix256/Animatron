@@ -164,7 +164,29 @@ int main(int argc, char** argv)
     }
     // Read the data in
     const char* srcFile = argv[1];
-    const char* destFile = (argc < 3) ? "out.mp4" : argv[2];
+    const char* destFile = nullptr;
+    char destFileBuffer[1024];
+    if (argc < 3)
+    {
+        strcpy(destFileBuffer, srcFile);
+        int len = (int)strlen(destFileBuffer);
+        while (len > 0 && destFileBuffer[len] != '.')
+            len--;
+        if (len == 0)
+        {
+            destFile = "out.mp4";
+        }
+        else
+        {
+            destFileBuffer[len] = 0;
+            strcat(destFileBuffer, ".mp4");
+            destFile = destFileBuffer;
+        }
+    }
+    else
+    {
+        destFile = argv[2];
+    }
     Data::Document document;
     const uint32_t versionMajor = document.versionMajor;
     const uint32_t versionMinor = document.versionMinor;
@@ -415,7 +437,7 @@ int main(int argc, char** argv)
         // TODO: make output file name configurable?
         printf("Assembling frames...\n");
         char buffer[1024];
-        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -pix_fmt yuv420p -vb 20M %s", document.config.ffmpeg.c_str(), document.FPS, destFile);
+        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -pix_fmt yuv420p -vb 20M -vframes %i %s", document.config.ffmpeg.c_str(), document.FPS, framesTotal, destFile);
         system(buffer);
     }
 
@@ -439,9 +461,7 @@ int main(int argc, char** argv)
 /*
 TODO:
 
-! probably need a "temp" or "build" directory.
- * frames can go there before ffmpeg combines em.
- * tex files go there
+* if no output file given, use the same as json file name, but make .mp4. same location too... basically just remove extension and put on .mp4!
 
 ! config needs path to ffmpeg, and path to dvipng / latex.
  * put in docs that miktex is suggested on windows if you don't know what you are doing / don't have a tex thing already installed.

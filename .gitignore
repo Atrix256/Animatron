@@ -1,5 +1,4 @@
 .vs
 x64/
-out/*.png
-out/*.mp4
 build/
+*.mp4

@@ -4,5 +4,5 @@
   "versionMajor": 1,
 
   "latexbinaries": "C:\\Users\\alanw\\AppData\\Local\\Programs\\MiKTeX\\miktex\\bin\\x64\\",
-  "ffmpeg": "out\\ffmpeg.exe"
+  "ffmpeg": "assets\\ffmpeg.exe"
 }

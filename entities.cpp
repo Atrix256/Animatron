@@ -541,8 +541,6 @@ void EntityLatex_DoAction(
 
 // TODO: there is a lot of distortion at the edges. the fov is too high, need to fix that.
 
-// TODO: problem with ffmpeg. if you decrease time of video, there are old frames laying around that it will still include. can you tell ffmpeg how many to include?
-
 // TODO: apparently dithering should help video not compress so hard. it'll help banding so maybe do it soon?
 
 // TODO: the lerp is clearing out all non serialized values in schemas.
