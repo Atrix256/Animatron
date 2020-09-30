@@ -120,6 +120,8 @@ STRUCT_BEGIN(Data, EntityCamera, "A camera, used to turn 3d objects into 2d")
     STRUCT_FIELD(Point3D, up, Point3D{ 0.0f COMMA 1.0f COMMA 0.0f }, "The up direction for the camera's orientation")
     STRUCT_FIELD(bool, perspective, true, "If true, uses a perspective projection, else an orthographic projection. The perspective projection uses reversed z, infinite far plane projection.")
     STRUCT_FIELD(float, near, 0.1f, "The near plane distance. Used by perspective projection.")
+    STRUCT_FIELD(float, far, 100.0f, "The far plane distance. Used by perspective projection.")
+    STRUCT_FIELD(float, FOV, 45.0f, "The vertical field of view. Used by perspective projection.")
     STRUCT_FIELD_NO_SERIALIZE(Matrix4x4, viewProj, Matrix4x4(), "The view projection matrix of the camera. Calculated each frame in the initialization function.")
 STRUCT_END()
 
@@ -192,6 +194,8 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(int, renderSizeY, 0, "The size of the render on the Y axis. 0 means use output size. The rendered image will be sized down (for AA) or up to match the output size.")
     STRUCT_FIELD(float, duration, 4.0f, "The duration of the rendering")
     STRUCT_FIELD(int, FPS, 30, "The frame rate of the render")
+
+    STRUCT_FIELD(bool, blueNoiseDither, true, "If true, will use blue noise to dither the floating point color before quantizing to 8 bit color.")
     STRUCT_FIELD(bool, forceOpaqueOutput, true, "If true, it will force all output pixels to be opaque. False to let transparency be output.")
 
     STRUCT_FIELD(uint32_t, samplesPerPixel, 16, "The number of samples taken per pixel, increase for better anti aliasing but increased rendering cost.")

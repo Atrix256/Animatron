@@ -228,34 +228,52 @@ void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera&
 
 void EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCamera& camera)
 {
-    // Deal with output z if we ever have a z buffer or similar. It's set to zero in these projection matrices.
     Data::Matrix4x4 projMtx;
-
-    // TODO: make sure handedness matches.
-
-    float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
-    PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
-    PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
-
-    // TODO: i don't think this is correct. i think the object is too small and too close.
-    // TODO: the z axis near plane value is probably too small. z values should be more like xy values.
-    float width = 1.0f / 100.0f;
-    float height = 1.0f / 100.0f;
 
     if (camera.perspective)
     {
-        projMtx.X = Data::Point4D{ 2.0f * camera.near / width, 0.0f, 0.0f, 0.0f };
-        projMtx.Y = Data::Point4D{ 0.0f, 2.0f * camera.near / height, 0.0f, 0.0f };
-        projMtx.Z = Data::Point4D{ 0.0f, 0.0f, 0.0f, -1.0f };
-        projMtx.W = Data::Point4D{ 0.0f, 0.0f, 0.0f, 0.0f };
+        // right handed perspective projection matrix
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovrh
+
+        float aspectRatio = float(document.renderSizeX) / float(document.renderSizeY);
+        float FOVRadians = DegreesToRadians(camera.FOV);
+        float yscale = 1.0f / tanf(FOVRadians / 2.0f);
+        float xscale = yscale / (aspectRatio);
+
+        float zf = camera.far;
+        float zn = camera.near;
+
+        projMtx.X = Data::Point4D{ xscale,   0.0f,             0.0f,  0.0f };
+        projMtx.Y = Data::Point4D{   0.0f, yscale,             0.0f,  0.0f };
+        projMtx.Z = Data::Point4D{   0.0f,   0.0f,   zf / (zn - zf), -1.0f };
+        projMtx.W = Data::Point4D{   0.0f,   0.0f, zn*zf/ (zn - zf),  0.0f };
     }
     else
     {
-        projMtx.X = Data::Point4D{ 2.0f / width, 0.0f, 0.0f, 0.0f };
-        projMtx.Y = Data::Point4D{ 0.0f, 2.0f / height, 0.0f, 0.0f };
-        projMtx.Z = Data::Point4D{ 0.0f, 0.0f, 1.0f, 0.0f };
-        projMtx.W = Data::Point4D{ 0.0f, 0.0f, 0.0f, 1.0f };
+        // TODO: test ortho!
+
+        // right handed ortho matrix 
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixorthorh
+
+        float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
+        PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
+        PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
+
+        float width = float(canvasMaxX - canvasMinX);
+        float height = float(canvasMaxY - canvasMinY);
+
+        float zf = camera.far;
+        float zn = camera.near;
+
+        // TODO: probably should make x/y just be 1, so it doesn't alter X,Y? unsure what exactly we'd want for z. probably a no-op too.
+
+        projMtx.X = Data::Point4D{ 2.0f / width,          0.0f,         0.0f, 0.0f };
+        projMtx.Y = Data::Point4D{         0.0f, 2.0f / height,         0.0f, 0.0f };
+        projMtx.Z = Data::Point4D{         0.0f,          0.0f, 1.0f/(zn-zf), 0.0f };
+        projMtx.W = Data::Point4D{         0.0f,          0.0f,   zn/(zn-zf), 1.0f };
     }
+
+    // TODO: make sure camera matrix interacts with world matrix correctly
 
     Data::Point3D forward = Normalize(camera.at - camera.position);
     Data::Point3D right = Normalize(Cross(forward, camera.up));
@@ -538,6 +556,9 @@ void EntityLatex_DoAction(
         }
     }
 }
+
+// TODO: should verify that translate, scale, rotate, is happening the desired order.
+ // make some objects, do this to them, watch the video
 
 // TODO: there is a lot of distortion at the edges. the fov is too high, need to fix that.
 

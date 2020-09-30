@@ -279,10 +279,30 @@ int main(int argc, char** argv)
                 default:
                 {
                     printf("unhandled entity type in variant\n");
-                    return false;
+                    return 8;
                 }
             }
         }
+    }
+
+    // Load blue noise texture for dithering
+    std::vector<Data::ColorU8> blueNoisePixels;
+    int blueNoiseWidth = 0;
+    int blueNoiseHeight = 0;
+    if (document.blueNoiseDither)
+    {
+        int blueNoiseComponents = 0;
+        stbi_uc* pixels = stbi_load("assets/BlueNoiseRGBA.png", &blueNoiseWidth, &blueNoiseHeight, &blueNoiseComponents, 4);
+        if (pixels == nullptr || blueNoiseWidth == 0 || blueNoiseHeight == 0)
+        {
+            printf("Could not load assets/BlueNoiseRGBA.png");
+            return 7;
+        }
+
+        blueNoisePixels.resize(blueNoiseWidth * blueNoiseHeight);
+        memcpy((unsigned char*)&blueNoisePixels[0], pixels, blueNoiseWidth * blueNoiseHeight * 4);
+
+        stbi_image_free(pixels);
     }
 
     // make a timeline for each entity by just starting with the entity definition
@@ -411,6 +431,25 @@ int main(int argc, char** argv)
         // resize from the rendered size to the output size
         Resize(threadData.pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
 
+        // Do blue noise dithering if we should
+        if (document.blueNoiseDither)
+        {
+            for (size_t iy = 0; iy < document.outputSizeY; ++iy)
+            {
+                const Data::ColorU8* blueNoiseRow = &blueNoisePixels[(iy % blueNoiseHeight) * blueNoiseWidth];
+                Data::Color* destPixel = &threadData.pixels[iy * document.outputSizeX];
+
+                for (size_t ix = 0; ix < document.outputSizeX; ++ix)
+                {
+                    destPixel->R += (float(blueNoiseRow[ix % blueNoiseWidth].R) / 255.0f) / 255.0f;
+                    destPixel->G += (float(blueNoiseRow[ix % blueNoiseWidth].G) / 255.0f) / 255.0f;
+                    destPixel->B += (float(blueNoiseRow[ix % blueNoiseWidth].B) / 255.0f) / 255.0f;
+                    destPixel->A += (float(blueNoiseRow[ix % blueNoiseWidth].A) / 255.0f) / 255.0f;
+                    destPixel++;
+                }
+            }
+        }
+
         // Convert it to RGBAU8
         ColorToColorU8(threadData.pixels, threadData.pixelsU8);
 
@@ -455,55 +494,28 @@ int main(int argc, char** argv)
         return 4;
     }
 
-    system("pause");
     return 0;
 }
 
 /*
 TODO:
 
-* if no output file given, use the same as json file name, but make .mp4. same location too... basically just remove extension and put on .mp4!
+Make an enum for main return values instead of all these magic numbers
 
-! config needs path to ffmpeg, and path to dvipng / latex.
- * put in docs that miktex is suggested on windows if you don't know what you are doing / don't have a tex thing already installed.
+* TODO: probably should have an option to animate the blue noise dithering?
+
+! can macros reflect to C#? if so, could make a C# editor for df_serialize and let it load/save binary/json
+ * could also make this thing able to render a single frame of a clip at a specific time, and use it to make a scrubber bar for C#?
 
 
-
-C:\Program Files\ImageMagick-7.0.10-Q16-HDRI\magick.exe
-
-Latex notes...
-* C:\Users\alanw\AppData\Local\Programs\MiKTeX\miktex\bin\x64\latex.exe
-* export to a png as small as possible: https://tex.stackexchange.com/questions/11866/compile-a-latex-document-into-a-png-image-thats-as-short-as-possible
-* but that uses image magick else to make a png. what format will latex give me without needing something else?
-? dvipng? https://en.wikibooks.org/wiki/LaTeX/Export_To_Other_Formats#Convert_to_image_formats
- * http://savannah.nongnu.org/projects/dvipng/
-* make pdf then to png https://stackoverflow.com/questions/26354780/how-can-i-generate-good-looking-png-images-out-of-latex
-
-TITLE SCREEN:
- * get a point, line, triangle, tetrahedron rotating on the screen.
  * TODO: have fill support gradients or make a vertical gradient fill node? using cubic hermite interpolation with y values and x values being colors.
- * make a more interesting than blank white background
- * make this be a specifically named json clip file. we can keep / reuse / improve this as time goes on
- ! get latex support in. Maybe have a settings file that this loads (with a version number etc). it can have a path to latex. use latex to render text, then load those images.
-
-! could also have config point at where ffmpeg.exe lives, to make an actual output video.
-
-! miktex: https://miktex.org/download
 
 ! flatten checkins for v1
-
-
-* make some test scene that uses all the features? or meh, use em when you have use of em, just like you'll extend as needed?
-
 
 * NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
  * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
 
 
-* be able to change size of rendering at runtime and get rid of the render vs output size too
- * I think this could work by just having a canvas be an entity that can be parented off of, and it's always resized to the target when mering.
- * In this way, I think you can get rid of render/output size and just make that be supported through this canvas mechanism.
-\
 * add option for dithering before quantizing
  * Blue noise by default but IGN, Bayer and some other options available.
  * Probably could have a setting to over-quantize.
