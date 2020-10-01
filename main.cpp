@@ -236,7 +236,7 @@ int main(int argc, char** argv)
         }
     }
     
-    // data interpretation
+    // data interpretation and fixup
     {
         if (document.renderSizeX == 0)
             document.renderSizeX = document.outputSizeX;
@@ -619,5 +619,15 @@ Notes on the architecture:
 * omp made it super easy to multitread
 * stb_image super easy to load images
 * latex.exe and dvipng for latex support: text, diagrams, formulas
+* multi sampling! having each thing (lines, fill, etc) know about multisampling is nice cause fills don't need multi sampling but lines do. don't need to make N buffers.
+* zordering of objects
+* 3d objects composed inline.
+* premultiplied alpha, sRGB correctness
+* not worrying a whole lot about perf. I probably should, it would be nice if it rendered faster. lots of time spent in linear to sRGB though actually.
+ * probably would be lots faster on gpu. this was quick and cross platform, i'm happy.
+ * i think caching more things could be helpful maybe. like don't need to calculate the same gradient every frame if it's expensive to do so. don't need to calculate a transform matrix every frame if it hasn't changed
+* trying to keep focused on only implementing features as i need them mostly. mixed results
+* a simple editor seems like it'd be real helpful and real easy to make... a list of entities and key frames in the file. a property sheet for each and ability to add / delete. then a scrub bar with a preview window. maybe make this program able to generate a specific frame instead of a full movie and use it for the preview? dunno if responsive enough
+ * a simple editor for df_serialize would be nice, and this could be an extension of that. Basically just adding a scrub bar and preview window
 
 */

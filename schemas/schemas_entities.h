@@ -10,4 +10,5 @@ VARIANT_BEGIN(Data, EntityVariant, "Storage for entity type specific information
     VARIANT_TYPE(EntityCamera, camera, EntityCamera(), "")
     VARIANT_TYPE(EntityTransform, transform, EntityTransform(), "")
     VARIANT_TYPE(EntityLatex, latex, EntityLatex(), "")
+    VARIANT_TYPE(EntityLinearGradient, lineargradient, EntityLinearGradient(), "")
 VARIANT_END()

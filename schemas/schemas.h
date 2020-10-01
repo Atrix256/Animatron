@@ -42,6 +42,12 @@ STRUCT_BEGIN(Data, Point4D, "A 4d Point")
     STRUCT_FIELD(float, W, 0.0f, "W")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, GradientPoint, "A color gradient point")
+    STRUCT_FIELD(float, value, 0.0f, "The gradient scalar value")
+    STRUCT_FIELD(Color, color, Color(), "The color at this value")
+    STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, { 0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f }, "Cubic Bezier control points for blending from the previous value")
+STRUCT_END()
+
 STRUCT_BEGIN(Data, Matrix2x2, "A 2x2 matrix")
     STRUCT_FIELD(Point2D, X, Point2D{1.0f COMMA 0.0f}, "X axis")
     STRUCT_FIELD(Point2D, Y, Point2D{0.0f COMMA 1.0f}, "Y axis")
@@ -143,6 +149,11 @@ STRUCT_BEGIN(Data, EntityLatex, "")
     STRUCT_FIELD_NO_SERIALIZE(std::vector<uint8_t>, _pixels, std::vector<uint8_t>(), "The PMA pixels of the generated image")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, EntityLinearGradient, "A linear gradient: define a 2d half space and a mapping from the scalar values to colors")
+    STRUCT_FIELD(Point3D, halfSpace, Point3D{}, "A 2d version of a plane: x and y are a vector to project a point on, z is a value to add to that projection.")
+    STRUCT_DYNAMIC_ARRAY(GradientPoint, points, "The gradient colors")
+STRUCT_END()
+
 // ----------------------------- Entity Types -----------------------------
 
 #include "schemas_entities.h"
@@ -161,7 +172,7 @@ STRUCT_BEGIN(Data, KeyFrame, "A KeyFrame")
     STRUCT_FIELD(std::string, entityId, "", "The ID of the entity affected")
     STRUCT_FIELD(float, time, 0.0f, "The time in seconds the event occurs")
     STRUCT_FIELD(std::string, newValue, "", "JSON describing the value of the entity at this point in time")
-    STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, {0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f}, "Middle two Cubic Bezier control points for blending from the previous value. The endpoints not given are 0.0 and 1.0")
+    STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, {0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f}, "Cubic Bezier control points for blending from the previous value")
 STRUCT_END()
 
 // ----------------------------- Application Settings File -----------------------------

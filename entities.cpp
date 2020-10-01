@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include "stb/stb_image.h"
 #include "schemas/lerp.h"
+#include <algorithm>
 
 // TODO: find a home for this?
 
@@ -542,6 +543,102 @@ void EntityLatex_DoAction(
         }
     }
 }
+
+
+void EntityLinearGradient_Initialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient, int entityIndex)
+{
+    // sort the gradients by key value to make logic easier
+    std::sort(
+        linearGradient.points.begin(),
+        linearGradient.points.end(),
+        [](const Data::GradientPoint& a, const Data::GradientPoint& b)
+        {
+            return a.value < b.value;
+        }
+    );
+}
+
+void EntityLinearGradient_FrameInitialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient)
+{
+
+}
+
+void EntityLinearGradient_DoAction(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::EntityLinearGradient& linearGradient)
+{
+    // no colors, no gradient
+    if (linearGradient.points.size() == 0)
+        return;
+
+    // get the canvas extents. used for gradient projection
+    float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
+    PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
+    PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
+
+    Data::ColorPMA* pixel = pixels.data();
+    for (int iy = 0; iy < document.renderSizeY; ++iy)
+    {
+        float percentY = float(iy) / float(document.renderSizeY - 1);
+        float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
+
+        for (int ix = 0; ix < document.renderSizeX; ++ix)
+        {
+            float percentX = float(ix) / float(document.renderSizeX - 1);
+            float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
+
+            float value = Dot(linearGradient.halfSpace, Data::Point3D{ canvasX, canvasY, 1.0f });
+
+            auto it = std::lower_bound(
+                linearGradient.points.begin(),
+                linearGradient.points.end(),
+                value,
+                [] (const Data::GradientPoint& p, float v)
+                {
+                    return p.value < v;
+                }
+            );
+
+            // if the value is beyond the control points, use the last color
+            Data::Color color;
+            if (it == linearGradient.points.end())
+            {
+                color = linearGradient.points.rbegin()->color;
+            }
+            // else if the value is lower than the first control point, use the first color
+            else if (it == linearGradient.points.begin())
+            {
+                color = linearGradient.points.begin()->color;
+            }
+            // else we are between two control points, do a cubic bezier interpolation
+            else
+            {
+                int index = int(it - linearGradient.points.begin());
+
+                float percent = (value - linearGradient.points[index - 1].value) / (linearGradient.points[index].value - linearGradient.points[index - 1].value);
+
+                float CP0 = linearGradient.points[index].blendControlPoints[0];
+                float CP1 = linearGradient.points[index].blendControlPoints[1];
+                float CP2 = linearGradient.points[index].blendControlPoints[2];
+                float CP3 = linearGradient.points[index].blendControlPoints[3];
+
+                float t = CubicBezierInterpolation(CP0, CP1, CP2, CP3, percent);
+
+                Lerp(linearGradient.points[index - 1].color, linearGradient.points[index].color, color, t);
+            }
+
+            *pixel = Blend(*pixel, ToPremultipliedAlpha(color));
+
+            pixel++;
+        }
+    }
+}
+
+// TODO: i think canvas to pixel and pixel to canvase need to flip the y axis over. the gradient suggests that.  investigate to be sure.
+
+// TODO: keyframes shouldn't be able to change an object type. that'll make for shorter strings too
 
 // TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
 
