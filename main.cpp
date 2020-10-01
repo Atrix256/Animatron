@@ -616,5 +616,8 @@ Notes on the architecture:
 * having df_serialize means i add a field to the schema then... i can add it to the json and it shows up at runtime.  I can also already use it as keyframe data!
 * using macros to define schema means that i can auto expand macros for other uses and turn runtime checks into compile errors. Like wanting a function per entity.
 * cubic bezier for interpolating values seems good for linear and non linear blends. can even NOT do blending by making CPs all 0s or all 1s.
+* omp made it super easy to multitread
+* stb_image super easy to load images
+* latex.exe and dvipng for latex support: text, diagrams, formulas
 
 */

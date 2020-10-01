@@ -195,18 +195,32 @@ inline const Data::Matrix4x4 Rotation(float x, float y, float z)
     return Multiply(Multiply(RotationX(x), RotationY(y)), RotationZ(z));
 }
 
-inline Data::Point2D ProjectPoint3DToPoint2D(const Data::Point3D& point_, const Data::Matrix4x4& mtx)
+inline Data::Point3D Multiply(const Data::Point3D& point, const Data::Matrix3x3& mtx)
 {
-    Data::Point4D point = Data::Point4D{ point_.X, point_.Y, point_.Z, 1.0f };
+    // TODO: use Dot and matrix col functions
+    Data::Point3D result;
+    result.X = point.X * mtx.X.X + point.Y * mtx.Y.X + point.Z * mtx.Z.X;
+    result.Y = point.X * mtx.X.Y + point.Y * mtx.Y.Y + point.Z * mtx.Z.Y;
+    result.Z = point.X * mtx.X.Z + point.Y * mtx.Y.Z + point.Z * mtx.Z.Z;
+    return result;
+}
 
-    // TODO: use Dot and matrix col function
-
+inline Data::Point4D Multiply(const Data::Point4D& point, const Data::Matrix4x4& mtx)
+{
+    // TODO: use Dot and matrix col functions
     Data::Point4D result;
     result.X = point.X * mtx.X.X + point.Y * mtx.Y.X + point.Z * mtx.Z.X + point.W * mtx.W.X;
     result.Y = point.X * mtx.X.Y + point.Y * mtx.Y.Y + point.Z * mtx.Z.Y + point.W * mtx.W.Y;
     result.Z = point.X * mtx.X.Z + point.Y * mtx.Y.Z + point.Z * mtx.Z.Z + point.W * mtx.W.Z;
     result.W = point.X * mtx.X.W + point.Y * mtx.Y.W + point.Z * mtx.Z.W + point.W * mtx.W.W;
+    return result;
+}
 
+inline Data::Point2D ProjectPoint3DToPoint2D(const Data::Point3D& point, const Data::Matrix4x4& mtx)
+{
+    Data::Point4D result = Multiply(Data::Point4D{ point.X, point.Y, point.Z, 1.0f }, mtx);
+
+    // homogeneous divide
     result.X /= result.W;
     result.Y /= result.W;
     result.Z /= result.W;

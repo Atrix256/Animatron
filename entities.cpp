@@ -234,6 +234,7 @@ void EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCa
     {
         // right handed perspective projection matrix
         // https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovrh
+        // Adjusting Z.W to be -1/100 instead of -1 though to make the x/y and z axes on equal footing.
 
         float aspectRatio = float(document.renderSizeX) / float(document.renderSizeY);
         float FOVRadians = DegreesToRadians(camera.FOV);
@@ -245,35 +246,20 @@ void EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCa
 
         projMtx.X = Data::Point4D{ xscale,   0.0f,             0.0f,  0.0f };
         projMtx.Y = Data::Point4D{   0.0f, yscale,             0.0f,  0.0f };
-        projMtx.Z = Data::Point4D{   0.0f,   0.0f,   zf / (zn - zf), -1.0f };
+        projMtx.Z = Data::Point4D{   0.0f,   0.0f,   zf / (zn - zf), -0.01f };
         projMtx.W = Data::Point4D{   0.0f,   0.0f, zn*zf/ (zn - zf),  0.0f };
     }
     else
     {
-        // TODO: test ortho!
-
-        // right handed ortho matrix 
-        // https://docs.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixorthorh
-
-        float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
-        PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
-        PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
-
-        float width = float(canvasMaxX - canvasMinX);
-        float height = float(canvasMaxY - canvasMinY);
-
+        // ortho matrix leaving x and y alone so it's the same results as if using canvas space coordinates
         float zf = camera.far;
         float zn = camera.near;
 
-        // TODO: probably should make x/y just be 1, so it doesn't alter X,Y? unsure what exactly we'd want for z. probably a no-op too.
-
-        projMtx.X = Data::Point4D{ 2.0f / width,          0.0f,         0.0f, 0.0f };
-        projMtx.Y = Data::Point4D{         0.0f, 2.0f / height,         0.0f, 0.0f };
-        projMtx.Z = Data::Point4D{         0.0f,          0.0f, 1.0f/(zn-zf), 0.0f };
-        projMtx.W = Data::Point4D{         0.0f,          0.0f,   zn/(zn-zf), 1.0f };
+        projMtx.X = Data::Point4D{ -1.0f,  0.0f,         0.0f, 0.0f };
+        projMtx.Y = Data::Point4D{  0.0f, -1.0f,         0.0f, 0.0f };
+        projMtx.Z = Data::Point4D{  0.0f,  0.0f, 1.0f/(zn-zf), 0.0f };
+        projMtx.W = Data::Point4D{  0.0f,  0.0f,   zn/(zn-zf), 1.0f };
     }
-
-    // TODO: make sure camera matrix interacts with world matrix correctly
 
     Data::Point3D forward = Normalize(camera.at - camera.position);
     Data::Point3D right = Normalize(Cross(forward, camera.up));
@@ -316,12 +302,12 @@ void EntityLine3D_DoAction(
     {
         // TODO: how to deal with errors better? should probably stop rendering
         // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
-        printf("Error: could not find lines3d camera %s\n", line3d.camera.c_str());
+        printf("Error: could not find line3d camera %s\n", line3d.camera.c_str());
         return;
     }
     if (it->second._index != Data::EntityVariant::c_index_camera)
     {
-        printf("Error lines3d camera was not a camera %s\n", line3d.camera.c_str());
+        printf("Error line3d camera was not a camera %s\n", line3d.camera.c_str());
         return;
     }
     const Data::EntityCamera& cameraEntity = it->second.camera;
@@ -336,12 +322,12 @@ void EntityLine3D_DoAction(
             // TODO: this will be moot when we parent instead of look up by name, so maybe hold off on this
             // TODO: how to deal with errors better? should probably stop rendering
             // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
-            printf("Error: could not find lines3d transform %s\n", line3d.transform.c_str());
+            printf("Error: could not find line3d transform %s\n", line3d.transform.c_str());
             return;
         }
         if (it->second._index != Data::EntityVariant::c_index_transform)
         {
-            printf("Error lines3d camera was not a camera %s\n", line3d.transform.c_str());
+            printf("Error line3d camera was not a camera %s\n", line3d.transform.c_str());
             return;
         }
         transform = Multiply(it->second.transform.mtx, cameraEntity.viewProj);
@@ -556,6 +542,8 @@ void EntityLatex_DoAction(
         }
     }
 }
+
+// TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
 
 // TODO: should verify that translate, scale, rotate, is happening the desired order.
  // make some objects, do this to them, watch the video

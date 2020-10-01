@@ -5,8 +5,10 @@
 
   "outputSizeX": 1920,
   "outputSizeY": 1080,
+  //"outputSizeX": 960,
+  //"outputSizeY": 540,
   "FPS": 30,
-  "duration": 5,
+  "duration": 10,
   "entities": [
     {
       "id": "Background",
@@ -23,46 +25,6 @@
       }
     },
     {
-      "id": "Title2",
-      "zorder": 10.0,
-      "data": {
-        "latex": {
-          "position": {
-            "X": 0,
-            "Y": -20
-          },
-          "foreground": {
-            "R": 1,
-            "G": 1,
-            "B": 1,
-            "A": 1
-          },
-          "DPI": 600,
-          "latex": "The Rendering Equation\n"
-        }
-      }
-    },
-    {
-      "id": "Title",
-      "zorder": 10.0,
-      "data": {
-        "latex": {
-          "position": {
-            "X": 0,
-            "Y": -10
-          },
-          "foreground": {
-            "R": 0,
-            "G": 0,
-            "B": 0,
-            "A": 0
-          },
-          "DPI": 300,
-          "latex": "$L_o(\\omega_o)=L_e(\\omega_o)+\\int_{\\Omega}{f(\\omega_i, \\omega_o)L_i(\\omega_i)(\\omega_i \\cdot n)\\mathrm{d}\\omega_i}$\n"
-        }
-      }
-    },
-    {
       "id": "Camera",
       "data": {
         "camera": {
@@ -75,257 +37,222 @@
       }
     },
     {
-      "id": "Test1",
-      "data": {
-        "line3d": {
-          "color": {
-            "R": 1.0,
-            "G": 0.0,
-            "B": 0.0,
-            "A": 1.0
-          },
-          "width": 0.1,
-          "camera": "Camera",
-          "transform": "TetrahedronTransform",
-          "A": {
-            "X": -1,
-            "Y": -1,
-            "Z": -1
-          },
-          "B": {
-            "X": -1,
-            "Y": 1,
-            "Z": 1
-          }
-        }
-      }
-    },
-    {
-      "id": "Test2",
-      "data": {
-        "line3d": {
-          "color": {
-            "R": 0.0,
-            "G": 1.0,
-            "B": 0.0,
-            "A": 1.0
-          },
-          "width": 0.1,
-          "camera": "Camera",
-          "transform": "TetrahedronTransform",
-          "A": {
-            "X": -1,
-            "Y": 1,
-            "Z": 1
-          },
-          "B": {
-            "X": 1,
-            "Y": -1,
-            "Z": 1
-          }
-        }
-      }
-    },
-    {
-      "id": "Test3",
-      "data": {
-        "line3d": {
-          "color": {
-            "R": 0.0,
-            "G": 0.0,
-            "B": 1.0,
-            "A": 1.0
-          },
-          "width": 0.1,
-          "camera": "Camera",
-          "transform": "TetrahedronTransform",
-          "A": {
-            "X": 1,
-            "Y": -1,
-            "Z": 1
-          },
-          "B": {
-            "X": -1,
-            "Y": -1,
-            "Z": -1
-          }
-        }
-      }
-    },
-    {
-      "id": "Test4",
-      "data": {
-        "line3d": {
-          "color": {
-            "R": 0.0,
-            "G": 1.0,
-            "B": 1.0,
-            "A": 1.0
-          },
-          "width": 0.1,
-          "camera": "Camera",
-          "transform": "TetrahedronTransform",
-          "A": {
-            "X": 1,
-            "Y": 1,
-            "Z": -1
-          },
-          "B": {
-            "X": -1,
-            "Y": -1,
-            "Z": -1
-          }
-        }
-      }
-    },
-    {
-      "id": "Test5",
-      "data": {
-        "line3d": {
-          "color": {
-            "R": 1.0,
-            "G": 0.0,
-            "B": 1.0,
-            "A": 1.0
-          },
-          "width": 0.1,
-          "camera": "Camera",
-          "transform": "TetrahedronTransform",
-          "A": {
-            "X": 1,
-            "Y": 1,
-            "Z": -1
-          },
-          "B": {
-            "X": -1,
-            "Y": 1,
-            "Z": 1
-          }
-        }
-      }
-    },
-    {
-      "id": "Test6",
-      "data": {
-        "line3d": {
-          "color": {
-            "R": 1.0,
-            "G": 1.0,
-            "B": 0.0,
-            "A": 1.0
-          },
-          "width": 0.1,
-          "camera": "Camera",
-          "transform": "TetrahedronTransform",
-          "A": {
-            "X": 1,
-            "Y": 1,
-            "Z": -1
-          },
-          "B": {
-            "X": 1,
-            "Y": -1,
-            "Z": 1
-          }
-        }
-      }
-    },
-    {
-      "id": "Tetrahedron",
+      "id": "Triangle",
       "data": {
         "lines3d": {
-          "color": {
-            "R": 0.0,
-            "G": 1.0,
-            "B": 0.0,
-            "A": 1.0
-          },
-          "width": 0.1,
-          "camera": "Camera",
-          "transform": "TetrahedronTransform2",
           "points": [
             {
-              // A
-              "X": -1,
-              "Y": -1,
-              "Z": -1
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
             },
             {
-              // B
-              "X": -1,
-              "Y": 1,
-              "Z": 1
+              "X": 0,
+              "Y": 1.5,
+              "Z": 0
             },
             {
-              // C
-              "X": 1,
-              "Y": -1,
-              "Z": 1
+              "X": 2,
+              "Y": -1.5,
+              "Z": 0
             },
             {
-              // A
-              "X": -1,
-              "Y": -1,
-              "Z": -1
-            },
-            {
-              // D
-              "X": 1,
-              "Y": 1,
-              "Z": -1
-            },
-            {
-              // B
-              "X": -1,
-              "Y": 1,
-              "Z": 1
-            },
-            {
-              // C
-              "X": 1,
-              "Y": -1,
-              "Z": 1
-            },
-            {
-              // D
-              "X": 1,
-              "Y": 1,
-              "Z": -1
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
             }
-          ]
+          ],
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 1,
+            "A": 1
+          },
+          "perspctive": false,
+          "camera": "Camera",
+          "width": 0.25,
+          "transform": "TriangleTransform"
         }
       }
     },
     {
-      "id": "TetrahedronTransform",
+      "id": "TriangleX",
+      "data": {
+        "lines3d": {
+          "points": [
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
+            },
+            {
+              "X": 0,
+              "Y": 1.5,
+              "Z": 0
+            },
+            {
+              "X": 2,
+              "Y": -1.5,
+              "Z": 0
+            },
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
+            }
+          ],
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          },
+          "camera": "Camera",
+          "width": 0.25,
+          "transform": "TriangleXTransform"
+        }
+      }
+    },
+    {
+      "id": "TriangleY",
+      "data": {
+        "lines3d": {
+          "points": [
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
+            },
+            {
+              "X": 0,
+              "Y": 1.5,
+              "Z": 0
+            },
+            {
+              "X": 2,
+              "Y": -1.5,
+              "Z": 0
+            },
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
+            }
+          ],
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          },
+          "camera": "Camera",
+          "width": 0.25,
+          "transform": "TriangleYTransform"
+        }
+      }
+    },
+    {
+      "id": "TriangleZ",
+      "data": {
+        "lines3d": {
+          "points": [
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
+            },
+            {
+              "X": 0,
+              "Y": 1.5,
+              "Z": 0
+            },
+            {
+              "X": 2,
+              "Y": -1.5,
+              "Z": 0
+            },
+            {
+              "X": -2,
+              "Y": -1.5,
+              "Z": 0
+            }
+          ],
+          "color": {
+            "R": 0,
+            "G": 0,
+            "B": 1,
+            "A": 1
+          },
+          "camera": "Camera",
+          "width": 0.25,
+          "transform": "TriangleZTransform"
+        }
+      }
+    },
+    {
+      "id": "TriangleTransform",
       "data": {
         "transform": {
           "translation": {
             "X": 0,
-            "Y": -2,
-            "Z": 2
+            "Y": 0,
+            "Z": 10
           },
           "scale": {
-            "X": 2,
-            "Y": 2,
-            "Z": 2
+            "X": 5,
+            "Y": 5,
+            "Z": 5
           }
         }
       }
     },
     {
-      "id": "TetrahedronTransform2",
+      "id": "TriangleXTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": 20,
+            "Y": 0,
+            "Z": 10
+          },
+          "scale": {
+            "X": 5,
+            "Y": 5,
+            "Z": 5
+          }
+        }
+      }
+    },
+    {
+      "id": "TriangleYTransform",
       "data": {
         "transform": {
           "translation": {
             "X": 0,
-            "Y": 2,
-            "Z": 2
+            "Y": 20,
+            "Z": 10
           },
           "scale": {
-            "X": 2,
-            "Y": 2,
-            "Z": 2
+            "X": 5,
+            "Y": 5,
+            "Z": 5
+          }
+        }
+      }
+    },
+    {
+      "id": "TriangleZTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 30
+          },
+          "scale": {
+            "X": 5,
+            "Y": 5,
+            "Z": 5
           }
         }
       }
@@ -333,71 +260,54 @@
   ],
   "keyFrames": [
     {
-      "entityId": "Title",
+      "entityId": "Camera",
       "time": 1,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":0,\"B\":0,\"A\":0}}}"
-    },
-    {
-      "entityId": "Title",
-      "time": 2,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":0,\"B\":0,\"A\":1}}}"
-    },
-    {
-      "entityId": "Title",
-      "time": 3,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":1,\"B\":0,\"A\":1}}}"
-    },
-    {
-      "entityId": "Title",
-      "time": 4,
-      "newValue": "{\"latex\":{\"background\":{\"R\":0,\"G\":0,\"B\":0,\"A\":0},\"foreground\":{\"R\":0,\"G\":0,\"B\":1,\"A\":1}}}"
-    },
-    {
-      "entityId": "Title",
-      "time": 5,
-      "newValue": "{\"latex\":{\"background\":{\"R\":0.8,\"G\":0.2,\"B\":0.4,\"A\":0.5},\"foreground\":{\"R\":1,\"G\":1,\"B\":1,\"A\":1}}}"
+      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-1000},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
     },
     {
       "entityId": "Camera",
       "time": 2,
-      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
-      "newValue": "{\"camera\":{\"position\":{\"X\":0.0, \"Y\":0.0, \"Z\":-10}}}"
+      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
     },
     {
-      "entityId": "TetrahedronTransform",
-      "time": 2,
-      "blendControlPoints": [ 1.0, 1.0, 1.0, 1.0 ],
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0.0, \"Z\":0}}}"
+      "entityId": "Camera",
+      "time": 3,
+      "newValue": "{\"camera\":{\"position\":{\"X\":-100, \"Y\":0, \"Z\":-100},\"at\":{\"X\":-100,\"Y\":0,\"Z\":0}}}"
     },
     {
-      "entityId": "TetrahedronTransform2",
-      "time": 2,
-      "blendControlPoints": [ 1.0, 1.0, 1.0, 1.0 ],
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0.0, \"Z\":0}}}"
-    },
-    {
-      "entityId": "TetrahedronTransform",
+      "entityId": "Camera",
       "time": 4,
-      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":100.0, \"Z\":0}}}"
+      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
     },
     {
-      "entityId": "TetrahedronTransform2",
-      "time": 4,
-      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":-100.0, \"Z\":0}}}"
-    },
-    {
-      "entityId": "TetrahedronTransform",
+      "entityId": "Camera",
       "time": 5,
-      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
-      "newValue": "{\"transform\":{\"translation\":{\"X\":-2, \"Y\":2, \"Z\":0}}}"
+      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":100, \"Z\":-100},\"at\":{\"X\":0,\"Y\":100,\"Z\":0}}}"
     },
     {
-      "entityId": "TetrahedronTransform2",
-      "time": 5,
-      "blendControlPoints": [ 0.0, 0.9, 0.999, 1.0 ],
-      "newValue": "{\"transform\":{\"translation\":{\"X\":2, \"Y\":-2, \"Z\":0}}}"
+      "entityId": "Camera",
+      "time": 6,
+      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+    },
+    {
+      "entityId": "Camera",
+      "time": 7,
+      "newValue": "{\"camera\":{\"position\":{\"X\":-100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+    },
+    {
+      "entityId": "Camera",
+      "time": 8,
+      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+    },
+    {
+      "entityId": "Camera",
+      "time": 9,
+      "newValue": "{\"camera\":{\"position\":{\"X\":100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+    },
+    {
+      "entityId": "Camera",
+      "time": 10,
+      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
     }
   ]
 }
