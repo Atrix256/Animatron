@@ -3,12 +3,10 @@
   "versionMajor": 0,
   "versionMajor": 1,
 
-  //"outputSizeX": 1920,
-  //"outputSizeY": 1080,
-  "outputSizeX": 960,
-  "outputSizeY": 540,
+  "outputSizeX": 1920,
+  "outputSizeY": 1080,
   "FPS": 30,
-  "duration": 3,
+  "duration": 10,
   "entities": [
     {
       "id": "Background",
@@ -87,11 +85,6 @@
       "id": "Camera",
       "data": {
         "camera": {
-          "position": {
-            "X": 0,
-            "Y": 0,
-            "Z": -1
-          }
         }
       }
     },
@@ -102,12 +95,12 @@
           "A": {
             "X": 5,
             "Y": 0,
-            "Z": 5
+            "Z": 0
           },
           "B": {
             "X": -5,
             "Y": 0,
-            "Z": 5
+            "Z": 0
           },
           "color": {
             "R": 0,
@@ -126,9 +119,9 @@
       "data": {
         "transform": {
           "translation": {
-            "X": 40,
+            "X": 80,
             "Y": 30,
-            "Z": 10
+            "Z": 110
           }
         }
       }
@@ -141,22 +134,22 @@
             {
               "X": -2,
               "Y": -1.5,
-              "Z": 5
+              "Z": 0
             },
             {
               "X": 0,
               "Y": 1.5,
-              "Z": 5
+              "Z": 0
             },
             {
               "X": 2,
               "Y": -1.5,
-              "Z": 5
+              "Z": 0
             },
             {
               "X": -2,
               "Y": -1.5,
-              "Z": 5
+              "Z": 0
             }
           ],
           "color": {
@@ -176,69 +169,14 @@
       "data": {
         "transform": {
           "translation": {
-            "X": -40,
+            "X": -80,
             "Y": -30,
-            "Z": 10
+            "Z": 115
           },
           "scale": {
             "X": 3,
             "Y": 3,
             "Z": 1
-          }
-        }
-      }
-    },
-    {
-      "id": "Triangle1",
-      "data": {
-        "lines3d": {
-          "points": [
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": 0,
-              "Y": 1.5,
-              "Z": 0
-            },
-            {
-              "X": 2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            }
-          ],
-          "color": {
-            "R": 1,
-            "G": 0,
-            "B": 0,
-            "A": 1
-          },
-          "camera": "Camera",
-          "width": 0.25,
-          "transform": "Triangle1Transform"
-        }
-      }
-    },
-    {
-      "id": "Triangle1Transform",
-      "data": {
-        "transform": {
-          "translation": {
-            "X": -50,
-            "Y": -20,
-            "Z": 5,
-          },
-          "scale": {
-            "X": 5,
-            "Y": 5,
-            "Z": 5
           }
         }
       }
@@ -314,9 +252,9 @@
       "data": {
         "transform": {
           "translation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 10
+            "X": 80,
+            "Y": -30,
+            "Z": 110
           },
           "scale": {
             "X": 5,
@@ -348,17 +286,10 @@
       "time": 10,
       "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}}"
     },
-/*
-    {
-      "entityId": "Triangle1Transform",
-      "time": 10,
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":1000, \"Y\":0, \"Z\":0}}}"
-    },
-  */
     {
       "entityId": "TetrahedronTransform",
       "time": 10,
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}}"
+      "newValue": "{\"transform\":{\"rotation\":{\"X\":100, \"Y\":30, \"Z\":1000}}}"
     }
   ]
 }

@@ -543,6 +543,8 @@ void EntityLatex_DoAction(
     }
 }
 
+// TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
+
 // TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
 
 // TODO: should verify that translate, scale, rotate, is happening the desired order.
