@@ -218,3 +218,54 @@ bool MakeJitterSequence(Data::Document& document)
     }
     return true;
 }
+
+void DrawLine(const Data::Document& document, std::vector<Data::ColorPMA>& pixels, const Data::Point2D& A, const Data::Point2D& B, float width, const Data::ColorPMA& color)
+{
+    // Get a bounding box of the line
+    float minX = Min(A.X, B.X) - width;
+    float minY = Min(A.Y, B.Y) - width;
+    float maxX = Max(A.X, B.X) + width;
+    float maxY = Max(A.Y, B.Y) + width;
+
+    int minPixelX, minPixelY, maxPixelX, maxPixelY;
+    CanvasToPixel(document, minX, minY, minPixelX, minPixelY);
+    CanvasToPixel(document, maxX, maxY, maxPixelX, maxPixelY);
+
+    // clip the bounding box to the screen
+    minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
+    maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
+    minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
+    maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
+
+    // Draw the line
+    for (int iy = minPixelY; iy <= maxPixelY; ++iy)
+    {
+        Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
+        for (int ix = minPixelX; ix <= maxPixelX; ++ix)
+        {
+            // do multiple jittered samples per pixel and integrate (average) the result
+            Data::ColorPMA samplesColor;
+            for (uint32_t sampleIndex = 0; sampleIndex < document.samplesPerPixel; ++sampleIndex)
+            {
+                Data::Point2D offset = document.jitterSequence.points[sampleIndex];
+
+                float canvasX, canvasY;
+                PixelToCanvas(document, (float)ix + offset.X, (float)iy + offset.Y, canvasX, canvasY);
+
+                float distance = sdLine({ A.X, A.Y }, { B.X, B.Y }, { canvasX, canvasY });
+
+                if (distance < width)
+                {
+                    samplesColor.R += color.R / float(document.samplesPerPixel);
+                    samplesColor.G += color.G / float(document.samplesPerPixel);
+                    samplesColor.B += color.B / float(document.samplesPerPixel);
+                    samplesColor.A += color.A / float(document.samplesPerPixel);
+                }
+            }
+
+            // alpha blend the result in
+            *pixel = Blend(*pixel, samplesColor);
+            pixel++;
+        }
+    }
+}

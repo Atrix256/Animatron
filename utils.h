@@ -400,3 +400,5 @@ inline Data::ColorPMA Blend(const Data::ColorPMA& out, const Data::ColorPMA& in)
 void Resize(std::vector<Data::Color>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY);
 
 bool MakeJitterSequence(Data::Document& document);
+
+void DrawLine(const Data::Document& document, std::vector<Data::ColorPMA>& pixels, const Data::Point2D& A, const Data::Point2D& B, float width, const Data::ColorPMA& color);

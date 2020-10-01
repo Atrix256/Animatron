@@ -6,67 +6,15 @@
 #include "schemas/lerp.h"
 #include <algorithm>
 
-// TODO: find a home for this?
 
-static void DrawLine(const Data::Document& document, std::vector<Data::ColorPMA>& pixels, const Data::Point2D& A, const Data::Point2D& B, float width, const Data::ColorPMA& color)
+bool EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill, int entityIndex)
 {
-    // Get a bounding box of the line
-    float minX = Min(A.X, B.X) - width;
-    float minY = Min(A.Y, B.Y) - width;
-    float maxX = Max(A.X, B.X) + width;
-    float maxY = Max(A.Y, B.Y) + width;
-
-    int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    CanvasToPixel(document, minX, minY, minPixelX, minPixelY);
-    CanvasToPixel(document, maxX, maxY, maxPixelX, maxPixelY);
-
-    // clip the bounding box to the screen
-    minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
-    maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
-    minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
-    maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
-
-    // Draw the line
-    for (int iy = minPixelY; iy <= maxPixelY; ++iy)
-    {
-        Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
-        for (int ix = minPixelX; ix <= maxPixelX; ++ix)
-        {
-            // do multiple jittered samples per pixel and integrate (average) the result
-            Data::ColorPMA samplesColor;
-            for (uint32_t sampleIndex = 0; sampleIndex < document.samplesPerPixel; ++sampleIndex)
-            {
-                Data::Point2D offset = document.jitterSequence.points[sampleIndex];
-
-                float canvasX, canvasY;
-                PixelToCanvas(document, (float)ix + offset.X, (float)iy + offset.Y, canvasX, canvasY);
-
-                float distance = sdLine({ A.X, A.Y }, { B.X, B.Y }, { canvasX, canvasY });
-
-                if (distance < width)
-                {
-                    samplesColor.R += color.R / float(document.samplesPerPixel);
-                    samplesColor.G += color.G / float(document.samplesPerPixel);
-                    samplesColor.B += color.B / float(document.samplesPerPixel);
-                    samplesColor.A += color.A / float(document.samplesPerPixel);
-                }
-            }
-
-            // alpha blend the result in
-            *pixel = Blend(*pixel, samplesColor);
-            pixel++;
-        }
-    }
+    return true;
 }
 
-// ==============================================
-
-void EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill, int entityIndex)
+bool EntityFill_FrameInitialize(const Data::Document& document, Data::EntityFill& fill)
 {
-}
-
-void EntityFill_FrameInitialize(const Data::Document& document, Data::EntityFill& fill)
-{
+    return true;
 }
 
 void EntityFill_DoAction(
@@ -89,12 +37,14 @@ void EntityFill_DoAction(
         pixel = Blend(pixel, colorPMA);
 }
 
-void EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle, int entityIndex)
+bool EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle, int entityIndex)
 {
+    return true;
 }
 
-void EntityCircle_FrameInitialize(const Data::Document& document, Data::EntityCircle& circle)
+bool EntityCircle_FrameInitialize(const Data::Document& document, Data::EntityCircle& circle)
 {
+    return true;
 }
 
 void EntityCircle_DoAction(
@@ -163,12 +113,14 @@ void EntityCircle_DoAction(
     }
 }
 
-void EntityRectangle_Initialize(const Data::Document& document, Data::EntityRectangle& rectangle, int entityIndex)
+bool EntityRectangle_Initialize(const Data::Document& document, Data::EntityRectangle& rectangle, int entityIndex)
 {
+    return true;
 }
 
-void EntityRectangle_FrameInitialize(const Data::Document& document, Data::EntityRectangle& rectangle)
+bool EntityRectangle_FrameInitialize(const Data::Document& document, Data::EntityRectangle& rectangle)
 {
+    return true;
 }
 
 void EntityRectangle_DoAction(
@@ -206,12 +158,14 @@ void EntityRectangle_DoAction(
     }
 }
 
-void EntityLine_Initialize(const Data::Document& document, Data::EntityLine& line, int entityIndex)
+bool EntityLine_Initialize(const Data::Document& document, Data::EntityLine& line, int entityIndex)
 {
+    return true;
 }
 
-void EntityLine_FrameInitialize(const Data::Document& document, Data::EntityLine& line)
+bool EntityLine_FrameInitialize(const Data::Document& document, Data::EntityLine& line)
 {
+    return true;
 }
 
 void EntityLine_DoAction(
@@ -223,11 +177,12 @@ void EntityLine_DoAction(
     DrawLine(document, pixels, line.A, line.B, line.width, ToPremultipliedAlpha(line.color));
 }
 
-void EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera, int entityIndex)
+bool EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera, int entityIndex)
 {
+    return true;
 }
 
-void EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCamera& camera)
+bool EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCamera& camera)
 {
     Data::Matrix4x4 projMtx;
 
@@ -272,6 +227,8 @@ void EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCa
     viewMtx.Z = Data::Point4D{ forward.X, forward.Y, forward.Z, 0.0 };
     viewMtx.W = Data::Point4D{-camera.position.X, -camera.position.Y, -camera.position.Z, 1.0f};
     camera.viewProj = Multiply(viewMtx, projMtx);
+
+    return true;
 }
 
 void EntityCamera_DoAction(
@@ -283,12 +240,14 @@ void EntityCamera_DoAction(
     // nothing to do for a camera
 }
 
-void EntityLine3D_Initialize(const Data::Document& document, Data::EntityLine3D& line3d, int entityIndex)
+bool EntityLine3D_Initialize(const Data::Document& document, Data::EntityLine3D& line3d, int entityIndex)
 {
+    return true;
 }
 
-void EntityLine3D_FrameInitialize(const Data::Document& document, Data::EntityLine3D& line3d)
+bool EntityLine3D_FrameInitialize(const Data::Document& document, Data::EntityLine3D& line3d)
 {
+    return true;
 }
 
 void EntityLine3D_DoAction(
@@ -344,12 +303,14 @@ void EntityLine3D_DoAction(
     DrawLine(document, pixels, A, B, line3d.width, ToPremultipliedAlpha(line3d.color));
 }
 
-void EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d, int entityIndex)
+bool EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d, int entityIndex)
 {
+    return true;
 }
 
-void EntityLines3D_FrameInitialize(const Data::Document& document, Data::EntityLines3D& lines3d)
+bool EntityLines3D_FrameInitialize(const Data::Document& document, Data::EntityLines3D& lines3d)
 {
+    return true;
 }
 
 void EntityLines3D_DoAction(
@@ -414,11 +375,12 @@ void EntityLines3D_DoAction(
     }
 }
 
-void EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform, int entityIndex)
+bool EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform, int entityIndex)
 {
+    return true;
 }
 
-void EntityTransform_FrameInitialize(const Data::Document& document, Data::EntityTransform& transform)
+bool EntityTransform_FrameInitialize(const Data::Document& document, Data::EntityTransform& transform)
 {
     Data::Matrix4x4 translation;
     translation.W = Data::Point4D{transform.translation.X, transform.translation.Y, transform.translation.Z, 1.0f};
@@ -431,6 +393,8 @@ void EntityTransform_FrameInitialize(const Data::Document& document, Data::Entit
     Data::Matrix4x4 rotation = Rotation(DegreesToRadians(transform.rotation.X), DegreesToRadians(transform.rotation.Y), DegreesToRadians(transform.rotation.Z));
 
     transform.mtx = Multiply(Multiply(scale, rotation), translation);
+
+    return true;
 }
 
 void EntityTransform_DoAction(
@@ -441,7 +405,7 @@ void EntityTransform_DoAction(
 {
 }
 
-void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& latex, int entityIndex)
+bool EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& latex, int entityIndex)
 {
     char buffer[4096];
 
@@ -452,7 +416,8 @@ void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& l
         fopen_s(&file, buffer, "wb");
         if (!file)
         {
-            // TODO: error etc
+            printf("Could not open file for write: %s\n", buffer);
+            return false;
         }
 
         fprintf(file,
@@ -483,7 +448,11 @@ void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& l
         int w, h, channels;
         stbi_uc* pixels = stbi_load(buffer, &w, &h, &channels, 1);
 
-        // TODO: error if pixels null!
+        if (pixels == nullptr)
+        {
+            printf("could not load file %s\n", buffer);
+            return false;
+        }
 
         // set the width and height and copy the pixels
         latex._width = w;
@@ -493,10 +462,12 @@ void EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& l
 
         stbi_image_free(pixels);
     }
+    return true;
 }
 
-void EntityLatex_FrameInitialize(const Data::Document& document, Data::EntityLatex& latex)
+bool EntityLatex_FrameInitialize(const Data::Document& document, Data::EntityLatex& latex)
 {
+    return true;
 }
 
 void EntityLatex_DoAction(
@@ -544,8 +515,7 @@ void EntityLatex_DoAction(
     }
 }
 
-
-void EntityLinearGradient_Initialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient, int entityIndex)
+bool EntityLinearGradient_Initialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient, int entityIndex)
 {
     // sort the gradients by key value to make logic easier
     std::sort(
@@ -556,11 +526,12 @@ void EntityLinearGradient_Initialize(const Data::Document& document, Data::Entit
             return a.value < b.value;
         }
     );
+    return true;
 }
 
-void EntityLinearGradient_FrameInitialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient)
+bool EntityLinearGradient_FrameInitialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient)
 {
-
+    return true;
 }
 
 void EntityLinearGradient_DoAction(

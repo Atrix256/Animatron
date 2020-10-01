@@ -30,8 +30,8 @@
         const std::unordered_map<std::string, Data::EntityVariant>& entityMap, \
         std::vector<Data::ColorPMA>& pixels, \
         const Data::##_TYPE& _NAME); \
-    void _TYPE##_FrameInitialize(const Data::Document& document, Data::##_TYPE& _NAME); \
-    void _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME, int entityIndex);
+    bool _TYPE##_FrameInitialize(const Data::Document& document, Data::##_TYPE& _NAME); \
+    bool _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME, int entityIndex);
 #include "df_serialize/df_serialize/_fillunsetdefines.h"
 #include "schemas/schemas_entities.h"
 
@@ -108,11 +108,12 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
             }
 
             // do per frame entity initialization
+            bool error = false;
             switch (entity._index)
             {
                 #include "df_serialize/df_serialize/_common.h"
                 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_FrameInitialize(document, entity.##_NAME); break;
+                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_FrameInitialize(document, entity.##_NAME); break;
                 #include "df_serialize/df_serialize/_fillunsetdefines.h"
                 #include "schemas/schemas_entities.h"
                 default:
@@ -120,6 +121,11 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                     printf("unhandled entity type in variant\n");
                     return false;
                 }
+            }
+            if (error)
+            {
+                printf("entity %s failed to FrameInitialize\n", timeline.id.c_str());
+                return false;
             }
 
             entityMap[timeline.id] = entity;
@@ -216,7 +222,7 @@ int main(int argc, char** argv)
     }
 
     // read the config if possible
-    if (ReadFromJSONFile(document.config, "config.json"))
+    if (ReadFromJSONFile(document.config, "internal/config.json"))
     {
         // verify
         if (document.config.program != "animatronconfig")
@@ -234,6 +240,11 @@ int main(int argc, char** argv)
             system("pause");
             return 6;
         }
+    }
+    else
+    {
+        printf("Could not load internal/config.json!");
+        return 10;
     }
     
     // data interpretation and fixup
@@ -267,13 +278,14 @@ int main(int argc, char** argv)
         int entityIndex = -1;
         for (Data::Entity& entity : document.entities)
         {
+            bool error = false;
             entityIndex++;
             // do per frame entity initialization
             switch (entity.data._index)
             {
                 #include "df_serialize/df_serialize/_common.h"
                 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: ##_TYPE##_Initialize(document, entity.data.##_NAME, entityIndex); break;
+                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Initialize(document, entity.data.##_NAME, entityIndex); break;
                 #include "df_serialize/df_serialize/_fillunsetdefines.h"
                 #include "schemas/schemas_entities.h"
                 default:
@@ -281,6 +293,11 @@ int main(int argc, char** argv)
                     printf("unhandled entity type in variant\n");
                     return 8;
                 }
+            }
+            if (error)
+            {
+                printf("entity %s failed to initialize.\n", entity.id.c_str());
+                return 9;
             }
         }
     }
@@ -292,10 +309,10 @@ int main(int argc, char** argv)
     if (document.blueNoiseDither)
     {
         int blueNoiseComponents = 0;
-        stbi_uc* pixels = stbi_load("assets/BlueNoiseRGBA.png", &blueNoiseWidth, &blueNoiseHeight, &blueNoiseComponents, 4);
+        stbi_uc* pixels = stbi_load("internal/BlueNoiseRGBA.png", &blueNoiseWidth, &blueNoiseHeight, &blueNoiseComponents, 4);
         if (pixels == nullptr || blueNoiseWidth == 0 || blueNoiseHeight == 0)
         {
-            printf("Could not load assets/BlueNoiseRGBA.png");
+            printf("Could not load internal/BlueNoiseRGBA.png");
             return 7;
         }
 
