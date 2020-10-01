@@ -399,6 +399,11 @@ int main(int argc, char** argv)
     bool wasError = false;
     std::atomic<int> framesDone(0);
 
+    // debug builds are single threaded
+    #if _DEBUG
+        omp_set_num_threads(1);
+    #endif
+
     #pragma omp parallel for
     for (int frameIndex = 0; frameIndex < framesTotal; ++frameIndex)
     {

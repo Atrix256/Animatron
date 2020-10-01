@@ -121,7 +121,7 @@ STRUCT_BEGIN(Data, EntityCamera, "A camera, used to turn 3d objects into 2d")
     STRUCT_FIELD(bool, perspective, true, "If true, uses a perspective projection, else an orthographic projection. The perspective projection uses reversed z, infinite far plane projection.")
     STRUCT_FIELD(float, near, 0.1f, "The near plane distance. Used by perspective projection.")
     STRUCT_FIELD(float, far, 100.0f, "The far plane distance. Used by perspective projection.")
-    STRUCT_FIELD(float, FOV, 45.0f, "The vertical field of view. Used by perspective projection.")
+    STRUCT_FIELD(float, FOV, 45.0f, "The vertical field of view in degrees. Used by perspective projection.")
     STRUCT_FIELD_NO_SERIALIZE(Matrix4x4, viewProj, Matrix4x4(), "The view projection matrix of the camera. Calculated each frame in the initialization function.")
 STRUCT_END()
 
