@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="reflectedvectormath.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="schemas\json.h" />
@@ -133,6 +134,7 @@
     <ClInclude Include="schemas\schemas.h" />
     <ClInclude Include="schemas\schemas_entities.h" />
     <ClInclude Include="schemas\types.h" />
+    <ClInclude Include="vectormath.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json" />
