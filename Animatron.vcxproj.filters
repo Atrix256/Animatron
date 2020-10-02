@@ -42,11 +42,11 @@
     <None Include="assets\clip.json">
       <Filter>assets</Filter>
     </None>
-    <None Include="assets\se2_intro.json">
-      <Filter>assets</Filter>
-    </None>
     <None Include="internal\config.json">
       <Filter>internal</Filter>
+    </None>
+    <None Include="assets\se2_1.json">
+      <Filter>assets</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

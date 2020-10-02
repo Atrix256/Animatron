@@ -76,6 +76,10 @@ ENUM_BEGIN(Data, SamplesType2D, "Type of 2d samples generated")
     ENUM_ITEM(MitchellsBlueNoise, "2d blue noise, made with Mitchell's Best Candidate algorithm. Good at hiding the error in low sample counts.")
 ENUM_END()
 
+ENUM_BEGIN(Data, DigitalDissolveType, "Types of digital dissolve")
+    ENUM_ITEM(BlueNoise, "2d blue noise texture, made with void and cluster.")
+ENUM_END()
+
 // ----------------------------- Specific Entity Types -----------------------------
 
 STRUCT_BEGIN(Data, EntityFill, "Fills the screen")
@@ -154,7 +158,15 @@ STRUCT_BEGIN(Data, EntityLinearGradient, "A linear gradient: define a 2d half sp
     STRUCT_DYNAMIC_ARRAY(GradientPoint, points, "The gradient colors")
 STRUCT_END()
 
-// ----------------------------- Entity Types -----------------------------
+STRUCT_BEGIN(Data, EntityDigitalDissolve, "A digital dissolve. An alpha value of 1 will show all foreground, a value of 0 will show all background, and inbetween values will show some of each.")
+    STRUCT_FIELD(DigitalDissolveType, type, DigitalDissolveType::BlueNoise, "The type of pattern to use for digital dissolve")
+    STRUCT_FIELD(Point2D, scale, Point2D{ 1.0f COMMA 1.0f }, "Pixel scale. Values larger than 1 make them chunkier")
+    STRUCT_FIELD(Data::Color, foreground, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 1.0f }, "The foreground color")
+    STRUCT_FIELD(Data::Color, background, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 0.0f }, "The background color")
+    STRUCT_FIELD(float, alpha, 0.0f, "How much foreground to show in percentage")
+STRUCT_END()
+
+// ----------------------------- Entity -----------------------------
 
 #include "schemas_entities.h"
 
@@ -208,6 +220,10 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(uint32_t, samplesPerPixel, 16, "The number of samples taken per pixel, increase for better anti aliasing but increased rendering cost.")
     STRUCT_FIELD(SamplesType2D, jitterSequenceType, SamplesType2D::MitchellsBlueNoise, "The jitter sequence to use for the samples in samplesPerPixel.")
     STRUCT_FIELD_NO_SERIALIZE(Point2DArray, jitterSequence, Point2DArray(), "The actual jitter sequence used per pixel")
+     
+    STRUCT_FIELD_NO_SERIALIZE(int, blueNoiseWidth, 0, "Width of loaded blue noise tetxure")
+    STRUCT_FIELD_NO_SERIALIZE(int, blueNoiseHeight, 0, "Height of loaded blue noise tetxure")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<Data::ColorU8>, blueNoisePixels, std::vector<Data::ColorU8>(), "pixels of loaded blue noise tetxure")
 
     STRUCT_DYNAMIC_ARRAY(Entity, entities, "")
     STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")

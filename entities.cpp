@@ -6,6 +6,29 @@
 #include "schemas/lerp.h"
 #include <algorithm>
 
+// TODO: move this to utils?
+
+void Fill(std::vector<Data::ColorPMA>& pixels, const Data::Color& color)
+{
+    Data::ColorPMA colorPMA = ToPremultipliedAlpha(color);
+
+    // if the color is fully transparent, it's a no-op
+    if (color.A == 0.0f)
+        return;
+
+    // if the color is opaque just do a fill
+    if (color.A >= 1.0f)
+    {
+        std::fill(pixels.begin(), pixels.end(), colorPMA);
+        return;
+    }
+
+    // otherwise, do a blend operation
+    for (Data::ColorPMA& pixel : pixels)
+        pixel = Blend(pixel, colorPMA);
+}
+
+
 
 bool EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill, int entityIndex)
 {
@@ -23,19 +46,7 @@ bool EntityFill_DoAction(
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityFill& fill)
 {
-    Data::ColorPMA colorPMA = ToPremultipliedAlpha(fill.color);
-
-    // if the color is opaque just do a fill
-    if (fill.color.A >= 1.0f)
-    {
-        std::fill(pixels.begin(), pixels.end(), colorPMA);
-        return true;
-    }
-
-    // otherwise, do a blend operation
-    for (Data::ColorPMA& pixel : pixels)
-        pixel = Blend(pixel, colorPMA);
-
+    Fill(pixels, fill.color);
     return true;
 }
 
@@ -610,5 +621,70 @@ bool EntityLinearGradient_DoAction(
         }
     }
 
+    return true;
+}
+
+bool EntityDigitalDissolve_Initialize(const Data::Document& document, Data::EntityDigitalDissolve& digitalDissolve, int entityIndex)
+{
+    return true;
+}
+
+bool EntityDigitalDissolve_FrameInitialize(const Data::Document& document, Data::EntityDigitalDissolve& digitalDissolve)
+{
+    return true;
+}
+
+bool EntityDigitalDissolve_DoAction(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::EntityDigitalDissolve& digitalDissolve)
+{
+    if (digitalDissolve.type != Data::DigitalDissolveType::BlueNoise)
+    {
+        printf("unknown digital dissolve type encountered!\n");
+        return false;
+    }
+
+    // full background
+    if (digitalDissolve.alpha <= 0.0f)
+    {
+        Fill(pixels, digitalDissolve.background);
+        return true;
+    }
+
+    // full foreground
+    if (digitalDissolve.alpha >= 1.0f)
+    {
+        Fill(pixels, digitalDissolve.foreground);
+        return true;
+    }
+
+    // convert colors to PMA
+    Data::ColorPMA bg = ToPremultipliedAlpha(digitalDissolve.background);
+    Data::ColorPMA fg = ToPremultipliedAlpha(digitalDissolve.foreground);
+
+    // do blending
+    for (size_t iy = 0; iy < document.renderSizeY; ++iy)
+    {
+        size_t bny = size_t(float(iy) / digitalDissolve.scale.Y);
+
+        Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX];
+        const Data::ColorU8* blueNoiseRow = &document.blueNoisePixels[(bny % document.blueNoiseHeight) * document.blueNoiseWidth];
+        for (size_t ix = 0; ix < document.renderSizeX; ++ix)
+        {
+            size_t bnx = size_t(float(ix) / digitalDissolve.scale.X);
+
+            float ditherValue = (blueNoiseRow[bnx % document.blueNoiseWidth].R) / 255.0f;
+            
+            if (ditherValue <= digitalDissolve.alpha)
+                *pixel = Blend(*pixel, fg);
+            else
+                *pixel = Blend(*pixel, bg);
+
+            pixel++;
+        }
+    }
+    
     return true;
 }

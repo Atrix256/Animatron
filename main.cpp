@@ -301,21 +301,18 @@ int main(int argc, char** argv)
     }
 
     // Load blue noise texture for dithering
-    std::vector<Data::ColorU8> blueNoisePixels;
-    int blueNoiseWidth = 0;
-    int blueNoiseHeight = 0;
     if (document.blueNoiseDither)
     {
         int blueNoiseComponents = 0;
-        stbi_uc* pixels = stbi_load("internal/BlueNoiseRGBA.png", &blueNoiseWidth, &blueNoiseHeight, &blueNoiseComponents, 4);
-        if (pixels == nullptr || blueNoiseWidth == 0 || blueNoiseHeight == 0)
+        stbi_uc* pixels = stbi_load("internal/BlueNoiseRGBA.png", &document.blueNoiseWidth, &document.blueNoiseHeight, &blueNoiseComponents, 4);
+        if (pixels == nullptr || document.blueNoiseWidth == 0 || document.blueNoiseHeight == 0)
         {
             printf("Could not load internal/BlueNoiseRGBA.png");
             return 1;
         }
 
-        blueNoisePixels.resize(blueNoiseWidth * blueNoiseHeight);
-        memcpy((unsigned char*)&blueNoisePixels[0], pixels, blueNoiseWidth * blueNoiseHeight * 4);
+        document.blueNoisePixels.resize(document.blueNoiseWidth * document.blueNoiseHeight);
+        memcpy((unsigned char*)&document.blueNoisePixels[0], pixels, document.blueNoiseWidth * document.blueNoiseHeight * 4);
 
         stbi_image_free(pixels);
     }
@@ -470,15 +467,15 @@ int main(int argc, char** argv)
         {
             for (size_t iy = 0; iy < document.outputSizeY; ++iy)
             {
-                const Data::ColorU8* blueNoiseRow = &blueNoisePixels[(iy % blueNoiseHeight) * blueNoiseWidth];
+                const Data::ColorU8* blueNoiseRow = &document.blueNoisePixels[(iy % document.blueNoiseHeight) * document.blueNoiseWidth];
                 Data::Color* destPixel = &threadData.pixels[iy * document.outputSizeX];
 
                 for (size_t ix = 0; ix < document.outputSizeX; ++ix)
                 {
-                    destPixel->R += (float(blueNoiseRow[ix % blueNoiseWidth].R) / 255.0f) / 255.0f;
-                    destPixel->G += (float(blueNoiseRow[ix % blueNoiseWidth].G) / 255.0f) / 255.0f;
-                    destPixel->B += (float(blueNoiseRow[ix % blueNoiseWidth].B) / 255.0f) / 255.0f;
-                    destPixel->A += (float(blueNoiseRow[ix % blueNoiseWidth].A) / 255.0f) / 255.0f;
+                    destPixel->R += (float(blueNoiseRow[ix % document.blueNoiseWidth].R) / 255.0f) / 255.0f;
+                    destPixel->G += (float(blueNoiseRow[ix % document.blueNoiseWidth].G) / 255.0f) / 255.0f;
+                    destPixel->B += (float(blueNoiseRow[ix % document.blueNoiseWidth].B) / 255.0f) / 255.0f;
+                    destPixel->A += (float(blueNoiseRow[ix % document.blueNoiseWidth].A) / 255.0f) / 255.0f;
                     destPixel++;
                 }
             }
@@ -527,6 +524,8 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+// TODO: maybe gaussian blur the intro screen away. if so, do separated blur. maybe entities (or entity types?) should be able to have per thread storage, so that it could keep a temporary pixel buffer there for the separated blur?
 
 
 // TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
@@ -619,7 +618,7 @@ TODO:
 * multi sampling! having each thing (lines, fill, etc) know about multisampling is nice cause fills don't need multi sampling but lines do. don't need to make N buffers.
 * zordering of objects
 * 3d objects composed inline.
-* premultiplied alpha, sRGB correctness
+* premultiplied alpha, sRGB correctness, blue noise dithering before quantization from float to U8.
 * not worrying a whole lot about perf. I probably should, it would be nice if it rendered faster. lots of time spent in linear to sRGB though actually.
  * probably would be lots faster on gpu. this was quick and cross platform, i'm happy.
  * i think caching more things could be helpful maybe. like don't need to calculate the same gradient every frame if it's expensive to do so. don't need to calculate a transform matrix every frame if it hasn't changed
