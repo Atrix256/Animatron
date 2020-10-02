@@ -26,7 +26,7 @@
 // prototypes for entity handler functions. These are implemented in entities.cpp
 #include "df_serialize/df_serialize/_common.h"
 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-    void _TYPE##_DoAction( \
+    bool _TYPE##_DoAction( \
         const Data::Document& document, \
         const std::unordered_map<std::string, Data::EntityVariant>& entityMap, \
         std::vector<Data::ColorPMA>& pixels, \
@@ -143,12 +143,13 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
             continue;
 
         // do the entity action
+        bool error = false;
         const Data::EntityVariant& entity = it->second;
         switch (entity._index)
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: _TYPE##_DoAction(document, entityMap, pixels, entity.##_NAME); break;
+                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_DoAction(document, entityMap, pixels, entity.##_NAME); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -157,6 +158,8 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                 return false;
             }
         }
+        if (error)
+            return false;
     }
 
     return true;
@@ -525,6 +528,27 @@ int main(int argc, char** argv)
     return 0;
 }
 
+// TODO: i think canvas to pixel and pixel to canvase need to flip the y axis over. the gradient suggests that.  investigate to be sure.
+
+
+
+
+// TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
+
+// TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
+
+// TODO: have a cache for latex since it's static. that means it won't be created every run. it will also stop copying those pixels around.
+
+// TODO: could put image support in since you basically already are for latex. don't need it yet though, so...
+
+// TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
+// TODO: re-profile & see where the time is going
+// TODO: need to clip lines against the z plane! can literally just do that, shouldn't be hard, but need z projections in matrices
+
+// TODO: how can the camera get roll etc? is parenting it to a matrix good enough?
+// TOOD: support recursive matrix parenting.
+// TODO: have a to grey scale operation, a multiply by color operation (and other target?) and an add color operation (and other target?), and a copy operation
+
 /*
 TODO:
 
@@ -614,6 +638,10 @@ TODO: 's for later
 * copy?
 
 */
+
+
+
+
 
 /*
 

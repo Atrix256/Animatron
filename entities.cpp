@@ -17,7 +17,7 @@ bool EntityFill_FrameInitialize(const Data::Document& document, Data::EntityFill
     return true;
 }
 
-void EntityFill_DoAction(
+bool EntityFill_DoAction(
     const Data::Document& document, 
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
@@ -29,12 +29,14 @@ void EntityFill_DoAction(
     if (fill.color.A >= 1.0f)
     {
         std::fill(pixels.begin(), pixels.end(), colorPMA);
-        return;
+        return true;
     }
 
     // otherwise, do a blend operation
     for (Data::ColorPMA& pixel : pixels)
         pixel = Blend(pixel, colorPMA);
+
+    return true;
 }
 
 bool EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle, int entityIndex)
@@ -47,7 +49,7 @@ bool EntityCircle_FrameInitialize(const Data::Document& document, Data::EntityCi
     return true;
 }
 
-void EntityCircle_DoAction(
+bool EntityCircle_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string,
     Data::EntityVariant>& entityMap, std::vector<Data::ColorPMA>& pixels,
@@ -111,6 +113,8 @@ void EntityCircle_DoAction(
             pixel++;
         }
     }
+
+    return true;
 }
 
 bool EntityRectangle_Initialize(const Data::Document& document, Data::EntityRectangle& rectangle, int entityIndex)
@@ -123,7 +127,7 @@ bool EntityRectangle_FrameInitialize(const Data::Document& document, Data::Entit
     return true;
 }
 
-void EntityRectangle_DoAction(
+bool EntityRectangle_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
@@ -156,6 +160,8 @@ void EntityRectangle_DoAction(
             pixel++;
         }
     }
+
+    return true;
 }
 
 bool EntityLine_Initialize(const Data::Document& document, Data::EntityLine& line, int entityIndex)
@@ -168,13 +174,14 @@ bool EntityLine_FrameInitialize(const Data::Document& document, Data::EntityLine
     return true;
 }
 
-void EntityLine_DoAction(
+bool EntityLine_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityLine& line)
 {
     DrawLine(document, pixels, line.A, line.B, line.width, ToPremultipliedAlpha(line.color));
+    return true;
 }
 
 bool EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera, int entityIndex)
@@ -231,13 +238,14 @@ bool EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCa
     return true;
 }
 
-void EntityCamera_DoAction(
+bool EntityCamera_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityCamera& camera)
 {
     // nothing to do for a camera
+    return true;
 }
 
 bool EntityLine3D_Initialize(const Data::Document& document, Data::EntityLine3D& line3d, int entityIndex)
@@ -250,7 +258,7 @@ bool EntityLine3D_FrameInitialize(const Data::Document& document, Data::EntityLi
     return true;
 }
 
-void EntityLine3D_DoAction(
+bool EntityLine3D_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
@@ -260,15 +268,13 @@ void EntityLine3D_DoAction(
     auto it = entityMap.find(line3d.camera);
     if (it == entityMap.end())
     {
-        // TODO: how to deal with errors better? should probably stop rendering
-        // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
         printf("Error: could not find line3d camera %s\n", line3d.camera.c_str());
-        return;
+        return false;
     }
     if (it->second._index != Data::EntityVariant::c_index_camera)
     {
         printf("Error line3d camera was not a camera %s\n", line3d.camera.c_str());
-        return;
+        return false;
     }
     const Data::EntityCamera& cameraEntity = it->second.camera;
 
@@ -279,16 +285,13 @@ void EntityLine3D_DoAction(
         auto it = entityMap.find(line3d.transform);
         if (it == entityMap.end())
         {
-            // TODO: this will be moot when we parent instead of look up by name, so maybe hold off on this
-            // TODO: how to deal with errors better? should probably stop rendering
-            // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
             printf("Error: could not find line3d transform %s\n", line3d.transform.c_str());
-            return;
+            return false;
         }
         if (it->second._index != Data::EntityVariant::c_index_transform)
         {
             printf("Error line3d camera was not a camera %s\n", line3d.transform.c_str());
-            return;
+            return false;
         }
         transform = Multiply(it->second.transform.mtx, cameraEntity.viewProj);
     }
@@ -301,6 +304,8 @@ void EntityLine3D_DoAction(
     Data::Point2D A = ProjectPoint3DToPoint2D(line3d.A, transform);
     Data::Point2D B = ProjectPoint3DToPoint2D(line3d.B, transform);
     DrawLine(document, pixels, A, B, line3d.width, ToPremultipliedAlpha(line3d.color));
+
+    return true;
 }
 
 bool EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d, int entityIndex)
@@ -313,33 +318,29 @@ bool EntityLines3D_FrameInitialize(const Data::Document& document, Data::EntityL
     return true;
 }
 
-void EntityLines3D_DoAction(
+bool EntityLines3D_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap, 
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityLines3D& lines3d)
 {
-    // TODO: make helper for getting an entity of a specific type? could return pointer for failure as null?
     // get the camera
     auto it = entityMap.find(lines3d.camera);
     if (it == entityMap.end())
     {
-        // TODO: this will be moot when we parent instead of look up by name, so maybe hold off on this
-        // TODO: how to deal with errors better? should probably stop rendering
-        // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
         printf("Error: could not find lines3d camera %s\n", lines3d.camera.c_str());
-        return;
+        return false;
     }
     if (it->second._index != Data::EntityVariant::c_index_camera)
     {
         printf("Error lines3d camera was not a camera %s\n", lines3d.camera.c_str());
-        return;
+        return false;
     }
     const Data::EntityCamera& cameraEntity = it->second.camera;
 
     // need at least 2 points to make a line
     if (lines3d.points.size() < 2)
-        return;
+        return true;
 
     // Get the world matrix
     Data::Matrix4x4 transform;
@@ -348,15 +349,13 @@ void EntityLines3D_DoAction(
         auto it = entityMap.find(lines3d.transform);
         if (it == entityMap.end())
         {
-            // TODO: how to deal with errors better? should probably stop rendering
-            // TOOD: should probably say what frame, and what entity this was, and write to a log string that is per thread, and write that out after exiting the thread loop
             printf("Error: could not find lines3d transform %s\n", lines3d.transform.c_str());
-            return;
+            return false;
         }
         if (it->second._index != Data::EntityVariant::c_index_transform)
         {
             printf("Error lines3d camera was not a camera %s\n", lines3d.transform.c_str());
-            return;
+            return false;
         }
         transform = Multiply(it->second.transform.mtx, cameraEntity.viewProj);
     }
@@ -373,6 +372,8 @@ void EntityLines3D_DoAction(
         DrawLine(document, pixels, lastPoint, nextPoint, lines3d.width, ToPremultipliedAlpha(lines3d.color));
         lastPoint = nextPoint;
     }
+
+    return true;
 }
 
 bool EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform, int entityIndex)
@@ -397,12 +398,13 @@ bool EntityTransform_FrameInitialize(const Data::Document& document, Data::Entit
     return true;
 }
 
-void EntityTransform_DoAction(
+bool EntityTransform_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityTransform& transform)
 {
+    return true;
 }
 
 bool EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& latex, int entityIndex)
@@ -470,7 +472,7 @@ bool EntityLatex_FrameInitialize(const Data::Document& document, Data::EntityLat
     return true;
 }
 
-void EntityLatex_DoAction(
+bool EntityLatex_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
@@ -513,6 +515,8 @@ void EntityLatex_DoAction(
             destPixel++;
         }
     }
+
+    return true;
 }
 
 bool EntityLinearGradient_Initialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient, int entityIndex)
@@ -534,7 +538,7 @@ bool EntityLinearGradient_FrameInitialize(const Data::Document& document, Data::
     return true;
 }
 
-void EntityLinearGradient_DoAction(
+bool EntityLinearGradient_DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
@@ -542,7 +546,7 @@ void EntityLinearGradient_DoAction(
 {
     // no colors, no gradient
     if (linearGradient.points.size() == 0)
-        return;
+        return true;
 
     // get the canvas extents. used for gradient projection
     float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
@@ -605,25 +609,6 @@ void EntityLinearGradient_DoAction(
             pixel++;
         }
     }
+
+    return true;
 }
-
-// TODO: i think canvas to pixel and pixel to canvase need to flip the y axis over. the gradient suggests that.  investigate to be sure.
-
-
-
-
-// TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
-
-// TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
-
-// TODO: have a cache for latex since it's static. that means it won't be created every run. it will also stop copying those pixels around.
-
-// TODO: could put image support in since you basically already are for latex. don't need it yet though, so...
-
-// TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
-// TODO: re-profile & see where the time is going
-// TODO: need to clip lines against the z plane! can literally just do that, shouldn't be hard, but need z projections in matrices
-
-// TODO: how can the camera get roll etc? is parenting it to a matrix good enough?
-// TOOD: support recursive matrix parenting.
-// TODO: have a to grey scale operation, a multiply by color operation (and other target?) and an add color operation (and other target?), and a copy operation
