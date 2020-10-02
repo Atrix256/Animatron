@@ -266,7 +266,7 @@ inline Data::Point3D Cross(const Data::Point3D& a, const Data::Point3D& b)
 
 
 
-
+// more sdf's here: https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 inline float sdLine(vec2 a, vec2 b, vec2 p)
 {
     vec2 pa = p - a;

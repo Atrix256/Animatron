@@ -507,9 +507,6 @@ int main(int argc, char** argv)
     // assemble the frames into a movie
     if (!wasError)
     {
-        // TODO: make frames be in the build folder
-        // TODO: make this command line respect settings in the file, and also make them configurable
-        // TODO: make output file name configurable?
         // Youtube recomended settings (https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
         printf("Assembling frames...\n");
         char buffer[1024];
@@ -536,15 +533,12 @@ int main(int argc, char** argv)
 /*
 TODO:
 
-Make an enum for main return values instead of all these magic numbers
+Make an enum for main return values instead of all these magic numbers? or maybe just always return 1...
 
 * TODO: probably should have an option to animate the blue noise dithering?
 
 ! can macros reflect to C#? if so, could make a C# editor for df_serialize and let it load/save binary/json
  * could also make this thing able to render a single frame of a clip at a specific time, and use it to make a scrubber bar for C#?
-
-
- * TODO: have fill support gradients or make a vertical gradient fill node? using cubic hermite interpolation with y values and x values being colors.
 
 ! flatten checkins for v1
 
@@ -564,20 +558,7 @@ Make an enum for main return values instead of all these magic numbers
 ! could show an estimated time remaining along with the percent!
 
 
-* camera needs ortho vs perspective ability and parameters
- * test both!
-
 * parenting and transforms next? after intro screen, should start making the video itself
-
-
-* make 3d use a reversed z, infinite z projection matrix. document if it's left or right handed
-
-
-
-* add a program and version number to the document, and verify it on load
-
-* make it spit out a text file that says the ffmpeg command to combine it into a movie
-* make this operate via command line
 
 * profile?
 
@@ -585,7 +566,6 @@ Make an enum for main return values instead of all these magic numbers
  * a transform is probably a parent all it's own. local / global rotation pivot?
 
  * textures
- * text
 
  * Parent off of a layer to render into a sublayer which is then merged back into the main image with alpha blending.
 
@@ -597,9 +577,9 @@ Make an enum for main return values instead of all these magic numbers
 * Gaussian blur.
 * Bloom?
 * Tone map.
-* cube maps
+* cube map reads? could just do this when you have raytracing i guess
 
-* there are more 2d sdf's here: https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+* there are more 2d sdf's here: 
 
 ! generate documentation from schemas?
 * should document that +/-50 canvas units is the largest square that fits in the center.
