@@ -13,6 +13,7 @@
 #include "schemas/types.h"
 #include "schemas/json.h"
 #include "schemas/lerp.h"
+#include "config.h"
 
 #include "utils.h"
 
@@ -194,10 +195,6 @@ int main(int argc, char** argv)
         destFile = argv[2];
     }
     Data::Document document;
-    const uint32_t versionMajor = document.versionMajor;
-    const uint32_t versionMinor = document.versionMinor;
-    const uint32_t configVersionMajor = document.config.versionMajor;
-    const uint32_t configVersionMinor = document.config.versionMinor;
     if (!ReadFromJSONFile(document, srcFile))
     {
         system("pause");
@@ -213,10 +210,9 @@ int main(int argc, char** argv)
     }
 
     // version fixup
-    if (document.versionMajor != versionMajor || document.versionMinor != versionMinor)
+    if (document.versionMajor != c_documentVersionMajor || document.versionMinor != c_documentVersionMinor)
     {
-        // TODO: version fixup
-        printf("Wrong version number: %i.%i, not %i.%i. Version upgrades are TODO\n", document.versionMajor, document.versionMinor, versionMajor, versionMinor);
+        printf("Wrong version number: %i.%i, not %i.%i\n", document.versionMajor, document.versionMinor, c_documentVersionMajor, c_documentVersionMinor);
         system("pause");
         return 6;
     }
@@ -233,10 +229,9 @@ int main(int argc, char** argv)
         }
 
         // version fixup
-        if (document.config.versionMajor != configVersionMajor || document.config.versionMinor != configVersionMinor)
+        if (document.config.versionMajor != c_configVersionMajor || document.config.versionMinor != c_configVersionMinor)
         {
-            // TODO: version fixup
-            printf("Wrong config version number: %i.%i, not %i.%i. Version upgrades are TODO\n", document.config.versionMajor, document.config.versionMinor, configVersionMajor, configVersionMinor);
+            printf("Wrong config version number: %i.%i, not %i.%i\n", document.config.versionMajor, document.config.versionMinor, c_configVersionMajor, c_configVersionMinor);
             system("pause");
             return 6;
         }
@@ -261,7 +256,7 @@ int main(int argc, char** argv)
 
     // report what we are doing
     int framesTotal = int(document.duration * float(document.FPS));
-    printf("Animatron v%i.%i\n", versionMajor, versionMinor);
+    printf("Animatron v%i.%i\n", c_programVersionMajor, c_programVersionMinor);
     printf("Rendering with %i threads...\n", omp_get_max_threads());
     printf("  srcFile: %s\n", srcFile);
     printf("  destFile: %s\n", destFile);

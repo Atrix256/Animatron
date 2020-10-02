@@ -34,6 +34,7 @@
       <Filter>schemas</Filter>
     </ClInclude>
     <ClInclude Include="utils.h" />
+    <ClInclude Include="config.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json">

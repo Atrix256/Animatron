@@ -177,14 +177,10 @@ STRUCT_END()
 
 // ----------------------------- Application Settings File -----------------------------
 
-// TODO: put major/minor version for config and app in a shared header somewhere.
-// TODO: make default version major/minor not be the current version, so it errors if they are omited
-// TODO: make the program read and verify config.  Probably put a no serialize configuration on the document and then manually serialize it in from the other place. yeah!
-
 STRUCT_BEGIN(Data, Configuration, "Application configuration, read from config.json")
     STRUCT_FIELD(std::string, program, "animatronconfig", "Identifier to make sure this is a file for Animatron to use")
-    STRUCT_FIELD(uint32_t, versionMajor, 0, "Major version number")
-    STRUCT_FIELD(uint32_t, versionMinor, 1, "Minor version number")
+    STRUCT_FIELD(uint32_t, versionMajor, -1, "Major version number")
+    STRUCT_FIELD(uint32_t, versionMinor, -1, "Minor version number")
 
     STRUCT_FIELD(std::string, latexbinaries, "", "The path to where pdflatex.exe and dvipng.exe are. Used to render text and formulas. MikTex suggested!")
     STRUCT_FIELD(std::string, ffmpeg, "", "The path to where ffmpeg.exe is, including the exe name. Used to assemble frames into the final video. ")
@@ -194,8 +190,8 @@ STRUCT_END()
 
 STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(std::string, program, "animatron", "Identifier to make sure this is a file for Animatron to use")
-    STRUCT_FIELD(uint32_t, versionMajor, 0, "Major version number")
-    STRUCT_FIELD(uint32_t, versionMinor, 1, "Minor version number")
+    STRUCT_FIELD(uint32_t, versionMajor, -1, "Major version number")
+    STRUCT_FIELD(uint32_t, versionMinor, -1, "Minor version number")
 
     STRUCT_FIELD_NO_SERIALIZE(Configuration, config, Configuration(), "Application configuration, read from config.json")
 
@@ -216,5 +212,3 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_DYNAMIC_ARRAY(Entity, entities, "")
     STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")
 STRUCT_END()
-
-// TODO: there is something weird where x and y axis aren't on equal footing as Z. i don't really understand why though.

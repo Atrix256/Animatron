@@ -1,7 +1,7 @@
 {
   "program": "animatron",
-  "versionMajor": 0,
   "versionMajor": 1,
+  "versionMinor": 0,
 
   "outputSizeX": 1920,
   "outputSizeY": 1080,

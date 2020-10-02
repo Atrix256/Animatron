@@ -125,6 +125,7 @@
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="schemas\json.h" />
