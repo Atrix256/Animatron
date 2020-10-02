@@ -297,27 +297,27 @@
     {
       "entityId": "subtitle",
       "time": 1,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":0,\"G\":0,\"B\":0,\"A\":0}}}"
+      "newValue": "{\"foreground\":{\"R\":0,\"G\":0,\"B\":0,\"A\":0}}"
     },
     {
       "entityId": "subtitle",
       "time": 2,
-      "newValue": "{\"latex\":{\"foreground\":{\"R\":1,\"G\":1,\"B\":1,\"A\":1}}}"
+      "newValue": "{\"foreground\":{\"R\":1,\"G\":1,\"B\":1,\"A\":1}}"
     },
     {
       "entityId": "LineTransform",
       "time": 10,
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}}"
+      "newValue": "{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}"
     },
     {
       "entityId": "TriangleTransform",
       "time": 10,
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}}"
+      "newValue": "{\"rotation\":{\"X\":0, \"Y\":0, \"Z\":1000}}"
     },
     {
       "entityId": "TetrahedronTransform",
       "time": 10,
-      "newValue": "{\"transform\":{\"rotation\":{\"X\":100, \"Y\":30, \"Z\":1000}}}"
+      "newValue": "{\"rotation\":{\"X\":100, \"Y\":30, \"Z\":1000}}"
     }
   ]
 }

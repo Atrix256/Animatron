@@ -609,32 +609,21 @@ void EntityLinearGradient_DoAction(
 
 // TODO: i think canvas to pixel and pixel to canvase need to flip the y axis over. the gradient suggests that.  investigate to be sure.
 
-// TODO: keyframes shouldn't be able to change an object type. that'll make for shorter strings too
+
+
 
 // TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
 
 // TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
 
-// TODO: should verify that translate, scale, rotate, is happening the desired order.
- // make some objects, do this to them, watch the video
+// TODO: have a cache for latex since it's static. that means it won't be created every run. it will also stop copying those pixels around.
 
-// TODO: there is a lot of distortion at the edges. the fov is too high, need to fix that.
-
-// TODO: apparently dithering should help video not compress so hard. it'll help banding so maybe do it soon?
-
-// TODO: the lerp is clearing out all non serialized values in schemas.
-// review them to see what to do.
-// for the latex situation, we could have a cache since it's static. That would make it stop copying those pixels around too.
-// ! could also try setting = before a lerp (did this temporarily)
-
-// TODO: could put image support in since you basically already are for latex
+// TODO: could put image support in since you basically already are for latex. don't need it yet though, so...
 
 // TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
 // TODO: re-profile & see where the time is going
-// TODO: need to clip lines against the z plane! can literally just do that, but need z projections in matrices
+// TODO: need to clip lines against the z plane! can literally just do that, shouldn't be hard, but need z projections in matrices
 
-// TODO: should do versioning soon, cause you are likely to start breaking things! fixup of loaded data would be nice
 // TODO: how can the camera get roll etc? is parenting it to a matrix good enough?
 // TOOD: support recursive matrix parenting.
 // TODO: have a to grey scale operation, a multiply by color operation (and other target?) and an add color operation (and other target?), and a copy operation
-// TODO: a gradient fill.. Make the gradient define a plane for the gradient, and the data points are the curve for the projected value. Probably should have "hermite" interpolation option, and custom which uses a per section curve? Not sure which is better.

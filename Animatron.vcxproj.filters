@@ -12,6 +12,9 @@
     <Filter Include="assets">
       <UniqueIdentifier>{9c8bc379-3b97-4747-b645-c5fc67bdfa8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="internal">
+      <UniqueIdentifier>{e53bbbb3-f779-49cb-85e5-3e6c8112ad8a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="schemas\schemas.h">
@@ -36,11 +39,16 @@
     <None Include="assets\clip.json">
       <Filter>assets</Filter>
     </None>
-    <None Include="config.json">
-      <Filter>assets</Filter>
-    </None>
     <None Include="assets\se2_intro.json">
       <Filter>assets</Filter>
     </None>
+    <None Include="internal\config.json">
+      <Filter>internal</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="internal\BlueNoiseRGBA.png">
+      <Filter>internal</Filter>
+    </Image>
   </ItemGroup>
 </Project>

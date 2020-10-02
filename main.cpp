@@ -377,7 +377,21 @@ int main(int argc, char** argv)
         newKeyFrame.entity = it->second.keyFrames.rbegin()->entity;
 
         // load the sparse json data over the keyframe data
-        if (!ReadFromJSONBuffer(newKeyFrame.entity, keyFrame.newValue))
+        bool error = false;
+        switch (newKeyFrame.entity._index)
+        {
+            #include "df_serialize/df_serialize/_common.h"
+            #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
+                        case Data::EntityVariant::c_index_##_NAME: error = !ReadFromJSONBuffer(newKeyFrame.entity.##_NAME, keyFrame.newValue); break;
+            #include "df_serialize/df_serialize/_fillunsetdefines.h"
+            #include "schemas/schemas_entities.h"
+            default:
+            {
+                printf("unhandled entity type in variant\n");
+                return false;
+            }
+        }
+        if (error)
         {
             printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
             system("pause");

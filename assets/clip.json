@@ -262,52 +262,52 @@
     {
       "entityId": "Camera",
       "time": 1,
-      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-1000},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-1000},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 2,
-      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 3,
-      "newValue": "{\"camera\":{\"position\":{\"X\":-100, \"Y\":0, \"Z\":-100},\"at\":{\"X\":-100,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":-100, \"Y\":0, \"Z\":-100},\"at\":{\"X\":-100,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 4,
-      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 5,
-      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":100, \"Z\":-100},\"at\":{\"X\":0,\"Y\":100,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":0, \"Y\":100, \"Z\":-100},\"at\":{\"X\":0,\"Y\":100,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 6,
-      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 7,
-      "newValue": "{\"camera\":{\"position\":{\"X\":-100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":-100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 8,
-      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 9,
-      "newValue": "{\"camera\":{\"position\":{\"X\":100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     },
     {
       "entityId": "Camera",
       "time": 10,
-      "newValue": "{\"camera\":{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}}"
+      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
     }
   ]
 }

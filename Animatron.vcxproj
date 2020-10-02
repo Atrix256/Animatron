@@ -136,7 +136,10 @@
   <ItemGroup>
     <None Include="assets\clip.json" />
     <None Include="assets\se2_intro.json" />
-    <None Include="config.json" />
+    <None Include="internal\config.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="internal\BlueNoiseRGBA.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
