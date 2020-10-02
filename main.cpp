@@ -170,7 +170,7 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
         printf("Usage:\n    animatron <sourcefile> <destfile>\n\n    <sourcefile> is a json file describing the animation.\n    <destfile> is the name and location of the mp4 output file.\n\n");
-        return 6;
+        return 1;
     }
     // Read the data in
     const char* srcFile = argv[1];
@@ -209,7 +209,7 @@ int main(int argc, char** argv)
     {
         printf("Not an animatron file!\n");
         system("pause");
-        return 5;
+        return 1;
     }
 
     // version fixup
@@ -217,7 +217,7 @@ int main(int argc, char** argv)
     {
         printf("Wrong version number: %i.%i, not %i.%i\n", document.versionMajor, document.versionMinor, c_documentVersionMajor, c_documentVersionMinor);
         system("pause");
-        return 6;
+        return 1;
     }
 
     // read the config if possible
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
         {
             printf("Not an animatron config file!\n");
             system("pause");
-            return 5;
+            return 1;
         }
 
         // version fixup
@@ -236,13 +236,13 @@ int main(int argc, char** argv)
         {
             printf("Wrong config version number: %i.%i, not %i.%i\n", document.config.versionMajor, document.config.versionMinor, c_configVersionMajor, c_configVersionMinor);
             system("pause");
-            return 6;
+            return 1;
         }
     }
     else
     {
         printf("Could not load internal/config.json!");
-        return 10;
+        return 1;
     }
     
     // data interpretation and fixup
@@ -289,13 +289,13 @@ int main(int argc, char** argv)
                 default:
                 {
                     printf("unhandled entity type in variant\n");
-                    return 8;
+                    return 1;
                 }
             }
             if (error)
             {
                 printf("entity %s failed to initialize.\n", entity.id.c_str());
-                return 9;
+                return 1;
             }
         }
     }
@@ -311,7 +311,7 @@ int main(int argc, char** argv)
         if (pixels == nullptr || blueNoiseWidth == 0 || blueNoiseHeight == 0)
         {
             printf("Could not load internal/BlueNoiseRGBA.png");
-            return 7;
+            return 1;
         }
 
         blueNoisePixels.resize(blueNoiseWidth * blueNoiseHeight);
@@ -359,7 +359,7 @@ int main(int argc, char** argv)
         {
             printf("Could not find entity %s for keyframe!\n", keyFrame.entityId.c_str());
             system("pause");
-            return 2;
+            return 1;
         }
 
         // ignore events outside the lifetime of the entity
@@ -386,14 +386,14 @@ int main(int argc, char** argv)
             default:
             {
                 printf("unhandled entity type in variant\n");
-                return false;
+                return 1;
             }
         }
         if (error)
         {
             printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
             system("pause");
-            return 3;
+            return 1;
         }
         it->second.keyFrames.push_back(newKeyFrame);
     }
@@ -522,62 +522,33 @@ int main(int argc, char** argv)
     if (wasError)
     {
         system("pause");
-        return 4;
+        return 1;
     }
 
     return 0;
 }
-
-// TODO: i think canvas to pixel and pixel to canvase need to flip the y axis over. the gradient suggests that.  investigate to be sure.
-
-
 
 
 // TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
 
 // TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
 
-// TODO: have a cache for latex since it's static. that means it won't be created every run. it will also stop copying those pixels around.
+// TODO: have a cache for latex since it's static. that means it won't be created every run. it will also stop copying those pixels around. could just have a CAS cache in build folder.
 
-// TODO: could put image support in since you basically already are for latex. don't need it yet though, so...
-
-// TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name
-// TODO: re-profile & see where the time is going
 // TODO: need to clip lines against the z plane! can literally just do that, shouldn't be hard, but need z projections in matrices
 
-// TODO: how can the camera get roll etc? is parenting it to a matrix good enough?
-// TOOD: support recursive matrix parenting.
-// TODO: have a to grey scale operation, a multiply by color operation (and other target?) and an add color operation (and other target?), and a copy operation
 
 /*
 TODO:
 
-Make an enum for main return values instead of all these magic numbers? or maybe just always return 1...
 
-* TODO: probably should have an option to animate the blue noise dithering?
-
-! can macros reflect to C#? if so, could make a C# editor for df_serialize and let it load/save binary/json
- * could also make this thing able to render a single frame of a clip at a specific time, and use it to make a scrubber bar for C#?
+// TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name (maybe?)
 
 ! flatten checkins for v1
 
 * NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
  * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
 
-
-* add option for dithering before quantizing
- * Blue noise by default but IGN, Bayer and some other options available.
- * Probably could have a setting to over-quantize.
- * Probably also option for resize up using "nearest".
- * Could over quantize with Bayer and up sample with nearest to make retro looking things.
-
-! other subpixel jitter types to implement: white noise, projective blue noise, R2, sobol.
- * may also have some that animate over time to make the noise good over time
-
-! could show an estimated time remaining along with the percent!
-
-
-* parenting and transforms next? after intro screen, should start making the video itself
 
 * profile?
 
@@ -588,64 +559,56 @@ Make an enum for main return values instead of all these magic numbers? or maybe
 
  * Parent off of a layer to render into a sublayer which is then merged back into the main image with alpha blending.
 
- * 3d lines to do fireframes, with 3d transforms. Projection is a parented transform too.
-  * do the same with triangles. convert to 2d and render (with zbuffer)
-  * no lights in scene = unlit. else, do diffuse only lighting.
-  * whitted raytracing
-  * path tracing
-* Gaussian blur.
+* Gaussian blur action for fun.
 * Bloom?
 * Tone map.
-* cube map reads? could just do this when you have raytracing i guess
 
-* there are more 2d sdf's here: 
+// TODO: i think canvas to pixel and pixel to canvase need to flip the y axis over. the gradient suggests that.  investigate to be sure.
 
-! generate documentation from schemas?
-* should document that +/-50 canvas units is the largest square that fits in the center.
-
-* For aa, could also just render N frames at different (random? Lds?) Subpixel offsets and average them together. simpler interface than resizing.
 
 * be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
  * should probably have a bitset of what fields are present in json data.
  * this could be a feature of df_serialize to reflect out this parallel object of bools and also fill it in.
+ * Right now if you have a keyframe spanning 0 to 10 for rotation and put a scale at 5, it makes the rotation start at 5 and go to 10. Multiple tracks would help this.
 
-TODO:
-* pre multiplied alpha
-* anti aliased (SDF? super sampling?). for super sampling, could have a render size and an output size.
-? should we multithread this? i think we could... file writes may get heinous, but rendering should be fine with it.
-
-Low priority:
-* maybe generate html documentaion?
-* could do 3d rendering later (path tracing) also whitted raytracing. can have 3d scenes and have defined lights. unlit if no lights defined.
-* other 2d sample sequences: R2, white noise, regular, jittered grid.
-* if init times become a problem, could do content addressable storage and cache things like latex images.
-* is there something we can use besides system() which can hide the output of the latex commands?
-
-TODO: 's for later
-* option for different image shrink / grow operations. right now it box filters down and bicubics up.
-* audio synth.. wave forms, envelopes, per channel operations, FIR, IIR. karplus strong, etc.
-* poisson blending could be cool to paste objects into scenes they arent from.
-* Could do effects between frames but it would serialize it. lik ebeing able to blend with the previous frame.
 * prefabs for library of reusable objects
  * Prefabs are another list of things.
  * They are a list of entities.
  * Allow file includes in general where an included json could have any of the data a regular file could. Prefabs included but not limited to.
  * When you make an entity of type prefab, it makes objects with a name prefix (name. Or name::) before the name.
  * This lets you make dice etc that are reusable.
-* convert to greyscale.
-* multiply by color
-* lerp between things
-* copy?
 
-*/
+
+----- Low Priority Features -----
 
 
 
+----- Future features (when needed) -----
+* convert a canvas to greyscale
+* multiple a canvas by a color
+* lerp between canvases
+* copy a canvase? (z order could make sure it's rendered before copy)
+* resize a convas, with options for up / down filters. just have box and bicubic right now for main canvase
+* audio synth.. wave forms, envelopes, per channel operations, FIR, IIR. karplus strong, etc.
+* poisson blending could be cool to paste objects into scenes they arent from.
+* Could do effects between frames but it would serialize it. lik ebeing able to blend with the previous frame.
+* generate html documentation of file format
+* whitted and path traced raytracing.  have lights / emissive i guess. unlit if no lights in whitted?
+* sample cube maps from raytracing i guess
+* other 2d sample sequences: R2, white noise, regular, jittered grid, bayer
+! other subpixel jitter types to implement: white noise, projective blue noise, R2, sobol.
+ * may also have some that animate over time to make the noise good over time
+* if init times become a problem, could do content addressable storage and cache things like latex images.
+* is there something we can use besides system() which can hide the output of the latex commands?
+! could show an estimated time remaining along with the percent!
+* allow animated gifs as output? i think ffmpeg can do that
+* quantization options to decrease unique colors for stylistic effect
+ * combine with point sampled canvas resizing!
+* support recursive matrix parenting.
+! can macros reflect to C#? if so, could make a C# editor for df_serialize and let it load/save binary/json
+ * could also make this thing able to render a single frame of a clip at a specific time, and use it to make a scrubber bar for C#?
 
-
-/*
-
-Notes on the architecture:
+----- Notes on the architecture, for writeup -----
 * having a sparse json reader means that keyframe data can be described as sparse json that is read. things are automatically key framable.
 * having df_serialize means i add a field to the schema then... i can add it to the json and it shows up at runtime.  I can also already use it as keyframe data!
 * using macros to define schema means that i can auto expand macros for other uses and turn runtime checks into compile errors. Like wanting a function per entity.
