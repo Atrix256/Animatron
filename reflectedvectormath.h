@@ -203,6 +203,31 @@ inline Data::Point3D operator - (const Data::Point3D& A, const Data::Point3D& B)
     return ret;
 }
 
+inline Data::Point2D operator - (const Data::Point2D& A, const Data::Point2D& B)
+{
+    Data::Point2D ret;
+    ret.X = A.X - B.X;
+    ret.Y = A.Y - B.Y;
+    return ret;
+}
+
+inline Data::Point3D operator + (const Data::Point3D& A, const Data::Point3D& B)
+{
+    Data::Point3D ret;
+    ret.X = A.X + B.X;
+    ret.Y = A.Y + B.Y;
+    ret.Z = A.Z + B.Z;
+    return ret;
+}
+
+inline Data::Point2D operator + (const Data::Point2D& A, const Data::Point2D& B)
+{
+    Data::Point2D ret;
+    ret.X = A.X + B.X;
+    ret.Y = A.Y + B.Y;
+    return ret;
+}
+
 inline float Length(const Data::Point3D& V)
 {
     return (float)sqrtf(Dot(V, V));

@@ -73,6 +73,16 @@ inline Data::Color CubicHermite(const Data::Color& A, const Data::Color& B, cons
     return ret;
 }
 
+inline Data::ColorPMA CubicHermite(const Data::ColorPMA& A, const Data::ColorPMA& B, const Data::ColorPMA& C, const Data::ColorPMA& D, float t)
+{
+    Data::ColorPMA ret;
+    ret.R = CubicHermite(A.R, B.R, C.R, D.R, t);
+    ret.G = CubicHermite(A.G, B.G, C.G, D.G, t);
+    ret.B = CubicHermite(A.B, B.B, C.B, D.B, t);
+    ret.A = CubicHermite(A.A, B.A, C.A, D.A, t);
+    return ret;
+}
+
 inline Data::Color operator + (const Data::Color& A, const Data::Color& B)
 {
     Data::Color ret;
@@ -80,6 +90,16 @@ inline Data::Color operator + (const Data::Color& A, const Data::Color& B)
     ret.G = A.G + B.G;
     ret.B = A.B + B.B;
     ret.A = A.A + B.A;
+    return ret;
+}
+
+inline Data::Color operator * (const Data::Color& A, const Data::Color& B)
+{
+    Data::Color ret;
+    ret.R = A.R * B.R;
+    ret.G = A.G * B.G;
+    ret.B = A.B * B.B;
+    ret.A = A.A * B.A;
     return ret;
 }
 
@@ -96,6 +116,46 @@ inline Data::Color operator * (const Data::Color& A, float B)
 inline Data::Color operator / (const Data::Color& A, float B)
 {
     Data::Color ret;
+    ret.R = A.R / B;
+    ret.G = A.G / B;
+    ret.B = A.B / B;
+    ret.A = A.A / B;
+    return ret;
+}
+
+inline Data::ColorPMA operator + (const Data::ColorPMA& A, const Data::ColorPMA& B)
+{
+    Data::ColorPMA ret;
+    ret.R = A.R + B.R;
+    ret.G = A.G + B.G;
+    ret.B = A.B + B.B;
+    ret.A = A.A + B.A;
+    return ret;
+}
+
+inline Data::ColorPMA operator * (const Data::ColorPMA& A, const Data::ColorPMA& B)
+{
+    Data::ColorPMA ret;
+    ret.R = A.R * B.R;
+    ret.G = A.G * B.G;
+    ret.B = A.B * B.B;
+    ret.A = A.A * B.A;
+    return ret;
+}
+
+inline Data::ColorPMA operator * (const Data::ColorPMA& A, float B)
+{
+    Data::ColorPMA ret;
+    ret.R = A.R * B;
+    ret.G = A.G * B;
+    ret.B = A.B * B;
+    ret.A = A.A * B;
+    return ret;
+}
+
+inline Data::ColorPMA operator / (const Data::ColorPMA& A, float B)
+{
+    Data::ColorPMA ret;
     ret.R = A.R / B;
     ret.G = A.G / B;
     ret.B = A.B / B;
@@ -137,6 +197,7 @@ inline Data::ColorPMA Blend(const Data::ColorPMA& out, const Data::ColorPMA& in)
 }
 
 void Resize(std::vector<Data::Color>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY);
+void Resize(std::vector<Data::ColorPMA>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY);
 
 bool MakeJitterSequence(Data::Document& document);
 

@@ -688,3 +688,100 @@ bool EntityDigitalDissolve_DoAction(
     
     return true;
 }
+
+bool EntityImage_Initialize(const Data::Document& document, Data::EntityImage& image, int entityIndex)
+{
+    int channels;
+    stbi_uc* pixels = stbi_load(image.fileName.c_str(), &image._rawwidth, &image._rawheight, &channels, 4);
+    if (pixels == nullptr)
+    {
+        printf("Could not load image %s.\n", image.fileName.c_str());
+        return false;
+    }
+
+    image._rawpixels.resize(image._rawwidth* image._rawheight);
+    const Data::ColorU8* pixel = (Data::ColorU8*)pixels;
+
+    for (size_t index = 0; index < image._rawpixels.size(); ++index)
+    {
+        Data::Color color{ float(pixel->R) / 255.0f, float(pixel->G) / 255.0f, float(pixel->B) / 255.0f, float(pixel->A) / 255.0f };
+        color.R = SRGBToLinear(color.R);
+        color.G = SRGBToLinear(color.G);
+        color.B = SRGBToLinear(color.B);
+        color.A = SRGBToLinear(color.A);
+        image._rawpixels[index] = ToPremultipliedAlpha(color);
+        pixel++;
+    }
+
+    stbi_image_free(pixels);
+    return true;
+}
+
+bool EntityImage_FrameInitialize(const Data::Document& document, Data::EntityImage& image)
+{
+    // calculate the desired width of the image, in pixels
+    Data::Point2D canvasMin, canvasMax;
+    canvasMin = image.position - image.radius;
+    canvasMax = image.position + image.radius;
+    int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
+    CanvasToPixel(document, canvasMin.X, canvasMin.Y, pixelMinX, pixelMinY);
+    CanvasToPixel(document, canvasMax.X, canvasMax.Y, pixelMaxX, pixelMaxY);
+
+    // if it's already the right size, nothing to do
+    int desiredWidth = pixelMaxX - pixelMinX;
+    int desiredHeight = pixelMaxY - pixelMinY;
+    if (image._width == desiredWidth && image._height == desiredHeight)
+        return true;
+
+    // resize
+    image._pixels = image._rawpixels;
+    image._width = desiredWidth;
+    image._height = desiredHeight;
+    Resize(image._pixels, image._rawwidth, image._rawheight, desiredWidth, desiredHeight);
+
+    return true;
+}
+
+bool EntityImage_DoAction(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::EntityImage& image)
+{
+    // calculate the begin and end of the image
+    Data::Point2D canvasMin, canvasMax;
+    canvasMin = image.position - image.radius;
+    canvasMax = image.position + image.radius;
+    int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
+    CanvasToPixel(document, canvasMin.X, canvasMin.Y, pixelMinX, pixelMinY);
+    CanvasToPixel(document, canvasMax.X, canvasMax.Y, pixelMaxX, pixelMaxY);
+
+    // clip the image to the screen
+    int srcOffsetX = 0;
+    int srcOffsetY = 0;
+    if (pixelMinX < 0)
+        srcOffsetX = pixelMinX * -1;
+    if (pixelMinY < 0)
+        srcOffsetY = pixelMinY * -1;
+    pixelMinX = Clamp(pixelMinX, 0, document.renderSizeX);
+    pixelMaxX = Clamp(pixelMaxX, 0, document.renderSizeX);
+    pixelMinY = Clamp(pixelMinY, 0, document.renderSizeY);
+    pixelMaxY = Clamp(pixelMaxY, 0, document.renderSizeY);
+
+    // paste the image
+    Data::ColorPMA tint = ToPremultipliedAlpha(image.tint);
+    for (size_t iy = pixelMinY; iy < pixelMaxY; ++iy)
+    {
+        Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + pixelMinX];
+        const Data::ColorPMA* srcPixel = &image._pixels[(iy - pixelMinY + srcOffsetY) * image._width + srcOffsetX];
+
+        for (size_t ix = pixelMinX; ix < pixelMaxX; ++ix)
+        {
+            *destPixel = Blend(*destPixel, *srcPixel * tint);
+            srcPixel++;
+            destPixel++;
+        }
+    }
+
+    return true;
+}

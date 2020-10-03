@@ -527,12 +527,13 @@ int main(int argc, char** argv)
 
 // TODO: maybe gaussian blur the intro screen away. if so, do separated blur. maybe entities (or entity types?) should be able to have per thread storage, so that it could keep a temporary pixel buffer there for the separated blur?
 
-
 // TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
+// TODO: the digital disolve isn't either. should fix that too. give size in canvas units perhaps
 
 // TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
 
 // TODO: have a cache for latex since it's static. that means it won't be created every run. it will also stop copying those pixels around. could just have a CAS cache in build folder.
+// TODO: also have a cache for resized images!
 
 // TODO: need to clip lines against the z plane! can literally just do that, shouldn't be hard, but need z projections in matrices
 
@@ -540,14 +541,18 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+! don't forget that PMA can do ADDITIVE BLENDING!
 
 // TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name (maybe?)
+
+* for non 
 
 ! flatten checkins for v1
 
 * NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
  * definitely want to be able to have a slowly rotating 3d tetrahedron. probably want to rotate a 2d triangle and line too. and have a point as well
 
+* should probably figure out how to make variants be unions instead of having all fields soon. there are quite a few entity types!
 
 * profile?
 
@@ -562,7 +567,7 @@ TODO:
 * Bloom?
 * Tone map.
 
-// TODO: i think canvas to pixel and pixel to canvase need to flip the y axis over. the gradient suggests that.  investigate to be sure.
+// TODO: i think canvas to pixel and pixel to canvas need to flip the y axis over. the gradient suggests that.  investigate to be sure.
 
 
 * be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
@@ -577,6 +582,7 @@ TODO:
  * When you make an entity of type prefab, it makes objects with a name prefix (name. Or name::) before the name.
  * This lets you make dice etc that are reusable.
 
+? are frame init and do action both really needed? right now no, but maybe can make it be later.
 
 ----- Low Priority Features -----
 
@@ -586,8 +592,8 @@ TODO:
 * convert a canvas to greyscale
 * multiple a canvas by a color
 * lerp between canvases
-* copy a canvase? (z order could make sure it's rendered before copy)
-* resize a convas, with options for up / down filters. just have box and bicubic right now for main canvase
+* copy a canvas? (z order could make sure it's rendered before copy)
+* resize a convas, with options for up / down filters. just have box and bicubic right now for main canvas
 * audio synth.. wave forms, envelopes, per channel operations, FIR, IIR. karplus strong, etc.
 * poisson blending could be cool to paste objects into scenes they arent from.
 * Could do effects between frames but it would serialize it. lik ebeing able to blend with the previous frame.

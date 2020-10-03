@@ -1,13 +1,14 @@
 #include "utils.h"
 #include <random>
 
-void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY)
+template <typename T>
+void ResizeInternal(std::vector<T> &pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY)
 {
     // resize on x axis first
     if (sizeX != desiredSizeX)
     {
         // allocate the new image
-        std::vector<Data::Color> newImage;
+        std::vector<T> newImage;
         newImage.resize(desiredSizeX*sizeY);
 
         // if we are growing the image, do cubic interpolation
@@ -15,7 +16,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
         {
             for (size_t iy = 0; iy < sizeY; ++iy)
             {
-                Data::Color* destPixel = &newImage[iy*desiredSizeX];
+                T* destPixel = &newImage[iy*desiredSizeX];
                 for (size_t ix = 0; ix < desiredSizeX; ++ix)
                 {
                     float percent = float(ix) / float(desiredSizeX - 1);
@@ -28,10 +29,10 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
 
                     float time = Fract(srcPixel);
 
-                    const Data::Color& pn1 = pixels[iy * sizeX + pixel_neg1];
-                    const Data::Color& pp0 = pixels[iy * sizeX + pixel_0];
-                    const Data::Color& pp1 = pixels[iy * sizeX + pixel_1];
-                    const Data::Color& pp2 = pixels[iy * sizeX + pixel_2];
+                    const T& pn1 = pixels[iy * sizeX + pixel_neg1];
+                    const T& pp0 = pixels[iy * sizeX + pixel_0];
+                    const T& pp1 = pixels[iy * sizeX + pixel_1];
+                    const T& pp2 = pixels[iy * sizeX + pixel_2];
 
                     *destPixel = CubicHermite(pn1, pp0, pp1, pp2, time);
 
@@ -44,7 +45,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
         {
             for (size_t iy = 0; iy < sizeY; ++iy)
             {
-                Data::Color* destPixel = &newImage[iy*desiredSizeX];
+                T* destPixel = &newImage[iy*desiredSizeX];
                 for (size_t ix = 0; ix < desiredSizeX; ++ix)
                 {
                     float percentStart = float(ix) / float(desiredSizeX);
@@ -53,7 +54,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
                     float srcPixelStart = Clamp(percentStart * float(sizeX), 0.0f, float(sizeX - 1));
                     float srcPixelEnd = Clamp(percentEnd * float(sizeX), 0.0f, float(sizeX - 1));
 
-                    Data::Color pixelSum;
+                    T pixelSum;
                     float weightSum = 0.0f;
 
                     // integrate (average) over the footprint
@@ -86,7 +87,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
     if (sizeY != desiredSizeY)
     {
         // allocate the new image
-        std::vector<Data::Color> newImage;
+        std::vector<T> newImage;
         newImage.resize(desiredSizeX*desiredSizeY);
 
         // if we are growing the image, do cubic interpolation
@@ -106,12 +107,12 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
 
                     float time = Fract(srcPixel);
 
-                    const Data::Color& pn1 = pixels[pixel_neg1 * sizeX + ix];
-                    const Data::Color& pp0 = pixels[pixel_0    * sizeX + ix];
-                    const Data::Color& pp1 = pixels[pixel_1    * sizeX + ix];
-                    const Data::Color& pp2 = pixels[pixel_2    * sizeX + ix];
+                    const T& pn1 = pixels[pixel_neg1 * sizeX + ix];
+                    const T& pp0 = pixels[pixel_0    * sizeX + ix];
+                    const T& pp1 = pixels[pixel_1    * sizeX + ix];
+                    const T& pp2 = pixels[pixel_2    * sizeX + ix];
 
-                    Data::Color* destPixel = &newImage[iy*sizeX + ix];
+                    T* destPixel = &newImage[iy*sizeX + ix];
                     *destPixel = CubicHermite(pn1, pp0, pp1, pp2, time);
                 }
             }
@@ -129,7 +130,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
                     float srcPixelStart = Clamp(percentStart * float(sizeY), 0.0f, float(sizeY - 1));
                     float srcPixelEnd = Clamp(percentEnd * float(sizeY), 0.0f, float(sizeY - 1));
 
-                    Data::Color pixelSum;
+                    T pixelSum;
                     float weightSum = 0.0f;
 
                     // integrate (average) over the footprint
@@ -147,7 +148,7 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
                         srcPixelStart = pixelEnd;
                     }
 
-                    Data::Color* destPixel = &newImage[iy*sizeX + ix];
+                    T* destPixel = &newImage[iy*sizeX + ix];
                     *destPixel = pixelSum / weightSum;
                     destPixel++;
                 }
@@ -158,6 +159,16 @@ void Resize(std::vector<Data::Color> &pixels, int sizeX, int sizeY, int desiredS
         pixels = newImage;
         sizeY = desiredSizeY;
     }
+}
+
+void Resize(std::vector<Data::Color>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY)
+{
+    ResizeInternal(pixels, sizeX, sizeY, desiredSizeX, desiredSizeY);
+}
+
+void Resize(std::vector<Data::ColorPMA>& pixels, int sizeX, int sizeY, int desiredSizeX, int desiredSizeY)
+{
+    ResizeInternal(pixels, sizeX, sizeY, desiredSizeX, desiredSizeY);
 }
 
 void MakeJitterSequence_MitchellsBlueNoise(Data::Document& document)

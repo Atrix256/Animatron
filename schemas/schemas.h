@@ -150,7 +150,7 @@ STRUCT_BEGIN(Data, EntityLatex, "")
     STRUCT_FIELD(std::string, latex, "", "The actual latex to render.")
     STRUCT_FIELD_NO_SERIALIZE(uint32_t, _width, 0, "the width of the generated image")
     STRUCT_FIELD_NO_SERIALIZE(uint32_t, _height, 0, "the height of the generated image")
-    STRUCT_FIELD_NO_SERIALIZE(std::vector<uint8_t>, _pixels, std::vector<uint8_t>(), "The PMA pixels of the generated image")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<uint8_t>, _pixels, std::vector<uint8_t>(), "The U8 pixels of the generated image")
 STRUCT_END()
 
 STRUCT_BEGIN(Data, EntityLinearGradient, "A linear gradient: define a 2d half space and a mapping from the scalar values to colors")
@@ -164,6 +164,19 @@ STRUCT_BEGIN(Data, EntityDigitalDissolve, "A digital dissolve. An alpha value of
     STRUCT_FIELD(Data::Color, foreground, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 1.0f }, "The foreground color")
     STRUCT_FIELD(Data::Color, background, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 0.0f }, "The background color")
     STRUCT_FIELD(float, alpha, 0.0f, "How much foreground to show in percentage")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, EntityImage, "An image file")
+    STRUCT_FIELD(std::string, fileName, "", "The image file")
+    STRUCT_FIELD(Point2D, position, Point2D(), "The center of the image")
+    STRUCT_FIELD(Point2D, radius, Point2D{ 50 COMMA 50 }, "half width and height, in canvas coordinates")
+    STRUCT_FIELD(Color, tint, Color{ 1.0f COMMA 1.0f COMMA 1.0f COMMA 1.0f }, "A color to multiply the image by")
+    STRUCT_FIELD_NO_SERIALIZE(int, _rawwidth, 0, "the width of the loaded image")
+    STRUCT_FIELD_NO_SERIALIZE(int, _rawheight, 0, "the height of the loaded image")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<ColorPMA>, _rawpixels, std::vector<ColorPMA>(), "The PMA pixels of the loaded image")
+    STRUCT_FIELD_NO_SERIALIZE(int, _width, 0, "the width of the resized image")
+    STRUCT_FIELD_NO_SERIALIZE(int, _height, 0, "the height of the resized image")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<ColorPMA>, _pixels, std::vector<ColorPMA>(), "The PMA pixels of the resized image")
 STRUCT_END()
 
 // ----------------------------- Entity -----------------------------
