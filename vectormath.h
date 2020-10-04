@@ -7,6 +7,15 @@ typedef std::array<float, 3> vec3;
 typedef std::array<float, 4> vec4;
 
 template <size_t N>
+std::array<float, N> Max (const std::array<float, N>& A, float B)
+{
+    std::array<float, N> ret;
+    for (size_t i = 0; i < N; ++i)
+        ret[i] = std::max(A[i], B);
+    return ret;
+}
+
+template <size_t N>
 std::array<float, N> operator * (const std::array<float, N>& A, float B)
 {
     std::array<float, N> ret;
@@ -37,6 +46,15 @@ template <size_t N>
 float Length(const std::array<float, N>& A)
 {
     return (float)sqrt(Dot(A, A));
+}
+
+template <size_t N>
+std::array<float, N> Abs(const std::array<float, N>& A)
+{
+    std::array<float, N> ret;
+    for (size_t i = 0; i < N; ++i)
+        ret[i] = abs(A[i]);
+    return ret;
 }
 
 template <size_t N>

@@ -6,12 +6,18 @@
 #include "reflectedvectormath.h"
 
 // more sdf's here: https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
-inline float sdLine(vec2 a, vec2 b, vec2 p)
+inline float sdLine(vec2 a, vec2 b, vec2 pixel)
 {
-    vec2 pa = p - a;
+    vec2 pa = pixel - a;
     vec2 ba = b - a;
     float h = Clamp(Dot(pa, ba) / Dot(ba, ba), 0.0f, 1.0f);
     return Length(pa - ba * h);
+}
+
+inline float sdBox(vec2 pixel, vec2 boxPos, vec2 boxRadius)
+{
+    vec2 d = Abs(pixel - boxPos) - boxRadius;
+    return Length(Max(d, 0.0f)) + std::min(std::max(d[0], d[1]), 0.0f);
 }
 
 inline Data::ColorU8 ColorToColorU8(const Data::Color& color)

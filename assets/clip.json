@@ -5,8 +5,6 @@
 
   "outputSizeX": 1920,
   "outputSizeY": 1080,
-  //"outputSizeX": 960,
-  //"outputSizeY": 540,
   "FPS": 30,
   "duration": 10,
   "entities": [

@@ -144,31 +144,93 @@ bool EntityRectangle_DoAction(
     std::vector<Data::ColorPMA>& pixels,
     const Data::EntityRectangle& rectangle)
 {
-    // Get the box of the rectangle
-    int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    CanvasToPixel(document, rectangle.center.X - rectangle.width / 2, rectangle.center.Y - rectangle.height / 2, minPixelX, minPixelY);
-    CanvasToPixel(document, rectangle.center.X + rectangle.width / 2, rectangle.center.Y + rectangle.height / 2, maxPixelX, maxPixelY);
-    minPixelX--;
-    minPixelY--;
-    maxPixelX++;
-    maxPixelY++;
-
-    // clip the bounding box to the screen
-    minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
-    maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
-    minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
-    maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
-
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(rectangle.color);
 
-    // Draw the rectangle
-    for (int iy = minPixelY; iy <= maxPixelY; ++iy)
+    if (rectangle.expansion == 0.0f)
     {
-        Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
-        for (int ix = minPixelX; ix <= maxPixelX; ++ix)
+        // Get the box of the rectangle
+        int minPixelX, minPixelY, maxPixelX, maxPixelY;
+        CanvasToPixel(document, rectangle.center.X - rectangle.radius.X, rectangle.center.Y - rectangle.radius.Y, minPixelX, minPixelY);
+        CanvasToPixel(document, rectangle.center.X + rectangle.radius.X, rectangle.center.Y + rectangle.radius.Y, maxPixelX, maxPixelY);
+        minPixelX--;
+        minPixelY--;
+        maxPixelX++;
+        maxPixelY++;
+
+        // clip the bounding box to the screen
+        minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
+        maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
+        minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
+        maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
+
+        // Draw the rectangle
+        for (int iy = minPixelY; iy <= maxPixelY; ++iy)
         {
-            *pixel = Blend(*pixel, colorPMA);
-            pixel++;
+            Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
+            for (int ix = minPixelX; ix <= maxPixelX; ++ix)
+            {
+                *pixel = Blend(*pixel, colorPMA);
+                pixel++;
+            }
+        }
+    }
+    else
+    {
+        // get the canvas space box of the rectangle
+        float minCanvasX, minCanvasY, maxCanvasX, maxCanvasY;
+        minCanvasX = rectangle.center.X - rectangle.radius.X - rectangle.expansion;
+        minCanvasY = rectangle.center.Y - rectangle.radius.Y - rectangle.expansion;
+        maxCanvasX = rectangle.center.X + rectangle.radius.X + rectangle.expansion;
+        maxCanvasY = rectangle.center.Y + rectangle.radius.Y + rectangle.expansion;
+
+        // Get the pixel space box of the rectangle
+        int minPixelX, minPixelY, maxPixelX, maxPixelY;
+        CanvasToPixel(document, minCanvasX, minCanvasY, minPixelX, minPixelY);
+        CanvasToPixel(document, maxCanvasX, maxCanvasY, maxPixelX, maxPixelY);
+        minPixelX--;
+        minPixelY--;
+        maxPixelX++;
+        maxPixelY++;
+
+        // clip the bounding box to the screen
+        minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
+        maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
+        minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
+        maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
+
+        // Draw the rectangle
+        for (int iy = minPixelY; iy <= maxPixelY; ++iy)
+        {
+            Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
+            for (int ix = minPixelX; ix <= maxPixelX; ++ix)
+            {
+                // do multiple jittered samples per pixel and integrate (average) the result
+                Data::ColorPMA samplesColor;
+                for (uint32_t sampleIndex = 0; sampleIndex < document.samplesPerPixel; ++sampleIndex)
+                {
+                    Data::Point2D offset = document.jitterSequence.points[sampleIndex];
+
+                    float percentX = float(ix + offset.X - minPixelX) / float(maxPixelX - minPixelX);
+                    float canvasX = Lerp(minCanvasX, maxCanvasX, percentX);
+
+                    float percentY = float(iy + offset.Y - minPixelY) / float(maxPixelY - minPixelY);
+                    float canvasY = Lerp(minCanvasY, maxCanvasY, percentY);
+
+                    float dist = sdBox(vec2{ canvasX, canvasY }, vec2{ rectangle.center.X, rectangle.center.Y }, vec2{ rectangle.radius.X, rectangle.radius.Y });
+
+                    if (dist <= rectangle.expansion)
+                    {
+                        samplesColor.R += colorPMA.R / float(document.samplesPerPixel);
+                        samplesColor.G += colorPMA.G / float(document.samplesPerPixel);
+                        samplesColor.B += colorPMA.B / float(document.samplesPerPixel);
+                        samplesColor.A += colorPMA.A / float(document.samplesPerPixel);
+                    }
+                }
+
+                *pixel = Blend(*pixel, samplesColor);
+
+                pixel++;
+            }
         }
     }
 

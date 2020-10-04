@@ -3,8 +3,8 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 1920,
-  "outputSizeY": 1080,
+  "outputSizeX": 960,//1920,
+  "outputSizeY": 540,//1080,
   "FPS": 30,
   "duration": 5,
   "entities": [
@@ -16,7 +16,7 @@
           "halfSpace": {
             "X": 0,
             "Y": 1,
-            "Z": -20,
+            "Z": -20
           },
           "points": [
             {
@@ -48,31 +48,42 @@
       }
     },
     {
-      "id": "Khan",
-      "createTime": 2,
-      "destroyTime": 4,
+      "id": "box1",
       "data": {
-        "image": {
-          "fileName": "assets/khan.jpg",
-          "radius": {
-            "X": 50,
-            "Y": 30
+        "rectangle": {
+          "center": {
+            "X": -20
           },
-          "tint": {
-            "A": 0
+          "radius": {
+            "X": 10,
+            "Y": 5
+          },
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
           }
         }
       }
     },
     {
-      "id": "TransitionIn",
-      "zorder": 20,
+      "id": "box2",
       "data": {
-        "digitalDissolve": {
-          "alpha": 1,
-          "scale": {
-            "X": 8,
-            "Y": 8
+        "rectangle": {
+          "center": {
+            "X": 20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 5
+          },
+          "expansion": 0,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
           }
         }
       }
@@ -80,34 +91,9 @@
   ],
   "keyFrames": [
     {
-      "entityId": "TransitionIn",
-      "time": 1,
-      "newValue": "{\"alpha\":0}"
-    },
-    {
-      "entityId": "Khan",
-      "time": 2.25,
-      "newValue": "{\"tint\":{\"A\":1}}"
-    },
-    {
-      "entityId": "Khan",
-      "time": 3.75,
-      "newValue": "{\"tint\":{\"A\":1}}"
-    },
-    {
-      "entityId": "Khan",
-      "time": 4,
-      "newValue": "{\"tint\":{\"A\":0}}"
-    },
-    {
-      "entityId": "TransitionIn",
-      "time": 4,
-      "newValue": "{\"alpha\":0}"
-    },
-    {
-      "entityId": "TransitionIn",
+      "entityId": "box2",
       "time": 5,
-      "newValue": "{\"alpha\":1}"
+      "newValue": "{\"expansion\":10}"
     }
   ]
 }

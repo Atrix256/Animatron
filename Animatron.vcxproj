@@ -140,6 +140,7 @@
     <None Include="assets\clip.json" />
     <None Include="assets\se2_1.json" />
     <None Include="assets\se2_2.json" />
+    <None Include="assets\se2_3.json" />
     <None Include="internal\config.json" />
   </ItemGroup>
   <ItemGroup>
