@@ -87,6 +87,106 @@
           }
         }
       }
+    },
+    {
+      "id": "curve1",
+      "zorder": 1,
+      "data": {
+        "cubicBezier": {
+          "A": {
+            "X": -10,
+            "Y": -10
+          },
+          "B": {
+            "X": -10,
+            "Y": 10
+          },
+          "C": {
+            "X": 10,
+            "Y": 10
+          },
+          "D": {
+            "X": 10,
+            "Y": -10
+          }
+        }
+      }
+    },
+    {
+      "id": "CPA",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": -10,
+            "Y": -10
+          },
+          "color": {
+            "R": 0.5,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CPB",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": -10,
+            "Y": 10
+          },
+          "color": {
+            "R": 0,
+            "G": 0.5,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CPC",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": 10,
+            "Y": 10
+          },
+          "color": {
+            "R": 0,
+            "G": 0,
+            "B": 0.5,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CPD",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": 10,
+            "Y": -10
+          },
+          "color": {
+            "R": 0.5,
+            "G": 0.5,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
     }
   ],
   "keyFrames": [
@@ -94,6 +194,21 @@
       "entityId": "box2",
       "time": 5,
       "newValue": "{\"expansion\":10}"
+    },
+    {
+      "entityId": "curve1",
+      "time": 5,
+      "newValue": "{\"B\":{\"X\":20},\"C\":{\"X\":-20}}"
+    },
+    {
+      "entityId": "CPB",
+      "time": 5,
+      "newValue": "{\"center\":{\"X\":20}}"
+    },
+    {
+      "entityId": "CPC",
+      "time": 5,
+      "newValue": "{\"center\":{\"X\":-20}}"
     }
   ]
 }

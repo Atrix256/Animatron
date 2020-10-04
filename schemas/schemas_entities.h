@@ -13,4 +13,5 @@ VARIANT_BEGIN(Data, EntityVariant, "Storage for entity type specific information
     VARIANT_TYPE(EntityLinearGradient, lineargradient, EntityLinearGradient(), "")
     VARIANT_TYPE(EntityDigitalDissolve, digitalDissolve, EntityDigitalDissolve(), "")
     VARIANT_TYPE(EntityImage, image, EntityImage(), "")
+    VARIANT_TYPE(EntityCubicBezier, cubicBezier, EntityCubicBezier(), "")
 VARIANT_END()

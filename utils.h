@@ -55,7 +55,7 @@ inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY
     PixelToCanvas(document, (float)pixelX, (float)pixelY, canvasX, canvasY);
 }
 
-inline void CanvasToPixel(const Data::Document& document, float canvasX, float canvasY, int& pixelX, int& pixelY)
+inline void CanvasToPixelFloat(const Data::Document& document, float canvasX, float canvasY, float& pixelX, float& pixelY)
 {
     int canvasSizeInPixels = (document.renderSizeX >= document.renderSizeY) ? document.renderSizeY : document.renderSizeX;
 
@@ -65,8 +65,16 @@ inline void CanvasToPixel(const Data::Document& document, float canvasX, float c
     int centerPx = document.renderSizeX / 2;
     int centerPy = document.renderSizeY / 2;
 
-    pixelX = int(canvasX + float(centerPx));
-    pixelY = int(canvasY + float(centerPy));
+    pixelX = (canvasX + float(centerPx));
+    pixelY = (canvasY + float(centerPy));
+}
+
+inline void CanvasToPixel(const Data::Document& document, float canvasX, float canvasY, int& pixelX, int& pixelY)
+{
+    float pixelFloatX, pixelFloatY;
+    CanvasToPixelFloat(document, canvasX, canvasY, pixelFloatX, pixelFloatY);
+    pixelX = int(pixelFloatX);
+    pixelY = int(pixelFloatY);
 }
 
 inline Data::Color CubicHermite(const Data::Color& A, const Data::Color& B, const Data::Color& C, const Data::Color& D, float t)

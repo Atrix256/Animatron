@@ -847,3 +847,154 @@ bool EntityImage_DoAction(
 
     return true;
 }
+
+bool EntityCubicBezier_Initialize(const Data::Document& document, Data::EntityCubicBezier& cubicBezier, int entityIndex)
+{
+    return true;
+}
+
+bool EntityCubicBezier_FrameInitialize(const Data::Document& document, Data::EntityCubicBezier& licubicBezierne)
+{
+    return true;
+}
+
+bool EntityCubicBezier_DoAction(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::EntityCubicBezier& cubicBezier)
+{
+    Data::ColorPMA colorPMA = ToPremultipliedAlpha(cubicBezier.color);
+
+    // first we want to turn the curve into a bunch of line segments which are no more than 1 pixel long
+    // TODO: this would be good to cache off, and only re-create when it was changed on a specific frame, if possible?
+    struct CurvePoint
+    {
+        float t;
+        float x, y;
+    };
+    std::vector<CurvePoint> points;
+    auto InsertCurvePoint = [&](float t)
+    {
+        float cx = CubicBezierInterpolation(cubicBezier.A.X, cubicBezier.B.X, cubicBezier.C.X, cubicBezier.D.X, t);
+        float cy = CubicBezierInterpolation(cubicBezier.A.Y, cubicBezier.B.Y, cubicBezier.C.Y, cubicBezier.D.Y, t);
+
+        float px, py;
+        CanvasToPixelFloat(document, cx, cy, px, py);
+
+        points.push_back({ t, px, py });
+        std::sort(points.begin(), points.end(), [](const CurvePoint& A, const CurvePoint& B) { return A.t < B.t; });
+        // TODO: would be more efficient to find where it goes and shift everything over, i think.
+        // TODO: in general, i think we always no where the next point should be, so should be trivial i think?
+    };
+    InsertCurvePoint(0.0f);
+    InsertCurvePoint(1.0f);
+    int index = 0;
+    while (index + 1 < points.size())
+    {
+        vec2 a = vec2{ points[index].x, points[index].y };
+        vec2 b = vec2{ points[index + 1].x, points[index + 1].y };
+
+        float length = Length(b - a);
+        if (length > 1.0f)
+        {
+            InsertCurvePoint((points[index].t + points[index + 1].t) / 2.0f);
+        }
+        else
+        {
+            index++;
+        }
+    }
+
+    // TODO: probably should choose which axis to project onto based on whichever axis the curve is longer on
+    // Now sort the points by x coordinate, so that we can do dimensional reduction and only test the points near our point on one axis
+    std::sort(points.begin(), points.end(), [](const CurvePoint& A, const CurvePoint& B) { return A.x < B.x; });
+
+    // get the bounding box of the curve, from the bounding box of its control points
+    float minCanvasX, minCanvasY, maxCanvasX, maxCanvasY;
+    minCanvasX = Min(cubicBezier.A.X, cubicBezier.B.X, cubicBezier.C.X, cubicBezier.D.X);
+    maxCanvasX = Max(cubicBezier.A.X, cubicBezier.B.X, cubicBezier.C.X, cubicBezier.D.X);
+    minCanvasY = Min(cubicBezier.A.Y, cubicBezier.B.Y, cubicBezier.C.Y, cubicBezier.D.Y);
+    maxCanvasY = Max(cubicBezier.A.Y, cubicBezier.B.Y, cubicBezier.C.Y, cubicBezier.D.Y);
+
+    // Get the pixel space bounding box
+    int minPixelX, minPixelY, maxPixelX, maxPixelY;
+    CanvasToPixel(document, minCanvasX, minCanvasY, minPixelX, minPixelY);
+    CanvasToPixel(document, maxCanvasX, maxCanvasY, maxPixelX, maxPixelY);
+    minPixelX--;
+    minPixelY--;
+    maxPixelX++;
+    maxPixelY++;
+
+    // clip the bounding box to the screen
+    minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
+    maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
+    minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
+    maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
+
+    // TODO: need to convert cubicBezier.width to pixels
+    int curveWidth = 3;
+
+    // Draw it
+    for (int iy = minPixelY; iy <= maxPixelY; ++iy)
+    {
+        Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
+        for (int ix = minPixelX; ix <= maxPixelX; ++ix)
+        {
+            // TODO: multisampling
+
+            float closestDistanceSquared = FLT_MAX;
+
+            // since the points of the curve are dense, we can find the distance to the closest point instead of line segments
+            for (const CurvePoint& p : points)
+            {
+                if (p.x < ix - curveWidth)
+                    continue;
+
+                if (p.x > ix + curveWidth)
+                    break;
+
+                float distanceSquared = LengthSquared(vec2{p.x, p.y} - vec2{float(ix), float(iy)});
+                closestDistanceSquared = Min(closestDistanceSquared, distanceSquared);
+            }
+
+            if ((float)sqrt(closestDistanceSquared) < curveWidth)
+                *pixel = Blend(*pixel, colorPMA);
+
+
+            /*
+            // do multiple jittered samples per pixel and integrate (average) the result
+            Data::ColorPMA samplesColor;
+            for (uint32_t sampleIndex = 0; sampleIndex < document.samplesPerPixel; ++sampleIndex)
+            {
+                Data::Point2D offset = document.jitterSequence.points[sampleIndex];
+
+                float percentX = float(ix + offset.X - minPixelX) / float(maxPixelX - minPixelX);
+                float canvasX = Lerp(minCanvasX, maxCanvasX, percentX);
+
+                float percentY = float(iy + offset.Y - minPixelY) / float(maxPixelY - minPixelY);
+                float canvasY = Lerp(minCanvasY, maxCanvasY, percentY);
+
+                float dist = sdBox(vec2{ canvasX, canvasY }, vec2{ rectangle.center.X, rectangle.center.Y }, vec2{ rectangle.radius.X, rectangle.radius.Y });
+
+                if (dist <= rectangle.expansion)
+                {
+                    samplesColor.R += colorPMA.R / float(document.samplesPerPixel);
+                    samplesColor.G += colorPMA.G / float(document.samplesPerPixel);
+                    samplesColor.B += colorPMA.B / float(document.samplesPerPixel);
+                    samplesColor.A += colorPMA.A / float(document.samplesPerPixel);
+                }
+            }
+
+            *pixel = Blend(*pixel, samplesColor);
+            * */
+
+            pixel++;
+        }
+    }
+
+    // TODO: is this curve upside down?
+    // TODO: can you verify the curve is doing the right thing? i expected it to loop w/o moving the CPs quite so far
+
+    return true;
+}

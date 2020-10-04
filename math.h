@@ -93,3 +93,15 @@ inline float DegreesToRadians(float x)
 {
     return x * c_pi / 180.0f;
 }
+
+template<typename T, typename... Args>
+T Min(T first, Args... args)
+{
+    return Min(first , Min(args...));
+}
+
+template<typename T, typename... Args>
+T Max(T first, Args... args)
+{
+    return Max(first, Max(args...));
+}

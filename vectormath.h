@@ -49,6 +49,12 @@ float Length(const std::array<float, N>& A)
 }
 
 template <size_t N>
+float LengthSquared(const std::array<float, N>& A)
+{
+    return Dot(A, A);
+}
+
+template <size_t N>
 std::array<float, N> Abs(const std::array<float, N>& A)
 {
     std::array<float, N> ret;
