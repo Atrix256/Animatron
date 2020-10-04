@@ -3,8 +3,12 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 960,//1920,
-  "outputSizeY": 540,//1080,
+  /*
+  "outputSizeX": 1920,
+  "outputSizeY": 1080,
+  */
+  "outputSizeX": 960,
+  "outputSizeY": 540,
   "FPS": 30,
   "duration": 5,
   "entities": [
@@ -95,19 +99,23 @@
         "cubicBezier": {
           "A": {
             "X": -10,
-            "Y": -10
+            "Y": -10,
+            "Z": 1
           },
           "B": {
             "X": -10,
-            "Y": 10
+            "Y": 10,
+            "Z": 8
           },
           "C": {
             "X": 10,
-            "Y": 10
+            "Y": 10,
+            "Z": 8
           },
           "D": {
             "X": 10,
-            "Y": -10
+            "Y": -10,
+            "Z": 1
           }
         }
       }
@@ -198,17 +206,17 @@
     {
       "entityId": "curve1",
       "time": 5,
-      "newValue": "{\"B\":{\"X\":20},\"C\":{\"X\":-20}}"
+      "newValue": "{\"B\":{\"X\":10},\"C\":{\"X\":-10}}"
     },
     {
       "entityId": "CPB",
       "time": 5,
-      "newValue": "{\"center\":{\"X\":20}}"
+      "newValue": "{\"center\":{\"X\":10}}"
     },
     {
       "entityId": "CPC",
       "time": 5,
-      "newValue": "{\"center\":{\"X\":-20}}"
+      "newValue": "{\"center\":{\"X\":-10}}"
     }
   ]
 }

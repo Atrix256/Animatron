@@ -876,16 +876,19 @@ bool EntityCubicBezier_DoAction(
     std::vector<CurvePoint> points;
     auto InsertCurvePoint = [&](float t)
     {
-        float cx = CubicBezierInterpolation(cubicBezier.A.X, cubicBezier.B.X, cubicBezier.C.X, cubicBezier.D.X, t);
-        float cy = CubicBezierInterpolation(cubicBezier.A.Y, cubicBezier.B.Y, cubicBezier.C.Y, cubicBezier.D.Y, t);
+        float cz = CubicBezierInterpolation(cubicBezier.A.Z, cubicBezier.B.Z, cubicBezier.C.Z, cubicBezier.D.Z, t);
+
+        float cx = CubicBezierInterpolation(cubicBezier.A.X * cubicBezier.A.Z, cubicBezier.B.X * cubicBezier.B.Z, cubicBezier.C.X * cubicBezier.C.Z, cubicBezier.D.X * cubicBezier.D.Z, t);
+        cx /= cz;  
+
+        float cy = CubicBezierInterpolation(cubicBezier.A.Y * cubicBezier.A.Z, cubicBezier.B.Y * cubicBezier.B.Z, cubicBezier.C.Y * cubicBezier.C.Z, cubicBezier.D.Y * cubicBezier.D.Z, t);
+        cy /= cz;
 
         float px, py;
         CanvasToPixelFloat(document, cx, cy, px, py);
 
         points.push_back({ t, px, py });
         std::sort(points.begin(), points.end(), [](const CurvePoint& A, const CurvePoint& B) { return A.t < B.t; });
-        // TODO: would be more efficient to find where it goes and shift everything over, i think.
-        // TODO: in general, i think we always no where the next point should be, so should be trivial i think?
     };
     InsertCurvePoint(0.0f);
     InsertCurvePoint(1.0f);
@@ -906,7 +909,6 @@ bool EntityCubicBezier_DoAction(
         }
     }
 
-    // TODO: probably should choose which axis to project onto based on whichever axis the curve is longer on
     // Now sort the points by x coordinate, so that we can do dimensional reduction and only test the points near our point on one axis
     std::sort(points.begin(), points.end(), [](const CurvePoint& A, const CurvePoint& B) { return A.x < B.x; });
 
@@ -932,8 +934,8 @@ bool EntityCubicBezier_DoAction(
     minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
     maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
 
-    // TODO: need to convert cubicBezier.width to pixels
-    int curveWidth = 3;
+    // TODO: need to convert cubicBezier.width to pixels width (even if fractional). a helper function should do that
+    float curveWidth = 3.0f;
 
     // Draw it
     for (int iy = minPixelY; iy <= maxPixelY; ++iy)
@@ -941,43 +943,30 @@ bool EntityCubicBezier_DoAction(
         Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
         for (int ix = minPixelX; ix <= maxPixelX; ++ix)
         {
-            // TODO: multisampling
-
-            float closestDistanceSquared = FLT_MAX;
-
-            // since the points of the curve are dense, we can find the distance to the closest point instead of line segments
-            for (const CurvePoint& p : points)
-            {
-                if (p.x < ix - curveWidth)
-                    continue;
-
-                if (p.x > ix + curveWidth)
-                    break;
-
-                float distanceSquared = LengthSquared(vec2{p.x, p.y} - vec2{float(ix), float(iy)});
-                closestDistanceSquared = Min(closestDistanceSquared, distanceSquared);
-            }
-
-            if ((float)sqrt(closestDistanceSquared) < curveWidth)
-                *pixel = Blend(*pixel, colorPMA);
-
-
-            /*
             // do multiple jittered samples per pixel and integrate (average) the result
             Data::ColorPMA samplesColor;
             for (uint32_t sampleIndex = 0; sampleIndex < document.samplesPerPixel; ++sampleIndex)
             {
                 Data::Point2D offset = document.jitterSequence.points[sampleIndex];
 
-                float percentX = float(ix + offset.X - minPixelX) / float(maxPixelX - minPixelX);
-                float canvasX = Lerp(minCanvasX, maxCanvasX, percentX);
+                float pixelX = ix + offset.X;
+                float pixelY = iy + offset.Y;
 
-                float percentY = float(iy + offset.Y - minPixelY) / float(maxPixelY - minPixelY);
-                float canvasY = Lerp(minCanvasY, maxCanvasY, percentY);
+                // since the points of the curve are dense, we can find the distance to the closest point instead of line segments
+                float closestDistanceSquared = FLT_MAX;
+                for (const CurvePoint& p : points)
+                {
+                    if (p.x < pixelX - curveWidth)
+                        continue;
 
-                float dist = sdBox(vec2{ canvasX, canvasY }, vec2{ rectangle.center.X, rectangle.center.Y }, vec2{ rectangle.radius.X, rectangle.radius.Y });
+                    if (p.x > pixelX + curveWidth)
+                        break;
 
-                if (dist <= rectangle.expansion)
+                    float distanceSquared = LengthSquared(vec2{ p.x, p.y } - vec2{ pixelX, pixelY });
+                    closestDistanceSquared = Min(closestDistanceSquared, distanceSquared);
+                }
+
+                if ((float)sqrt(closestDistanceSquared) < curveWidth)
                 {
                     samplesColor.R += colorPMA.R / float(document.samplesPerPixel);
                     samplesColor.G += colorPMA.G / float(document.samplesPerPixel);
@@ -987,14 +976,18 @@ bool EntityCubicBezier_DoAction(
             }
 
             *pixel = Blend(*pixel, samplesColor);
-            * */
 
             pixel++;
         }
     }
 
     // TODO: is this curve upside down?
-    // TODO: can you verify the curve is doing the right thing? i expected it to loop w/o moving the CPs quite so far
+    // TODO: make bezier curve between nodes in the clip.
+    // basically if you have 2 connect points A and B. CPs are: (assuming connecting on the sides, not top or bottom)
+    // (A.x, A.y)
+    // ((A.x+B.x)/2, A.y)
+    // ((A.x+B.x)/2, B.y)
+    // (B.x, B.y)
 
     return true;
 }
