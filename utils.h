@@ -47,7 +47,7 @@ inline void PixelToCanvas(const Data::Document& document, float pixelX, float pi
     int centerPy = document.renderSizeY / 2;
 
     canvasX = 100.0f * float(pixelX - centerPx) / float(canvasSizeInPixels);
-    canvasY = 100.0f * float(pixelY - centerPy) / float(canvasSizeInPixels);
+    canvasY = -100.0f * float(pixelY - centerPy) / float(canvasSizeInPixels);
 }
 
 inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY, float& canvasX, float& canvasY)
@@ -65,8 +65,8 @@ inline void CanvasToPixelFloat(const Data::Document& document, float canvasX, fl
     int centerPx = document.renderSizeX / 2;
     int centerPy = document.renderSizeY / 2;
 
-    pixelX = (canvasX + float(centerPx));
-    pixelY = (canvasY + float(centerPy));
+    pixelX = (float(centerPx) + canvasX);
+    pixelY = (float(centerPy) - canvasY);
 }
 
 inline float CanvasLengthToPixelLength(const Data::Document& document, float canvasLength)
@@ -83,6 +83,29 @@ inline void CanvasToPixel(const Data::Document& document, float canvasX, float c
     CanvasToPixelFloat(document, canvasX, canvasY, pixelFloatX, pixelFloatY);
     pixelX = int(pixelFloatX);
     pixelY = int(pixelFloatY);
+}
+
+inline void GetPixelBoundingBox(const Data::Document& document, float canvasX, float canvasY, float canvasRadiusX, float canvasRadiusY, int& pixelMinX, int& pixelMinY, int& pixelMaxX, int& pixelMaxY)
+{
+    float px1, py1, px2, py2;
+    CanvasToPixelFloat(document, canvasX - canvasRadiusX, canvasY - canvasRadiusY, px1, py1);
+    CanvasToPixelFloat(document, canvasX + canvasRadiusX, canvasY + canvasRadiusY, px2, py2);
+
+    pixelMinX = (int)floor(Min(px1, px2));
+    pixelMinY = (int)floor(Min(py1, py2));
+    pixelMaxX = (int)ceil(Max(px1, px2));
+    pixelMaxY = (int)ceil(Max(py1, py2));
+}
+
+inline void GetCanvasExtents(const Data::Document& document, float& canvasMinX, float& canvasMinY, float& canvasMaxX, float& canvasMaxY)
+{
+    float cx1, cy1, cx2, cy2;
+    PixelToCanvas(document, 0, 0, cx1, cy1);
+    PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, cx2, cy2);
+    canvasMinX = Min(cx1, cx2);
+    canvasMinY = Min(cy1, cy2);
+    canvasMaxX = Max(cx1, cx2);
+    canvasMaxY = Max(cy1, cy2);
 }
 
 inline Data::Color CubicHermite(const Data::Color& A, const Data::Color& B, const Data::Color& C, const Data::Color& D, float t)

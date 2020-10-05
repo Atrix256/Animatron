@@ -12,7 +12,7 @@
   "outputSizeY": 1080,
   */
   "FPS": 30,
-  "duration": 5,
+  "duration": 1,
   "entities": [
     {
       "id": "background",
@@ -36,7 +36,7 @@
           "halfSpace": {
             "X": 1,
             "Y": 1,
-            "Z": -1
+            "Z": 0
           },
           "points": [
             {
@@ -58,6 +58,69 @@
               }
             }
           ]
+        }
+      }
+    },
+    {
+      "id": "circle1",
+      "data": {
+        "circle": {
+          "innerRadius": 2,
+          "outerRadius": 0.75,
+          "center": {
+            "X": 10,
+            "Y": 10
+          },
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 0.75
+          }
+        }
+      }
+    },
+    {
+      "id": "rectangle1",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -20,
+            "Y": -20
+          },
+          "radius": {
+            "X": 3,
+            "Y": 5
+          },
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "rectangle2",
+      "zorder": 1,
+      "data": {
+        "rectangle": {
+          "expansion": 5,
+          "center": {
+            "X": -40,
+            "Y": -20
+          },
+          "radius": {
+            "X": 3,
+            "Y": 5
+          },
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
         }
       }
     }

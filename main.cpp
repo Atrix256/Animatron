@@ -525,6 +525,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
+// TODO: i think canvas to pixel and pixel to canvas need to flip the y axis over. the gradient suggests that.  investigate to be sure.
+
+
 // TODO: maybe gaussian blur the intro screen away. if so, do separated blur. maybe entities (or entity types?) should be able to have per thread storage, so that it could keep a temporary pixel buffer there for the separated blur?
 
 // TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
@@ -566,9 +569,6 @@ TODO:
 * Gaussian blur action for fun.
 * Bloom?
 * Tone map.
-
-// TODO: i think canvas to pixel and pixel to canvas need to flip the y axis over. the gradient suggests that.  investigate to be sure.
-
 
 * be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
  * should probably have a bitset of what fields are present in json data.

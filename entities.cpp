@@ -66,15 +66,9 @@ bool EntityCircle_DoAction(
     Data::EntityVariant>& entityMap, std::vector<Data::ColorPMA>& pixels,
     const Data::EntityCircle& circle)
 {
-    // Get a bounding box of the circle
+    // Get a pixel space bounding box of the circle
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    float totalRadius = circle.innerRadius + circle.outerRadius;
-    CanvasToPixel(document, circle.center.X - totalRadius, circle.center.Y - totalRadius, minPixelX, minPixelY);
-    CanvasToPixel(document, circle.center.X + totalRadius, circle.center.Y + totalRadius, maxPixelX, maxPixelY);
-    minPixelX--;
-    minPixelY--;
-    maxPixelX++;
-    maxPixelY++;
+    GetPixelBoundingBox(document, circle.center.X, circle.center.Y, circle.innerRadius + circle.outerRadius, circle.innerRadius + circle.outerRadius, minPixelX, minPixelY, maxPixelX, maxPixelY);
 
     // clip the bounding box to the screen
     minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
@@ -85,9 +79,6 @@ bool EntityCircle_DoAction(
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(circle.color);
 
     // Draw the circle
-    float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
-    PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
-    PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
     for (int iy = minPixelY; iy <= maxPixelY; ++iy)
     {
         Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
@@ -99,15 +90,13 @@ bool EntityCircle_DoAction(
             {
                 Data::Point2D offset = document.jitterSequence.points[sampleIndex];
 
-                float percentX = (float(ix) + offset.X) / float(document.renderSizeX - 1);
-                float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
+                float canvasX, canvasY;
+                PixelToCanvas(document, float(ix) + offset.X, float(iy) + offset.Y, canvasX, canvasY);
+                
                 float distX = abs(canvasX - circle.center.X);
-
-                float percentY = (float(iy) + offset.Y) / float(document.renderSizeY - 1);
-                float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
                 float distY = abs(canvasY - circle.center.Y);
-
                 float dist = (float)sqrt(distX * distX + distY * distY);
+
                 dist -= circle.innerRadius;
 
                 if (dist > 0.0f && dist <= circle.outerRadius)
@@ -146,24 +135,18 @@ bool EntityRectangle_DoAction(
 {
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(rectangle.color);
 
+    // Get the box of the rectangle
+    int minPixelX, minPixelY, maxPixelX, maxPixelY;
+    GetPixelBoundingBox(document, rectangle.center.X, rectangle.center.Y, rectangle.radius.X + rectangle.expansion, rectangle.radius.Y + rectangle.expansion, minPixelX, minPixelY, maxPixelX, maxPixelY);
+
+    // clip the bounding box to the screen
+    minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
+    maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
+    minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
+    maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
+
     if (rectangle.expansion == 0.0f)
     {
-        // Get the box of the rectangle
-        int minPixelX, minPixelY, maxPixelX, maxPixelY;
-        CanvasToPixel(document, rectangle.center.X - rectangle.radius.X, rectangle.center.Y - rectangle.radius.Y, minPixelX, minPixelY);
-        CanvasToPixel(document, rectangle.center.X + rectangle.radius.X, rectangle.center.Y + rectangle.radius.Y, maxPixelX, maxPixelY);
-        minPixelX--;
-        minPixelY--;
-        maxPixelX++;
-        maxPixelY++;
-
-        // clip the bounding box to the screen
-        minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
-        maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
-        minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
-        maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
-
-        // Draw the rectangle
         for (int iy = minPixelY; iy <= maxPixelY; ++iy)
         {
             Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX + minPixelX];
@@ -176,28 +159,6 @@ bool EntityRectangle_DoAction(
     }
     else
     {
-        // get the canvas space box of the rectangle
-        float minCanvasX, minCanvasY, maxCanvasX, maxCanvasY;
-        minCanvasX = rectangle.center.X - rectangle.radius.X - rectangle.expansion;
-        minCanvasY = rectangle.center.Y - rectangle.radius.Y - rectangle.expansion;
-        maxCanvasX = rectangle.center.X + rectangle.radius.X + rectangle.expansion;
-        maxCanvasY = rectangle.center.Y + rectangle.radius.Y + rectangle.expansion;
-
-        // Get the pixel space box of the rectangle
-        int minPixelX, minPixelY, maxPixelX, maxPixelY;
-        CanvasToPixel(document, minCanvasX, minCanvasY, minPixelX, minPixelY);
-        CanvasToPixel(document, maxCanvasX, maxCanvasY, maxPixelX, maxPixelY);
-        minPixelX--;
-        minPixelY--;
-        maxPixelX++;
-        maxPixelY++;
-
-        // clip the bounding box to the screen
-        minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
-        maxPixelX = Clamp(maxPixelX, 0, document.renderSizeX - 1);
-        minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
-        maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
-
         // Draw the rectangle
         for (int iy = minPixelY; iy <= maxPixelY; ++iy)
         {
@@ -210,11 +171,8 @@ bool EntityRectangle_DoAction(
                 {
                     Data::Point2D offset = document.jitterSequence.points[sampleIndex];
 
-                    float percentX = float(ix + offset.X - minPixelX) / float(maxPixelX - minPixelX);
-                    float canvasX = Lerp(minCanvasX, maxCanvasX, percentX);
-
-                    float percentY = float(iy + offset.Y - minPixelY) / float(maxPixelY - minPixelY);
-                    float canvasY = Lerp(minCanvasY, maxCanvasY, percentY);
+                    float canvasX, canvasY;
+                    PixelToCanvas(document, float(ix) + offset.X, float(iy) + offset.Y, canvasX, canvasY);
 
                     float dist = sdBox(vec2{ canvasX, canvasY }, vec2{ rectangle.center.X, rectangle.center.Y }, vec2{ rectangle.radius.X, rectangle.radius.Y });
 
@@ -621,21 +579,14 @@ bool EntityLinearGradient_DoAction(
     if (linearGradient.points.size() == 0)
         return true;
 
-    // get the canvas extents. used for gradient projection
-    float canvasMinX, canvasMinY, canvasMaxX, canvasMaxY;
-    PixelToCanvas(document, 0, 0, canvasMinX, canvasMinY);
-    PixelToCanvas(document, document.renderSizeX - 1, document.renderSizeY - 1, canvasMaxX, canvasMaxY);
-
+    // draw the gradient
     Data::ColorPMA* pixel = pixels.data();
     for (int iy = 0; iy < document.renderSizeY; ++iy)
     {
-        float percentY = float(iy) / float(document.renderSizeY - 1);
-        float canvasY = Lerp(canvasMinY, canvasMaxY, percentY);
-
         for (int ix = 0; ix < document.renderSizeX; ++ix)
         {
-            float percentX = float(ix) / float(document.renderSizeX - 1);
-            float canvasX = Lerp(canvasMinX, canvasMaxX, percentX);
+            float canvasX, canvasY;
+            PixelToCanvas(document, float(ix), float(iy), canvasX, canvasY);
 
             float value = Dot(linearGradient.halfSpace, Data::Point3D{ canvasX, canvasY, 1.0f });
 
