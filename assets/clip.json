@@ -1,311 +1,67 @@
+// This file is to roughly use each feature, to make sure things are working correctly.
 {
   "program": "animatron",
   "versionMajor": 1,
   "versionMinor": 0,
 
+  "outputSizeX": 960,
+  "outputSizeY": 540,
+
+  /*
   "outputSizeX": 1920,
   "outputSizeY": 1080,
+  */
   "FPS": 30,
-  "duration": 10,
+  "duration": 5,
   "entities": [
     {
-      "id": "Background",
-      "zorder": -1000.0,
+      "id": "background",
+      "zorder": -1000,
       "data": {
         "fill": {
           "color": {
-            "R": 0.3,
-            "G": 0.4,
-            "B": 0.5,
-            "A": 1.0
+            "R": 0.75,
+            "G": 0.0,
+            "B": 0.75,
+            "A": 1
           }
         }
       }
     },
     {
-      "id": "Camera",
+      "id": "backgroundGradient",
+      "zorder": -900,
       "data": {
-        "camera": {
-          "position": {
-            "X": 0,
-            "Y": 0,
+        "lineargradient": {
+          "halfSpace": {
+            "X": 1,
+            "Y": 1,
             "Z": -1
-          }
-        }
-      }
-    },
-    {
-      "id": "Triangle",
-      "data": {
-        "lines3d": {
+          },
           "points": [
             {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
+              "value": -40,
+              "color": {
+                "R": 1,
+                "G": 1,
+                "B": 1,
+                "A": 1
+              }
             },
             {
-              "X": 0,
-              "Y": 1.5,
-              "Z": 0
-            },
-            {
-              "X": 2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
+              "value": 40,
+              "color": {
+                "R": 1,
+                "G": 1,
+                "B": 1,
+                "A": 0
+              }
             }
-          ],
-          "color": {
-            "R": 1,
-            "G": 1,
-            "B": 1,
-            "A": 1
-          },
-          "perspctive": false,
-          "camera": "Camera",
-          "width": 0.25,
-          "transform": "TriangleTransform"
-        }
-      }
-    },
-    {
-      "id": "TriangleX",
-      "data": {
-        "lines3d": {
-          "points": [
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": 0,
-              "Y": 1.5,
-              "Z": 0
-            },
-            {
-              "X": 2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            }
-          ],
-          "color": {
-            "R": 1,
-            "G": 0,
-            "B": 0,
-            "A": 1
-          },
-          "camera": "Camera",
-          "width": 0.25,
-          "transform": "TriangleXTransform"
-        }
-      }
-    },
-    {
-      "id": "TriangleY",
-      "data": {
-        "lines3d": {
-          "points": [
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": 0,
-              "Y": 1.5,
-              "Z": 0
-            },
-            {
-              "X": 2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            }
-          ],
-          "color": {
-            "R": 0,
-            "G": 1,
-            "B": 0,
-            "A": 1
-          },
-          "camera": "Camera",
-          "width": 0.25,
-          "transform": "TriangleYTransform"
-        }
-      }
-    },
-    {
-      "id": "TriangleZ",
-      "data": {
-        "lines3d": {
-          "points": [
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": 0,
-              "Y": 1.5,
-              "Z": 0
-            },
-            {
-              "X": 2,
-              "Y": -1.5,
-              "Z": 0
-            },
-            {
-              "X": -2,
-              "Y": -1.5,
-              "Z": 0
-            }
-          ],
-          "color": {
-            "R": 0,
-            "G": 0,
-            "B": 1,
-            "A": 1
-          },
-          "camera": "Camera",
-          "width": 0.25,
-          "transform": "TriangleZTransform"
-        }
-      }
-    },
-    {
-      "id": "TriangleTransform",
-      "data": {
-        "transform": {
-          "translation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 10
-          },
-          "scale": {
-            "X": 5,
-            "Y": 5,
-            "Z": 5
-          }
-        }
-      }
-    },
-    {
-      "id": "TriangleXTransform",
-      "data": {
-        "transform": {
-          "translation": {
-            "X": 20,
-            "Y": 0,
-            "Z": 10
-          },
-          "scale": {
-            "X": 5,
-            "Y": 5,
-            "Z": 5
-          }
-        }
-      }
-    },
-    {
-      "id": "TriangleYTransform",
-      "data": {
-        "transform": {
-          "translation": {
-            "X": 0,
-            "Y": 20,
-            "Z": 10
-          },
-          "scale": {
-            "X": 5,
-            "Y": 5,
-            "Z": 5
-          }
-        }
-      }
-    },
-    {
-      "id": "TriangleZTransform",
-      "data": {
-        "transform": {
-          "translation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 30
-          },
-          "scale": {
-            "X": 5,
-            "Y": 5,
-            "Z": 5
-          }
+          ]
         }
       }
     }
   ],
   "keyFrames": [
-    {
-      "entityId": "Camera",
-      "time": 1,
-      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-1000},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 2,
-      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 3,
-      "newValue": "{\"position\":{\"X\":-100, \"Y\":0, \"Z\":-100},\"at\":{\"X\":-100,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 4,
-      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 5,
-      "newValue": "{\"position\":{\"X\":0, \"Y\":100, \"Z\":-100},\"at\":{\"X\":0,\"Y\":100,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 6,
-      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 7,
-      "newValue": "{\"position\":{\"X\":-100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 8,
-      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 9,
-      "newValue": "{\"position\":{\"X\":100, \"Y\":0, \"Z\":0},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    },
-    {
-      "entityId": "Camera",
-      "time": 10,
-      "newValue": "{\"position\":{\"X\":0, \"Y\":0, \"Z\":-100},\"at\":{\"X\":0,\"Y\":0,\"Z\":0}}"
-    }
   ]
 }

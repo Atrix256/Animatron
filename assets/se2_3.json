@@ -3,12 +3,12 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  /*
   "outputSizeX": 1920,
   "outputSizeY": 1080,
-  */
+/*
   "outputSizeX": 960,
   "outputSizeY": 540,
+  */
   "FPS": 30,
   "duration": 5,
   "entities": [
@@ -97,6 +97,7 @@
       "zorder": 1,
       "data": {
         "cubicBezier": {
+          "width": 0.1,
           "A": {
             "X": -10,
             "Y": -10,

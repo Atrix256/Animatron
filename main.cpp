@@ -584,6 +584,11 @@ TODO:
 
 ? are frame init and do action both really needed? right now no, but maybe can make it be later.
 
+* certain things are calculated per frame that don't change from frame to frame, but frames aren't processed in order so can't really cache them in a straightforward way.
+ * maybe if there's a long stretch where something doesn't change (no active keyframe? or constant section) could calculate once and re-use.
+ * this would be good for things like bezier curve points, and image resizing.
+ * could probably store this in the CAS?
+
 ----- Low Priority Features -----
 
 

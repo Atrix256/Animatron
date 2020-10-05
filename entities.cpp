@@ -867,7 +867,6 @@ bool EntityCubicBezier_DoAction(
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(cubicBezier.color);
 
     // first we want to turn the curve into a bunch of line segments which are no more than 1 pixel long
-    // TODO: this would be good to cache off, and only re-create when it was changed on a specific frame, if possible?
     struct CurvePoint
     {
         float t;
@@ -934,8 +933,8 @@ bool EntityCubicBezier_DoAction(
     minPixelY = Clamp(minPixelY, 0, document.renderSizeY - 1);
     maxPixelY = Clamp(maxPixelY, 0, document.renderSizeY - 1);
 
-    // TODO: need to convert cubicBezier.width to pixels width (even if fractional). a helper function should do that
-    float curveWidth = 3.0f;
+    // Convert cubicBezier.width to pixels width
+    float curveWidth = CanvasLengthToPixelLength(document, cubicBezier.width);
 
     // Draw it
     for (int iy = minPixelY; iy <= maxPixelY; ++iy)
@@ -956,10 +955,10 @@ bool EntityCubicBezier_DoAction(
                 float closestDistanceSquared = FLT_MAX;
                 for (const CurvePoint& p : points)
                 {
-                    if (p.x < pixelX - curveWidth)
+                    if (p.x < floor(pixelX - curveWidth))
                         continue;
 
-                    if (p.x > pixelX + curveWidth)
+                    if (p.x > ceil(pixelX + curveWidth))
                         break;
 
                     float distanceSquared = LengthSquared(vec2{ p.x, p.y } - vec2{ pixelX, pixelY });
@@ -981,7 +980,8 @@ bool EntityCubicBezier_DoAction(
         }
     }
 
-    // TODO: is this curve upside down?
+    // TODO: is this curve upside down? it seems to match the circles. what is upside down and what isn't? (are lines?)
+
     // TODO: make bezier curve between nodes in the clip.
     // basically if you have 2 connect points A and B. CPs are: (assuming connecting on the sides, not top or bottom)
     // (A.x, A.y)

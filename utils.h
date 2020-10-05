@@ -69,6 +69,14 @@ inline void CanvasToPixelFloat(const Data::Document& document, float canvasX, fl
     pixelY = (canvasY + float(centerPy));
 }
 
+inline float CanvasLengthToPixelLength(const Data::Document& document, float canvasLength)
+{
+    float px1, px2, py;
+    CanvasToPixelFloat(document, 0.0f, 0.0f, px1, py);
+    CanvasToPixelFloat(document, canvasLength, 0.0f, px2, py);
+    return px2 - px1;
+}
+
 inline void CanvasToPixel(const Data::Document& document, float canvasX, float canvasY, int& pixelX, int& pixelY)
 {
     float pixelFloatX, pixelFloatY;
