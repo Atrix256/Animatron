@@ -68,7 +68,7 @@ bool EntityCircle_DoAction(
 {
     // Get a pixel space bounding box of the circle
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    GetPixelBoundingBox(document, circle.center.X, circle.center.Y, circle.innerRadius + circle.outerRadius, circle.innerRadius + circle.outerRadius, minPixelX, minPixelY, maxPixelX, maxPixelY);
+    GetPixelBoundingBox_PointRadius(document, circle.center.X, circle.center.Y, circle.innerRadius + circle.outerRadius, circle.innerRadius + circle.outerRadius, minPixelX, minPixelY, maxPixelX, maxPixelY);
 
     // clip the bounding box to the screen
     minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
@@ -137,7 +137,7 @@ bool EntityRectangle_DoAction(
 
     // Get the box of the rectangle
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    GetPixelBoundingBox(document, rectangle.center.X, rectangle.center.Y, rectangle.radius.X + rectangle.expansion, rectangle.radius.Y + rectangle.expansion, minPixelX, minPixelY, maxPixelX, maxPixelY);
+    GetPixelBoundingBox_PointRadius(document, rectangle.center.X, rectangle.center.Y, rectangle.radius.X + rectangle.expansion, rectangle.radius.Y + rectangle.expansion, minPixelX, minPixelY, maxPixelX, maxPixelY);
 
     // clip the bounding box to the screen
     minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
@@ -871,12 +871,7 @@ bool EntityCubicBezier_DoAction(
 
     // Get the pixel space bounding box
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    CanvasToPixel(document, minCanvasX, minCanvasY, minPixelX, minPixelY);
-    CanvasToPixel(document, maxCanvasX, maxCanvasY, maxPixelX, maxPixelY);
-    minPixelX--;
-    minPixelY--;
-    maxPixelX++;
-    maxPixelY++;
+    GetPixelBoundingBox_TwoPoints(document, minCanvasX, minCanvasY, maxCanvasX, maxCanvasY, minPixelX, minPixelY, maxPixelX, maxPixelY);
 
     // clip the bounding box to the screen
     minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
@@ -930,15 +925,6 @@ bool EntityCubicBezier_DoAction(
             pixel++;
         }
     }
-
-    // TODO: is this curve upside down? it seems to match the circles. what is upside down and what isn't? (are lines?)
-
-    // TODO: make bezier curve between nodes in the clip.
-    // basically if you have 2 connect points A and B. CPs are: (assuming connecting on the sides, not top or bottom)
-    // (A.x, A.y)
-    // ((A.x+B.x)/2, A.y)
-    // ((A.x+B.x)/2, B.y)
-    // (B.x, B.y)
 
     return true;
 }

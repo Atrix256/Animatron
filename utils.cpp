@@ -232,14 +232,8 @@ bool MakeJitterSequence(Data::Document& document)
 void DrawLine(const Data::Document& document, std::vector<Data::ColorPMA>& pixels, const Data::Point2D& A, const Data::Point2D& B, float width, const Data::ColorPMA& color)
 {
     // Get a bounding box of the line
-    float minX = Min(A.X, B.X) - width;
-    float minY = Min(A.Y, B.Y) - width;
-    float maxX = Max(A.X, B.X) + width;
-    float maxY = Max(A.Y, B.Y) + width;
-
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    CanvasToPixel(document, minX, minY, minPixelX, minPixelY);
-    CanvasToPixel(document, maxX, maxY, maxPixelX, maxPixelY);
+    GetPixelBoundingBox_TwoPointsRadius(document, A.X, A.Y, B.X, B.Y, width, width, minPixelX, minPixelY, maxPixelX, maxPixelY);
 
     // clip the bounding box to the screen
     minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);

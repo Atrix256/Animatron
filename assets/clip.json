@@ -123,6 +123,249 @@
           }
         }
       }
+    },
+    {
+      "id": "line1",
+      "zorder": 10,
+      "data": {
+        "line": {
+          "A": {
+            "X": 0,
+            "Y": -50
+          },
+          "B": {
+            "X": 0,
+            "Y": 50
+          },
+          "width": 0.25,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "line2",
+      "zorder": 10,
+      "data": {
+        "line": {
+          "A": {
+            "X": -50,
+            "Y": 0
+          },
+          "B": {
+            "X": 50,
+            "Y": 0
+          },
+          "width": 0.25,
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "curve1",
+      "zorder": 1,
+      "data": {
+        "cubicBezier": {
+          "width": 0.5,
+          "A": {
+            "X": -30,
+            "Y": 30,
+            "Z": 1
+          },
+          "B": {
+            "X": -10,
+            "Y": 10,
+            "Z": 8
+          },
+          "C": {
+            "X": -30,
+            "Y": 10,
+            "Z": 8
+          },
+          "D": {
+            "X": -10,
+            "Y": 30,
+            "Z": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "Line3d1",
+      "data": {
+        "line3d": {
+          "A": {
+            "X": 5,
+            "Y": 5,
+            "Z": 0
+          },
+          "B": {
+            "X": -5,
+            "Y": -5,
+            "Z": 0
+          },
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          },
+          "camera": "Camera",
+          "width": 0.1,
+          "transform": "LineTransform"
+        }
+      }
+    },
+    {
+      "id": "LineTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": -10,
+            "Y": -10,
+            "Z": 100
+          }
+        }
+      }
+    },
+    {
+      "id": "Camera",
+      "data": {
+        "camera": {
+        }
+      }
+    },
+    {
+      "id": "Tetrahedron",
+      "data": {
+        "lines3d": {
+          "color": {
+            "R": 1.0,
+            "G": 1.0,
+            "B": 0.0,
+            "A": 1.0
+          },
+          "width": 0.1,
+          "camera": "Camera",
+          "transform": "TetrahedronTransform",
+          "points": [
+            {
+              // A
+              "X": -1,
+              "Y": -1,
+              "Z": -1
+            },
+            {
+              // B
+              "X": -1,
+              "Y": 1,
+              "Z": 1
+            },
+            {
+              // C
+              "X": 1,
+              "Y": -1,
+              "Z": 1
+            },
+            {
+              // A
+              "X": -1,
+              "Y": -1,
+              "Z": -1
+            },
+            {
+              // D
+              "X": 1,
+              "Y": 1,
+              "Z": -1
+            },
+            {
+              // B
+              "X": -1,
+              "Y": 1,
+              "Z": 1
+            },
+            {
+              // C
+              "X": 1,
+              "Y": -1,
+              "Z": 1
+            },
+            {
+              // D
+              "X": 1,
+              "Y": 1,
+              "Z": -1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "TetrahedronTransform",
+      "data": {
+        "transform": {
+          "translation": {
+            "X": 20,
+            "Y": -30,
+            "Z": 110
+          },
+          "scale": {
+            "X": 5,
+            "Y": 5,
+            "Z": 5
+          }
+        }
+      }
+    },
+    {
+      "id": "Latex1",
+      "zorder": 30.0,
+      "data": {
+        "latex": {
+          "position": {
+            "X": 0,
+            "Y": -20
+          },
+          "foreground": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          },
+          "DPI": 600,
+          "latex": "$a^2+b^2=c^2$"
+        }
+      }
+    },
+    {
+      "id": "Latex2",
+      "zorder": 29.0,
+      "data": {
+        "latex": {
+          "position": {
+            "X": 0.5,
+            "Y": -20.5
+          },
+          "foreground": {
+            "R": 0,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          },
+          "DPI": 600,
+          "latex": "$a^2+b^2=c^2$"
+        }
+      }
     }
   ],
   "keyFrames": [

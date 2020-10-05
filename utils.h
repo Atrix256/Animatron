@@ -85,16 +85,39 @@ inline void CanvasToPixel(const Data::Document& document, float canvasX, float c
     pixelY = int(pixelFloatY);
 }
 
-inline void GetPixelBoundingBox(const Data::Document& document, float canvasX, float canvasY, float canvasRadiusX, float canvasRadiusY, int& pixelMinX, int& pixelMinY, int& pixelMaxX, int& pixelMaxY)
+inline void GetPixelBoundingBox_TwoPointsRadius(const Data::Document& document, float canvasX1, float canvasY1, float canvasX2, float canvasY2, float canvasRadiusX, float canvasRadiusY, int& pixelMinX, int& pixelMinY, int& pixelMaxX, int& pixelMaxY)
 {
+    float minX = Min(canvasX1, canvasX2) - canvasRadiusX;
+    float minY = Min(canvasY1, canvasY2) - canvasRadiusY;
+
+    float maxX = Max(canvasX1, canvasX2) + canvasRadiusX;
+    float maxY = Max(canvasY1, canvasY2) + canvasRadiusY;
+
     float px1, py1, px2, py2;
-    CanvasToPixelFloat(document, canvasX - canvasRadiusX, canvasY - canvasRadiusY, px1, py1);
-    CanvasToPixelFloat(document, canvasX + canvasRadiusX, canvasY + canvasRadiusY, px2, py2);
+    CanvasToPixelFloat(document, minX, minY, px1, py1);
+    CanvasToPixelFloat(document, maxX, maxY, px2, py2);
 
     pixelMinX = (int)floor(Min(px1, px2));
     pixelMinY = (int)floor(Min(py1, py2));
     pixelMaxX = (int)ceil(Max(px1, px2));
     pixelMaxY = (int)ceil(Max(py1, py2));
+}
+
+inline void GetPixelBoundingBox_TwoPoints(const Data::Document& document, float canvasX1, float canvasY1, float canvasX2, float canvasY2, int& pixelMinX, int& pixelMinY, int& pixelMaxX, int& pixelMaxY)
+{
+    float px1, py1, px2, py2;
+    CanvasToPixelFloat(document, canvasX1, canvasY1, px1, py1);
+    CanvasToPixelFloat(document, canvasX2, canvasY2, px2, py2);
+
+    pixelMinX = (int)floor(Min(px1, px2));
+    pixelMinY = (int)floor(Min(py1, py2));
+    pixelMaxX = (int)ceil(Max(px1, px2));
+    pixelMaxY = (int)ceil(Max(py1, py2));
+}
+
+inline void GetPixelBoundingBox_PointRadius(const Data::Document& document, float canvasX, float canvasY, float canvasRadiusX, float canvasRadiusY, int& pixelMinX, int& pixelMinY, int& pixelMaxX, int& pixelMaxY)
+{
+    GetPixelBoundingBox_TwoPoints(document, canvasX - canvasRadiusX, canvasY - canvasRadiusY, canvasX + canvasRadiusX, canvasY + canvasRadiusY, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
 }
 
 inline void GetCanvasExtents(const Data::Document& document, float& canvasMinX, float& canvasMinY, float& canvasMaxX, float& canvasMaxY)

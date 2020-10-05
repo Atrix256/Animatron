@@ -544,6 +544,8 @@ int main(int argc, char** argv)
 /*
 TODO:
 
+! check for and error on duplicate object ids
+
 ! don't forget that PMA can do ADDITIVE BLENDING!
 
 // TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name (maybe?)
