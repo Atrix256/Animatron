@@ -15,7 +15,7 @@
         "lineargradient": {
           "halfSpace": {
             "X": 0,
-            "Y": 1,
+            "Y": -1,
             "Z": -20,
           },
           "points": [
@@ -60,7 +60,7 @@
         "latex": {
           "position": {
             "X": 0,
-            "Y": -10
+            "Y": 10
           },
           "foreground": {
             "R": 1,
@@ -101,7 +101,7 @@
           "outerRadius": 1,
           "center": {
             "X": -50,
-            "Y": -35
+            "Y": 35
           },
           "color": {
             "R": 1,
@@ -151,7 +151,7 @@
         "transform": {
           "translation": {
             "X": 80,
-            "Y": 30,
+            "Y": -30,
             "Z": 110
           }
         }
@@ -201,7 +201,7 @@
         "transform": {
           "translation": {
             "X": -80,
-            "Y": -30,
+            "Y": 30,
             "Z": 115
           },
           "scale": {
@@ -284,7 +284,7 @@
         "transform": {
           "translation": {
             "X": 80,
-            "Y": -30,
+            "Y": 30,
             "Z": 110
           },
           "scale": {
