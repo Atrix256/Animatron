@@ -366,6 +366,42 @@
           "latex": "$a^2+b^2=c^2$"
         }
       }
+    },
+    {
+      "id": "TransitionOut",
+      "zorder": -1,
+      "data": {
+        "digitalDissolve": {
+          "alpha": 0.1,
+          "scale": {
+            "X": 8,
+            "Y": 8
+          },
+          "foreground": {
+            "R": 0.8,
+            "G": 0.8,
+            "B": 0.8,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "image1",
+      "zorder": 1000,
+      "data": {
+        "image": {
+          "fileName": "internal/BlueNoiseRGBA.png",
+          "position": {
+            "X": 20,
+            "Y": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 10
+          }
+        }
+      }
     }
   ],
   "keyFrames": [

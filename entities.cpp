@@ -733,12 +733,8 @@ bool EntityImage_Initialize(const Data::Document& document, Data::EntityImage& i
 bool EntityImage_FrameInitialize(const Data::Document& document, Data::EntityImage& image)
 {
     // calculate the desired width of the image, in pixels
-    Data::Point2D canvasMin, canvasMax;
-    canvasMin = image.position - image.radius;
-    canvasMax = image.position + image.radius;
     int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
-    CanvasToPixel(document, canvasMin.X, canvasMin.Y, pixelMinX, pixelMinY);
-    CanvasToPixel(document, canvasMax.X, canvasMax.Y, pixelMaxX, pixelMaxY);
+    GetPixelBoundingBox_PointRadius(document, image.position.X, image.position.Y, image.radius.X, image.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
 
     // if it's already the right size, nothing to do
     int desiredWidth = pixelMaxX - pixelMinX;
@@ -762,12 +758,8 @@ bool EntityImage_DoAction(
     const Data::EntityImage& image)
 {
     // calculate the begin and end of the image
-    Data::Point2D canvasMin, canvasMax;
-    canvasMin = image.position - image.radius;
-    canvasMax = image.position + image.radius;
     int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
-    CanvasToPixel(document, canvasMin.X, canvasMin.Y, pixelMinX, pixelMinY);
-    CanvasToPixel(document, canvasMax.X, canvasMax.Y, pixelMaxX, pixelMaxY);
+    GetPixelBoundingBox_PointRadius(document, image.position.X, image.position.Y, image.radius.X, image.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
 
     // clip the image to the screen
     int srcOffsetX = 0;
