@@ -12,7 +12,7 @@
   "outputSizeY": 1080,
   */
   "FPS": 30,
-  "duration": 1,
+  "duration": 4,
   "entities": [
     {
       "id": "background",
@@ -29,10 +29,29 @@
       }
     },
     {
+      "id": "ParentCircle",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": 0,
+            "Y": 0
+          },
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 1,
+            "A": 0.75
+          }
+        }
+      }
+    },
+    {
       "id": "backgroundGradient",
       "zorder": -900,
       "data": {
-        "lineargradient": {
+        "linearGradient": {
           "halfSpace": {
             "X": 1,
             "Y": 1,
@@ -63,6 +82,7 @@
     },
     {
       "id": "circle1",
+      "parent": "ParentCircle",
       "data": {
         "circle": {
           "innerRadius": 2,
@@ -82,6 +102,7 @@
     },
     {
       "id": "rectangle1",
+      "parent": "ParentCircle",
       "data": {
         "rectangle": {
           "center": {
@@ -103,6 +124,7 @@
     },
     {
       "id": "rectangle2",
+      "parent": "ParentCircle",
       "zorder": 1,
       "data": {
         "rectangle": {
@@ -126,6 +148,7 @@
     },
     {
       "id": "line1",
+      "parent": "ParentCircle",
       "zorder": 10,
       "data": {
         "line": {
@@ -149,6 +172,7 @@
     },
     {
       "id": "line2",
+      "parent": "ParentCircle",
       "zorder": 10,
       "data": {
         "line": {
@@ -172,6 +196,7 @@
     },
     {
       "id": "curve1",
+      "parent": "ParentCircle",
       "zorder": 1,
       "data": {
         "cubicBezier": {
@@ -329,6 +354,7 @@
     },
     {
       "id": "Latex1",
+      "parent": "ParentCircle",
       "zorder": 30.0,
       "data": {
         "latex": {
@@ -349,6 +375,7 @@
     },
     {
       "id": "Latex2",
+      "parent": "ParentCircle",
       "zorder": 29.0,
       "data": {
         "latex": {
@@ -388,6 +415,7 @@
     },
     {
       "id": "image1",
+      "parent": "ParentCircle",
       "zorder": 1000,
       "data": {
         "image": {
@@ -405,5 +433,25 @@
     }
   ],
   "keyFrames": [
+    {
+      "entityId": "ParentCircle",
+      "time": 1,
+      "newValue": "{\"center\":{\"X\":20, \"Y\": 0}}"
+    },
+    {
+      "entityId": "ParentCircle",
+      "time": 2,
+      "newValue": "{\"center\":{\"X\":0, \"Y\": 20}}"
+    },
+    {
+      "entityId": "ParentCircle",
+      "time": 3,
+      "newValue": "{\"center\":{\"X\":20, \"Y\": 20}}"
+    },
+    {
+      "entityId": "ParentCircle",
+      "time": 4,
+      "newValue": "{\"center\":{\"X\":0, \"Y\": 0}}"
+    }
   ]
 }

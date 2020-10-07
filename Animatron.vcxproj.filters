@@ -37,6 +37,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="vectormath.h" />
     <ClInclude Include="reflectedvectormath.h" />
+    <ClInclude Include="entities.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json">

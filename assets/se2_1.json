@@ -12,7 +12,7 @@
       "id": "Background",
       "zorder": -1000.0,
       "data": {
-        "lineargradient": {
+        "linearGradient": {
           "halfSpace": {
             "X": 0,
             "Y": -1,

@@ -14,6 +14,7 @@
 #include "schemas/json.h"
 #include "schemas/lerp.h"
 #include "config.h"
+#include "entities.h"
 
 #include "utils.h"
 
@@ -23,24 +24,11 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-// prototypes for entity handler functions. These are implemented in entities.cpp
-#include "df_serialize/df_serialize/_common.h"
-#define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-    bool _TYPE##_DoAction( \
-        const Data::Document& document, \
-        const std::unordered_map<std::string, Data::EntityVariant>& entityMap, \
-        std::vector<Data::ColorPMA>& pixels, \
-        const Data::##_TYPE& _NAME); \
-    bool _TYPE##_FrameInitialize(const Data::Document& document, Data::##_TYPE& _NAME); \
-    bool _TYPE##_Initialize(const Data::Document& document, Data::##_TYPE& _NAME, int entityIndex);
-#include "df_serialize/df_serialize/_fillunsetdefines.h"
-#include "schemas/schemas_entities.h"
-
 struct EntityTimelineKeyframe
 {
     float time = 0.0f;
     std::array<float,4> blendControlPoints = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-    Data::EntityVariant entity;
+    Data::Entity entity;
 };
 
 struct EntityTimeline
@@ -60,7 +48,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
     std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 0.0f });
 
     // Get the key frame interpolated state of each entity first, so that they can look at eachother (like 3d objects looking at their camera)
-    std::unordered_map<std::string, Data::EntityVariant> entityMap;
+    std::unordered_map<std::string, Data::Entity> entityMap;
     {
         for (const EntityTimeline* timeline_ : entityTimelines)
         {
@@ -75,7 +63,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                 cursorIndex++;
 
             // interpolate keyframes if we are between two key frames
-            Data::EntityVariant entity;
+            Data::Entity entity;
             if (cursorIndex + 1 < timeline.keyFrames.size())
             {
                 // calculate the blend percentage from the key frame percentage and the control points
@@ -94,8 +82,8 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                 }
 
                 // Get the entity(ies) involved
-                const Data::EntityVariant& entity1 = timeline.keyFrames[cursorIndex].entity;
-                const Data::EntityVariant& entity2 = timeline.keyFrames[cursorIndex + 1].entity;
+                const Data::Entity& entity1 = timeline.keyFrames[cursorIndex].entity;
+                const Data::Entity& entity2 = timeline.keyFrames[cursorIndex + 1].entity;
 
                 // Do the lerp between keyframe entities
                 // Set entity to entity1 first though to catch anything that isn't serialized (and not lerped)
@@ -110,11 +98,11 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
 
             // do per frame entity initialization
             bool error = false;
-            switch (entity._index)
+            switch (entity.data._index)
             {
                 #include "df_serialize/df_serialize/_common.h"
                 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_FrameInitialize(document, entity.##_NAME); break;
+                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::FrameInitialize(document, entity); break;
                 #include "df_serialize/df_serialize/_fillunsetdefines.h"
                 #include "schemas/schemas_entities.h"
                 default:
@@ -144,12 +132,12 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
 
         // do the entity action
         bool error = false;
-        const Data::EntityVariant& entity = it->second;
-        switch (entity._index)
+        const Data::Entity& entity = it->second;
+        switch (entity.data._index)
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_DoAction(document, entityMap, pixels, entity.##_NAME); break;
+                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -283,7 +271,7 @@ int main(int argc, char** argv)
             {
                 #include "df_serialize/df_serialize/_common.h"
                 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Initialize(document, entity.data.##_NAME, entityIndex); break;
+                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::Initialize(document, entity, entityIndex); break;
                 #include "df_serialize/df_serialize/_fillunsetdefines.h"
                 #include "schemas/schemas_entities.h"
                 default:
@@ -329,7 +317,7 @@ int main(int argc, char** argv)
 
         EntityTimelineKeyframe newKeyFrame;
         newKeyFrame.time = entity.createTime;
-        newKeyFrame.entity = entity.data;
+        newKeyFrame.entity = entity;
         newTimeline.keyFrames.push_back(newKeyFrame);
 
         entityTimelinesMap[entity.id] = newTimeline;
@@ -373,11 +361,11 @@ int main(int argc, char** argv)
 
         // load the sparse json data over the keyframe data
         bool error = false;
-        switch (newKeyFrame.entity._index)
+        switch (newKeyFrame.entity.data._index)
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                        case Data::EntityVariant::c_index_##_NAME: error = !ReadFromJSONBuffer(newKeyFrame.entity.##_NAME, keyFrame.newValue); break;
+                        case Data::EntityVariant::c_index_##_NAME: error = !ReadFromJSONBuffer(newKeyFrame.entity.data.##_NAME, keyFrame.newValue); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -543,6 +531,8 @@ int main(int argc, char** argv)
 
 /*
 TODO:
+
+! in the future, maybe need to have parenting take a whole transform, instead of just position. unsure what it means for some things to be parented. work it out?
 
 ! check for and error on duplicate object ids
 

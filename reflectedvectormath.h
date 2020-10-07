@@ -194,6 +194,40 @@ inline Data::Point2D ProjectPoint3DToPoint2D(const Data::Point3D& point, const D
     return Data::Point2D{ result.X, result.Y };
 }
 
+inline Data::Point3D operator * (const Data::Point3D& A, float B)
+{
+    Data::Point3D ret;
+    ret.X = A.X * B;
+    ret.Y = A.Y * B;
+    ret.Z = A.Z * B;
+    return ret;
+}
+
+inline Data::Point2D operator * (const Data::Point2D& A, float B)
+{
+    Data::Point2D ret;
+    ret.X = A.X * B;
+    ret.Y = A.Y * B;
+    return ret;
+}
+
+inline Data::Point3D operator / (const Data::Point3D& A, float B)
+{
+    Data::Point3D ret;
+    ret.X = A.X / B;
+    ret.Y = A.Y / B;
+    ret.Z = A.Z / B;
+    return ret;
+}
+
+inline Data::Point2D operator / (const Data::Point2D& A, float B)
+{
+    Data::Point2D ret;
+    ret.X = A.X / B;
+    ret.Y = A.Y / B;
+    return ret;
+}
+
 inline Data::Point3D operator - (const Data::Point3D& A, const Data::Point3D& B)
 {
     Data::Point3D ret;
@@ -251,4 +285,14 @@ inline Data::Point3D Cross(const Data::Point3D& a, const Data::Point3D& b)
         a.Z * b.X - a.X * b.Z,
         a.X * b.Y - a.Y * b.X
     };
+}
+
+inline Data::Point3D ToPoint3D(const Data::Point2D& a)
+{
+    return Data::Point3D{ a.X, a.Y, 0.0f };
+}
+
+inline Data::Point2D Point3D_XY(const Data::Point3D& a)
+{
+    return Data::Point2D{ a.X, a.Y};
 }

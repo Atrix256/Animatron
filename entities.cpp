@@ -5,70 +5,20 @@
 #include "stb/stb_image.h"
 #include "schemas/lerp.h"
 #include <algorithm>
+#include "entities.h"
 
-// TODO: move this to utils?
-
-void Fill(std::vector<Data::ColorPMA>& pixels, const Data::Color& color)
-{
-    Data::ColorPMA colorPMA = ToPremultipliedAlpha(color);
-
-    // if the color is fully transparent, it's a no-op
-    if (color.A == 0.0f)
-        return;
-
-    // if the color is opaque just do a fill
-    if (color.A >= 1.0f)
-    {
-        std::fill(pixels.begin(), pixels.end(), colorPMA);
-        return;
-    }
-
-    // otherwise, do a blend operation
-    for (Data::ColorPMA& pixel : pixels)
-        pixel = Blend(pixel, colorPMA);
-}
-
-
-
-bool EntityFill_Initialize(const Data::Document& document, Data::EntityFill& fill, int entityIndex)
-{
-    return true;
-}
-
-bool EntityFill_FrameInitialize(const Data::Document& document, Data::EntityFill& fill)
-{
-    return true;
-}
-
-bool EntityFill_DoAction(
-    const Data::Document& document, 
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
-    std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityFill& fill)
-{
-    Fill(pixels, fill.color);
-    return true;
-}
-
-bool EntityCircle_Initialize(const Data::Document& document, Data::EntityCircle& circle, int entityIndex)
-{
-    return true;
-}
-
-bool EntityCircle_FrameInitialize(const Data::Document& document, Data::EntityCircle& circle)
-{
-    return true;
-}
-
-bool EntityCircle_DoAction(
+bool EntityCircle_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string,
-    Data::EntityVariant>& entityMap, std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityCircle& circle)
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::Entity& entity)
 {
+    const Data::EntityCircle& circle = entity.data.circle;
+    Data::Point2D center = circle.center + Point3D_XY(GetParentPosition(document, entityMap, entity));
+
     // Get a pixel space bounding box of the circle
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    GetPixelBoundingBox_PointRadius(document, circle.center.X, circle.center.Y, circle.innerRadius + circle.outerRadius, circle.innerRadius + circle.outerRadius, minPixelX, minPixelY, maxPixelX, maxPixelY);
+    GetPixelBoundingBox_PointRadius(document, center.X, center.Y, circle.innerRadius + circle.outerRadius, circle.innerRadius + circle.outerRadius, minPixelX, minPixelY, maxPixelX, maxPixelY);
 
     // clip the bounding box to the screen
     minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
@@ -93,8 +43,8 @@ bool EntityCircle_DoAction(
                 float canvasX, canvasY;
                 PixelToCanvas(document, float(ix) + offset.X, float(iy) + offset.Y, canvasX, canvasY);
                 
-                float distX = abs(canvasX - circle.center.X);
-                float distY = abs(canvasY - circle.center.Y);
+                float distX = abs(canvasX - center.X);
+                float distY = abs(canvasY - center.Y);
                 float dist = (float)sqrt(distX * distX + distY * distY);
 
                 dist -= circle.innerRadius;
@@ -117,27 +67,19 @@ bool EntityCircle_DoAction(
     return true;
 }
 
-bool EntityRectangle_Initialize(const Data::Document& document, Data::EntityRectangle& rectangle, int entityIndex)
-{
-    return true;
-}
-
-bool EntityRectangle_FrameInitialize(const Data::Document& document, Data::EntityRectangle& rectangle)
-{
-    return true;
-}
-
-bool EntityRectangle_DoAction(
+bool EntityRectangle_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityRectangle& rectangle)
+    const Data::Entity& entity)
 {
+    const Data::EntityRectangle& rectangle = entity.data.rectangle;
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(rectangle.color);
+    Data::Point2D center = rectangle.center + Point3D_XY(GetParentPosition(document, entityMap, entity));
 
     // Get the box of the rectangle
     int minPixelX, minPixelY, maxPixelX, maxPixelY;
-    GetPixelBoundingBox_PointRadius(document, rectangle.center.X, rectangle.center.Y, rectangle.radius.X + rectangle.expansion, rectangle.radius.Y + rectangle.expansion, minPixelX, minPixelY, maxPixelX, maxPixelY);
+    GetPixelBoundingBox_PointRadius(document, center.X, center.Y, rectangle.radius.X + rectangle.expansion, rectangle.radius.Y + rectangle.expansion, minPixelX, minPixelY, maxPixelX, maxPixelY);
 
     // clip the bounding box to the screen
     minPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
@@ -174,7 +116,7 @@ bool EntityRectangle_DoAction(
                     float canvasX, canvasY;
                     PixelToCanvas(document, float(ix) + offset.X, float(iy) + offset.Y, canvasX, canvasY);
 
-                    float dist = sdBox(vec2{ canvasX, canvasY }, vec2{ rectangle.center.X, rectangle.center.Y }, vec2{ rectangle.radius.X, rectangle.radius.Y });
+                    float dist = sdBox(vec2{ canvasX, canvasY }, vec2{ center.X, center.Y }, vec2{ rectangle.radius.X, rectangle.radius.Y });
 
                     if (dist <= rectangle.expansion)
                     {
@@ -195,33 +137,9 @@ bool EntityRectangle_DoAction(
     return true;
 }
 
-bool EntityLine_Initialize(const Data::Document& document, Data::EntityLine& line, int entityIndex)
+bool EntityCamera_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity)
 {
-    return true;
-}
-
-bool EntityLine_FrameInitialize(const Data::Document& document, Data::EntityLine& line)
-{
-    return true;
-}
-
-bool EntityLine_DoAction(
-    const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
-    std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityLine& line)
-{
-    DrawLine(document, pixels, line.A, line.B, line.width, ToPremultipliedAlpha(line.color));
-    return true;
-}
-
-bool EntityCamera_Initialize(const Data::Document& document, Data::EntityCamera& camera, int entityIndex)
-{
-    return true;
-}
-
-bool EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCamera& camera)
-{
+    Data::EntityCamera& camera = entity.data.camera;
     Data::Matrix4x4 projMtx;
 
     if (camera.perspective)
@@ -269,32 +187,15 @@ bool EntityCamera_FrameInitialize(const Data::Document& document, Data::EntityCa
     return true;
 }
 
-bool EntityCamera_DoAction(
+bool EntityLine3D_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityCamera& camera)
+    const Data::Entity& entity)
 {
-    // nothing to do for a camera
-    return true;
-}
+    const Data::EntityLine3D& line3d = entity.data.line3d;
+    Data::Point3D offset = GetParentPosition(document, entityMap, entity);
 
-bool EntityLine3D_Initialize(const Data::Document& document, Data::EntityLine3D& line3d, int entityIndex)
-{
-    return true;
-}
-
-bool EntityLine3D_FrameInitialize(const Data::Document& document, Data::EntityLine3D& line3d)
-{
-    return true;
-}
-
-bool EntityLine3D_DoAction(
-    const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
-    std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityLine3D& line3d)
-{
     // get the camera
     auto it = entityMap.find(line3d.camera);
     if (it == entityMap.end())
@@ -302,12 +203,12 @@ bool EntityLine3D_DoAction(
         printf("Error: could not find line3d camera %s\n", line3d.camera.c_str());
         return false;
     }
-    if (it->second._index != Data::EntityVariant::c_index_camera)
+    if (it->second.data._index != Data::EntityVariant::c_index_camera)
     {
         printf("Error line3d camera was not a camera %s\n", line3d.camera.c_str());
         return false;
     }
-    const Data::EntityCamera& cameraEntity = it->second.camera;
+    const Data::EntityCamera& cameraEntity = it->second.data.camera;
 
     // Get the world matrix
     Data::Matrix4x4 transform;
@@ -319,12 +220,12 @@ bool EntityLine3D_DoAction(
             printf("Error: could not find line3d transform %s\n", line3d.transform.c_str());
             return false;
         }
-        if (it->second._index != Data::EntityVariant::c_index_transform)
+        if (it->second.data._index != Data::EntityVariant::c_index_transform)
         {
             printf("Error line3d camera was not a camera %s\n", line3d.transform.c_str());
             return false;
         }
-        transform = Multiply(it->second.transform.mtx, cameraEntity.viewProj);
+        transform = Multiply(it->second.data.transform.mtx, cameraEntity.viewProj);
     }
     else
     {
@@ -332,29 +233,22 @@ bool EntityLine3D_DoAction(
     }
 
     // draw the line
-    Data::Point2D A = ProjectPoint3DToPoint2D(line3d.A, transform);
-    Data::Point2D B = ProjectPoint3DToPoint2D(line3d.B, transform);
+    Data::Point2D A = ProjectPoint3DToPoint2D(line3d.A + offset, transform);
+    Data::Point2D B = ProjectPoint3DToPoint2D(line3d.B + offset, transform);
     DrawLine(document, pixels, A, B, line3d.width, ToPremultipliedAlpha(line3d.color));
 
     return true;
 }
 
-bool EntityLines3D_Initialize(const Data::Document& document, Data::EntityLines3D& lines3d, int entityIndex)
-{
-    return true;
-}
-
-bool EntityLines3D_FrameInitialize(const Data::Document& document, Data::EntityLines3D& lines3d)
-{
-    return true;
-}
-
-bool EntityLines3D_DoAction(
+bool EntityLines3D_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap, 
+    const std::unordered_map<std::string, Data::Entity>& entityMap, 
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityLines3D& lines3d)
+    const Data::Entity& entity)
 {
+    const Data::EntityLines3D& lines3d = entity.data.lines3d;
+    Data::Point3D offset = GetParentPosition(document, entityMap, entity);
+
     // get the camera
     auto it = entityMap.find(lines3d.camera);
     if (it == entityMap.end())
@@ -362,12 +256,12 @@ bool EntityLines3D_DoAction(
         printf("Error: could not find lines3d camera %s\n", lines3d.camera.c_str());
         return false;
     }
-    if (it->second._index != Data::EntityVariant::c_index_camera)
+    if (it->second.data._index != Data::EntityVariant::c_index_camera)
     {
         printf("Error lines3d camera was not a camera %s\n", lines3d.camera.c_str());
         return false;
     }
-    const Data::EntityCamera& cameraEntity = it->second.camera;
+    const Data::EntityCamera& cameraEntity = it->second.data.camera;
 
     // need at least 2 points to make a line
     if (lines3d.points.size() < 2)
@@ -383,12 +277,12 @@ bool EntityLines3D_DoAction(
             printf("Error: could not find lines3d transform %s\n", lines3d.transform.c_str());
             return false;
         }
-        if (it->second._index != Data::EntityVariant::c_index_transform)
+        if (it->second.data._index != Data::EntityVariant::c_index_transform)
         {
             printf("Error lines3d camera was not a camera %s\n", lines3d.transform.c_str());
             return false;
         }
-        transform = Multiply(it->second.transform.mtx, cameraEntity.viewProj);
+        transform = Multiply(it->second.data.transform.mtx, cameraEntity.viewProj);
     }
     else
     {
@@ -396,10 +290,10 @@ bool EntityLines3D_DoAction(
     }
 
     // draw the lines
-    Data::Point2D lastPoint = ProjectPoint3DToPoint2D(lines3d.points[0], transform);
+    Data::Point2D lastPoint = ProjectPoint3DToPoint2D(lines3d.points[0] + offset, transform);
     for (int pointIndex = 1; pointIndex < lines3d.points.size(); ++pointIndex)
     {
-        Data::Point2D nextPoint = ProjectPoint3DToPoint2D(lines3d.points[pointIndex], transform);
+        Data::Point2D nextPoint = ProjectPoint3DToPoint2D(lines3d.points[pointIndex] + offset, transform);
         DrawLine(document, pixels, lastPoint, nextPoint, lines3d.width, ToPremultipliedAlpha(lines3d.color));
         lastPoint = nextPoint;
     }
@@ -407,13 +301,10 @@ bool EntityLines3D_DoAction(
     return true;
 }
 
-bool EntityTransform_Initialize(const Data::Document& document, Data::EntityTransform& transform, int entityIndex)
+bool EntityTransform_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity)
 {
-    return true;
-}
+    Data::EntityTransform& transform = entity.data.transform;
 
-bool EntityTransform_FrameInitialize(const Data::Document& document, Data::EntityTransform& transform)
-{
     Data::Matrix4x4 translation;
     translation.W = Data::Point4D{transform.translation.X, transform.translation.Y, transform.translation.Z, 1.0f};
 
@@ -429,17 +320,11 @@ bool EntityTransform_FrameInitialize(const Data::Document& document, Data::Entit
     return true;
 }
 
-bool EntityTransform_DoAction(
-    const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
-    std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityTransform& transform)
-{
-    return true;
-}
 
-bool EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& latex, int entityIndex)
+bool EntityLatex_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
 {
+    Data::EntityLatex& latex = entity.data.latex;
+
     char buffer[4096];
 
     // make the latex file
@@ -498,20 +383,19 @@ bool EntityLatex_Initialize(const Data::Document& document, Data::EntityLatex& l
     return true;
 }
 
-bool EntityLatex_FrameInitialize(const Data::Document& document, Data::EntityLatex& latex)
-{
-    return true;
-}
-
-bool EntityLatex_DoAction(
+bool EntityLatex_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityLatex& latex)
+    const Data::Entity& entity)
 {
+    const Data::EntityLatex& latex = entity.data.latex;
+
+    Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));
+
     // Get the box of the latex image
     int positionX, positionY;
-    CanvasToPixel(document, latex.position.X, latex.position.Y, positionX, positionY);
+    CanvasToPixel(document, latex.position.X + offset.X, latex.position.Y + offset.Y, positionX, positionY);
     int minPixelX = positionX - latex._width / 2;
     int minPixelY = positionY - latex._height / 2;
     int maxPixelX = minPixelX + latex._width;
@@ -550,8 +434,10 @@ bool EntityLatex_DoAction(
     return true;
 }
 
-bool EntityLinearGradient_Initialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient, int entityIndex)
+bool EntityLinearGradient_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
 {
+    Data::EntityLinearGradient& linearGradient = entity.data.linearGradient;
+
     // sort the gradients by key value to make logic easier
     std::sort(
         linearGradient.points.begin(),
@@ -564,17 +450,14 @@ bool EntityLinearGradient_Initialize(const Data::Document& document, Data::Entit
     return true;
 }
 
-bool EntityLinearGradient_FrameInitialize(const Data::Document& document, Data::EntityLinearGradient& linearGradient)
-{
-    return true;
-}
-
-bool EntityLinearGradient_DoAction(
+bool EntityLinearGradient_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityLinearGradient& linearGradient)
+    const Data::Entity& entity)
 {
+    const Data::EntityLinearGradient& linearGradient = entity.data.linearGradient;
+
     // no colors, no gradient
     if (linearGradient.points.size() == 0)
         return true;
@@ -637,22 +520,14 @@ bool EntityLinearGradient_DoAction(
     return true;
 }
 
-bool EntityDigitalDissolve_Initialize(const Data::Document& document, Data::EntityDigitalDissolve& digitalDissolve, int entityIndex)
-{
-    return true;
-}
-
-bool EntityDigitalDissolve_FrameInitialize(const Data::Document& document, Data::EntityDigitalDissolve& digitalDissolve)
-{
-    return true;
-}
-
-bool EntityDigitalDissolve_DoAction(
+bool EntityDigitalDissolve_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityDigitalDissolve& digitalDissolve)
+    const Data::Entity& entity)
 {
+    const Data::EntityDigitalDissolve& digitalDissolve = entity.data.digitalDissolve;
+
     if (digitalDissolve.type != Data::DigitalDissolveType::BlueNoise)
     {
         printf("unknown digital dissolve type encountered!\n");
@@ -702,8 +577,10 @@ bool EntityDigitalDissolve_DoAction(
     return true;
 }
 
-bool EntityImage_Initialize(const Data::Document& document, Data::EntityImage& image, int entityIndex)
+bool EntityImage_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
 {
+    Data::EntityImage& image = entity.data.image;
+
     int channels;
     stbi_uc* pixels = stbi_load(image.fileName.c_str(), &image._rawwidth, &image._rawheight, &channels, 4);
     if (pixels == nullptr)
@@ -730,8 +607,10 @@ bool EntityImage_Initialize(const Data::Document& document, Data::EntityImage& i
     return true;
 }
 
-bool EntityImage_FrameInitialize(const Data::Document& document, Data::EntityImage& image)
+bool EntityImage_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity)
 {
+    Data::EntityImage& image = entity.data.image;
+
     // calculate the desired width of the image, in pixels
     int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
     GetPixelBoundingBox_PointRadius(document, image.position.X, image.position.Y, image.radius.X, image.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
@@ -751,12 +630,14 @@ bool EntityImage_FrameInitialize(const Data::Document& document, Data::EntityIma
     return true;
 }
 
-bool EntityImage_DoAction(
+bool EntityImage_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityImage& image)
+    const Data::Entity& entity)
 {
+    const Data::EntityImage& image = entity.data.image;
+
     // calculate the begin and end of the image
     int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
     GetPixelBoundingBox_PointRadius(document, image.position.X, image.position.Y, image.radius.X, image.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
@@ -791,23 +672,22 @@ bool EntityImage_DoAction(
     return true;
 }
 
-bool EntityCubicBezier_Initialize(const Data::Document& document, Data::EntityCubicBezier& cubicBezier, int entityIndex)
-{
-    return true;
-}
 
-bool EntityCubicBezier_FrameInitialize(const Data::Document& document, Data::EntityCubicBezier& licubicBezierne)
-{
-    return true;
-}
-
-bool EntityCubicBezier_DoAction(
+bool EntityCubicBezier_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::EntityVariant>& entityMap,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::EntityCubicBezier& cubicBezier)
+    const Data::Entity& entity)
 {
+    const Data::EntityCubicBezier& cubicBezier = entity.data.cubicBezier;
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(cubicBezier.color);
+
+    Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));
+
+    Data::Point3D A = ToPoint3D(offset) + cubicBezier.A;
+    Data::Point3D B = ToPoint3D(offset) + cubicBezier.B;
+    Data::Point3D C = ToPoint3D(offset) + cubicBezier.C;
+    Data::Point3D D = ToPoint3D(offset) + cubicBezier.D;
 
     // first we want to turn the curve into a bunch of line segments which are no more than 1 pixel long
     struct CurvePoint
@@ -818,12 +698,12 @@ bool EntityCubicBezier_DoAction(
     std::vector<CurvePoint> points;
     auto InsertCurvePoint = [&](float t)
     {
-        float cz = CubicBezierInterpolation(cubicBezier.A.Z, cubicBezier.B.Z, cubicBezier.C.Z, cubicBezier.D.Z, t);
+        float cz = CubicBezierInterpolation(A.Z, B.Z, C.Z, D.Z, t);
 
-        float cx = CubicBezierInterpolation(cubicBezier.A.X * cubicBezier.A.Z, cubicBezier.B.X * cubicBezier.B.Z, cubicBezier.C.X * cubicBezier.C.Z, cubicBezier.D.X * cubicBezier.D.Z, t);
+        float cx = CubicBezierInterpolation(A.X * A.Z, B.X * B.Z, C.X * C.Z, D.X * D.Z, t);
         cx /= cz;  
 
-        float cy = CubicBezierInterpolation(cubicBezier.A.Y * cubicBezier.A.Z, cubicBezier.B.Y * cubicBezier.B.Z, cubicBezier.C.Y * cubicBezier.C.Z, cubicBezier.D.Y * cubicBezier.D.Z, t);
+        float cy = CubicBezierInterpolation(A.Y * A.Z, B.Y * B.Z, C.Y * C.Z, D.Y * D.Z, t);
         cy /= cz;
 
         float px, py;
@@ -856,10 +736,10 @@ bool EntityCubicBezier_DoAction(
 
     // get the bounding box of the curve, from the bounding box of its control points
     float minCanvasX, minCanvasY, maxCanvasX, maxCanvasY;
-    minCanvasX = Min(cubicBezier.A.X, cubicBezier.B.X, cubicBezier.C.X, cubicBezier.D.X);
-    maxCanvasX = Max(cubicBezier.A.X, cubicBezier.B.X, cubicBezier.C.X, cubicBezier.D.X);
-    minCanvasY = Min(cubicBezier.A.Y, cubicBezier.B.Y, cubicBezier.C.Y, cubicBezier.D.Y);
-    maxCanvasY = Max(cubicBezier.A.Y, cubicBezier.B.Y, cubicBezier.C.Y, cubicBezier.D.Y);
+    minCanvasX = Min(A.X, B.X, C.X, D.X);
+    maxCanvasX = Max(A.X, B.X, C.X, D.X);
+    minCanvasY = Min(A.Y, B.Y, C.Y, D.Y);
+    maxCanvasY = Max(A.Y, B.Y, C.Y, D.Y);
 
     // Get the pixel space bounding box
     int minPixelX, minPixelY, maxPixelX, maxPixelY;

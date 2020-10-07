@@ -194,6 +194,7 @@ STRUCT_END()
 
 STRUCT_BEGIN(Data, Entity, "All information about an entity")
     STRUCT_FIELD(std::string, id, "", "The unique ID of the entity")
+    STRUCT_FIELD(std::string, parent, "", "The parent of an entity. Positions are relative to the parent positions. If no parent given, the canvas is used.")
     STRUCT_FIELD(float, zorder, 0.0f, "Determines the order of rendering. higher numbers are on top.")
     STRUCT_FIELD(float, createTime, 0.0f, "The time in seconds that the object is created.")
     STRUCT_FIELD(float, destroyTime, -1.0f, "The time in seconds that the object is destroyed. -1 means it is never destroyed")
@@ -250,3 +251,5 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_DYNAMIC_ARRAY(Entity, entities, "")
     STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")
 STRUCT_END()
+
+// TODO: Bezier curve should be able to parent each point off of a different parent! Do this in next checkin, you are using it for clip 3!

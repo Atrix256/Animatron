@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="entities.h" />
     <ClInclude Include="reflectedvectormath.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="math.h" />

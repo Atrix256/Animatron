@@ -270,3 +270,23 @@ void Resize(std::vector<Data::ColorPMA>& pixels, int sizeX, int sizeY, int desir
 bool MakeJitterSequence(Data::Document& document);
 
 void DrawLine(const Data::Document& document, std::vector<Data::ColorPMA>& pixels, const Data::Point2D& A, const Data::Point2D& B, float width, const Data::ColorPMA& color);
+
+inline void Fill(std::vector<Data::ColorPMA>& pixels, const Data::Color& color)
+{
+    Data::ColorPMA colorPMA = ToPremultipliedAlpha(color);
+
+    // if the color is fully transparent, it's a no-op
+    if (color.A == 0.0f)
+        return;
+
+    // if the color is opaque just do a fill
+    if (color.A >= 1.0f)
+    {
+        std::fill(pixels.begin(), pixels.end(), colorPMA);
+        return;
+    }
+
+    // otherwise, do a blend operation
+    for (Data::ColorPMA& pixel : pixels)
+        pixel = Blend(pixel, colorPMA);
+}
