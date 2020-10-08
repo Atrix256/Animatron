@@ -7,6 +7,9 @@
   "outputSizeY": 1080,
   "FPS": 30,
   "duration": 2,
+
+  "audioFile": "assets/2.wav",
+
   "entities": [
     {
       "id": "Background",

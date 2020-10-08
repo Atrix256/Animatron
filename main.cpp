@@ -492,8 +492,28 @@ int main(int argc, char** argv)
     {
         // Youtube recomended settings (https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
         printf("Assembling frames...\n");
+
+        bool hasAudio = !document.audioFile.empty();
+
+        char inputs[1024];
+        if (!hasAudio)
+            sprintf_s(inputs, "-i build/%%d.png");
+        else
+            sprintf_s(inputs, "-i build/%%d.png -i %s", document.audioFile.c_str());
+
+        char audioOptions[1024];
+        /*
+        if (hasAudio)
+            sprintf(audioOptions, " -c:a aac -b:a 384k ");
+        else*/
+            sprintf(audioOptions, " ");
+
+        char containerOptions[1024];
+        sprintf(containerOptions, "-framerate %i -frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p", document.FPS, framesTotal);
+
         char buffer[1024];
-        sprintf_s(buffer, "%s -y -framerate %i -i build/%%d.png -vframes %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p %s", document.config.ffmpeg.c_str(), document.FPS, framesTotal, destFile);
+        sprintf_s(buffer, "%s -y %s%s%s %s", document.config.ffmpeg.c_str(), inputs, audioOptions, containerOptions, destFile);
+
         system(buffer);
     }
 

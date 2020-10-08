@@ -6,7 +6,10 @@
   "outputSizeX": 1920,
   "outputSizeY": 1080,
   "FPS": 30,
-  "duration": 27,
+  "duration": 11,
+
+  "audioFile": "assets/1.wav",
+
   "entities": [
     {
       "id": "Background",
@@ -16,7 +19,7 @@
           "halfSpace": {
             "X": 0,
             "Y": -1,
-            "Z": -20,
+            "Z": -20
           },
           "points": [
             {
@@ -46,7 +49,10 @@
                 "A": 1
               },
               "blendControlPoints": [
-                0,1,1,1
+                0,
+                1,
+                1,
+                1
               ]
             }
           ]
@@ -336,12 +342,12 @@
     },
     {
       "entityId": "TransitionOut",
-      "time": 26,
+      "time": 10,
       "newValue": "{\"alpha\":0}"
     },
     {
       "entityId": "TransitionOut",
-      "time": 26.9,
+      "time": 10.9,
       "newValue": "{\"alpha\":1}"
     }
   ]

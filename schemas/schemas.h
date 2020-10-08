@@ -237,6 +237,8 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(float, duration, 4.0f, "The duration of the rendering")
     STRUCT_FIELD(int, FPS, 30, "The frame rate of the render")
 
+    STRUCT_FIELD(std::string, audioFile, "", "The name of the audio file to attach to the video. Later on there will be better audio support.")
+
     STRUCT_FIELD(bool, blueNoiseDither, true, "If true, will use blue noise to dither the floating point color before quantizing to 8 bit color.")
     STRUCT_FIELD(bool, forceOpaqueOutput, true, "If true, it will force all output pixels to be opaque. False to let transparency be output.")
 
