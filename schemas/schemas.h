@@ -153,7 +153,7 @@ STRUCT_END()
 
 STRUCT_BEGIN(Data, EntityLatex, "")
     STRUCT_FIELD(Point2D, position, Point2D(), "The center of the generated image")
-    STRUCT_FIELD(uint32_t, DPI, 300, "Dots per inch")
+    STRUCT_FIELD(float, Scale, 1.0f, "A size scalar for the text")
     STRUCT_FIELD(Data::Color, foreground, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 1.0f }, "The foreground color of the latex (where it's black in a rendered latex image)")
     STRUCT_FIELD(Data::Color, background, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 0.0f }, "The foreground color of the latex (where it's white in a rendered latex image)")
     STRUCT_FIELD(std::string, latex, "", "The actual latex to render.")

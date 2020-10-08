@@ -4,13 +4,12 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 960,
-  "outputSizeY": 540,
-
-  /*
+  //"outputSizeX": 960,
+  //"outputSizeY": 540,
+ 
   "outputSizeX": 1920,
   "outputSizeY": 1080,
-  */
+ 
   "FPS": 30,
   "duration": 4,
   "entities": [
@@ -368,7 +367,7 @@
             "B": 0,
             "A": 1
           },
-          "DPI": 600,
+          "Scale": 2,
           "latex": "$a^2+b^2=c^2$"
         }
       }
@@ -380,8 +379,8 @@
       "data": {
         "latex": {
           "position": {
-            "X": 0.5,
-            "Y": -20.5
+            "X": 0.25,
+            "Y": -20.25
           },
           "foreground": {
             "R": 0,
@@ -389,7 +388,7 @@
             "B": 0,
             "A": 1
           },
-          "DPI": 600,
+          "Scale": 2,
           "latex": "$a^2+b^2=c^2$"
         }
       }

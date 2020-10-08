@@ -6,7 +6,7 @@
   "outputSizeX": 1920,
   "outputSizeY": 1080,
   "FPS": 30,
-  "duration": 5,
+  "duration": 2,
   "entities": [
     {
       "id": "Background",
@@ -16,7 +16,7 @@
           "halfSpace": {
             "X": 0,
             "Y": 1,
-            "Z": -20,
+            "Z": -20
           },
           "points": [
             {
@@ -48,23 +48,6 @@
       }
     },
     {
-      "id": "Khan",
-      "createTime": 2,
-      "destroyTime": 4,
-      "data": {
-        "image": {
-          "fileName": "assets/khan.jpg",
-          "radius": {
-            "X": 50,
-            "Y": 30
-          },
-          "tint": {
-            "A": 0
-          }
-        }
-      }
-    },
-    {
       "id": "TransitionIn",
       "zorder": 20,
       "data": {
@@ -76,6 +59,226 @@
           }
         }
       }
+    },
+    {
+      "id": "NodeBoxTrash",
+      "data": {
+        "rectangle": {
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextTrash",
+      "zorder": 1,
+      "parent": "NodeBoxTrash",
+      "data": {
+        "latex": {
+          "latex": "Trash",
+          "scale": 0.5
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWatermelon",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -30,
+            "Y": 0
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWatermelon",
+      "zorder": 1,
+      "parent": "NodeBoxWatermelon",
+      "data": {
+        "latex": {
+          "latex": "Watermelon",
+          "scale": 0.5
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRake",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 30,
+            "Y": 0
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRake",
+      "zorder": 1,
+      "parent": "NodeBoxRake",
+      "data": {
+        "latex": {
+          "latex": "Rake",
+          "scale": 0.5
+        }
+      }
+    },
+    {
+      "id": "NodeBoxDishes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 30,
+            "Y": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextDishes",
+      "zorder": 1,
+      "parent": "NodeBoxDishes",
+      "data": {
+        "latex": {
+          "latex": "Dishes",
+          "scale": 0.5
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWashClothes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 0,
+            "Y": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWashClothes",
+      "zorder": 1,
+      "parent": "NodeBoxWashClothes",
+      "data": {
+        "latex": {
+          "latex": "Wash Clothes",
+          "scale": 0.5
+        }
+      }
+    },
+    {
+      "id": "NodeBoxFoldLaundry",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -30,
+            "Y": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextFoldLaundry",
+      "zorder": 1,
+      "parent": "NodeBoxFoldLaundry",
+      "data": {
+        "latex": {
+          "latex": "Fold Laundry",
+          "scale": 0.5
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRelax",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 0,
+            "Y": 20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRelax",
+      "zorder": 1,
+      "parent": "NodeBoxRelax",
+      "data": {
+        "latex": {
+          "latex": "Relax",
+          "scale": 0.5
+        }
+      }
     }
   ],
   "keyFrames": [
@@ -83,31 +286,8 @@
       "entityId": "TransitionIn",
       "time": 1,
       "newValue": "{\"alpha\":0}"
-    },
-    {
-      "entityId": "Khan",
-      "time": 2.25,
-      "newValue": "{\"tint\":{\"A\":1}}"
-    },
-    {
-      "entityId": "Khan",
-      "time": 3.75,
-      "newValue": "{\"tint\":{\"A\":1}}"
-    },
-    {
-      "entityId": "Khan",
-      "time": 4,
-      "newValue": "{\"tint\":{\"A\":0}}"
-    },
-    {
-      "entityId": "TransitionIn",
-      "time": 4,
-      "newValue": "{\"alpha\":0}"
-    },
-    {
-      "entityId": "TransitionIn",
-      "time": 5,
-      "newValue": "{\"alpha\":1}"
     }
   ]
 }
+
+// TODO: probably need some custom connect, not cubic bezier, to have more points, and to be able to parent the points? dunno.

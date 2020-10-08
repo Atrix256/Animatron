@@ -355,7 +355,11 @@ bool EntityLatex_Action::Initialize(const Data::Document& document, Data::Entity
         sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex", document.config.latexbinaries.c_str(), entityIndex);
         system(buffer);
 
-        sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", document.config.latexbinaries.c_str(), latex.DPI, entityIndex, entityIndex);
+        // At 1920x1080, a scale of 1.0 gives you 300 DPI rendering from latex.
+        // Not the most elegant thing, but it makes it resolution independent.
+        int DPI = int((float(CanvasSizeInPixels(document)) / 1080.0f) * latex.Scale * 300.0f);
+
+        sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", document.config.latexbinaries.c_str(), DPI, entityIndex, entityIndex);
         system(buffer);
     }
 

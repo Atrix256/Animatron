@@ -55,9 +55,14 @@ inline void PixelToCanvas(const Data::Document& document, int pixelX, int pixelY
     PixelToCanvas(document, (float)pixelX, (float)pixelY, canvasX, canvasY);
 }
 
+inline int CanvasSizeInPixels(const Data::Document& document)
+{
+    return (document.renderSizeX >= document.renderSizeY) ? document.renderSizeY : document.renderSizeX;
+}
+
 inline void CanvasToPixelFloat(const Data::Document& document, float canvasX, float canvasY, float& pixelX, float& pixelY)
 {
-    int canvasSizeInPixels = (document.renderSizeX >= document.renderSizeY) ? document.renderSizeY : document.renderSizeX;
+    int canvasSizeInPixels = CanvasSizeInPixels(document);
 
     canvasX = canvasX * float(canvasSizeInPixels) / 100.0f;
     canvasY = canvasY * float(canvasSizeInPixels) / 100.0f;

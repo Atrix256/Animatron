@@ -68,7 +68,7 @@
             "B": 1,
             "A": 1
           },
-          "DPI": 600,
+          "Scale": 2,
           "latex": "simplexplanations\n"
         }
       }
@@ -88,7 +88,7 @@
             "B": 0,
             "A": 0
           },
-          "DPI": 300,
+          "Scale": 1,
           "latex": "Ep2: Flattening A Dependency Graph\n"
         }
       }
