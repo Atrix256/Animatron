@@ -556,16 +556,19 @@ bool EntityDigitalDissolve_Action::DoAction(
     Data::ColorPMA bg = ToPremultipliedAlpha(digitalDissolve.background);
     Data::ColorPMA fg = ToPremultipliedAlpha(digitalDissolve.foreground);
 
+    // resolution independent scaling
+    float resolutionScale = float(CanvasSizeInPixels(document)) / 1080.0f;
+
     // do blending
     for (size_t iy = 0; iy < document.renderSizeY; ++iy)
     {
-        size_t bny = size_t(float(iy) / digitalDissolve.scale.Y);
+        size_t bny = size_t(float(iy) / (digitalDissolve.scale.Y * resolutionScale));
 
         Data::ColorPMA* pixel = &pixels[iy * document.renderSizeX];
         const Data::ColorU8* blueNoiseRow = &document.blueNoisePixels[(bny % document.blueNoiseHeight) * document.blueNoiseWidth];
         for (size_t ix = 0; ix < document.renderSizeX; ++ix)
         {
-            size_t bnx = size_t(float(ix) / digitalDissolve.scale.X);
+            size_t bnx = size_t(float(ix) / (digitalDissolve.scale.X * resolutionScale));
 
             float ditherValue = (blueNoiseRow[bnx % document.blueNoiseWidth].R) / 255.0f;
             
