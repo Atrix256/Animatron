@@ -502,14 +502,13 @@ int main(int argc, char** argv)
             sprintf_s(inputs, "-i build/%%d.png -i %s", document.audioFile.c_str());
 
         char audioOptions[1024];
-        /*
         if (hasAudio)
             sprintf(audioOptions, " -c:a aac -b:a 384k ");
-        else*/
+        else
             sprintf(audioOptions, " ");
 
         char containerOptions[1024];
-        sprintf(containerOptions, "-framerate %i -frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p", document.FPS, framesTotal);
+        sprintf(containerOptions, "-framerate %i -frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p -filter_complex \"[1:0] apad \" -shortest", document.FPS, framesTotal);
 
         char buffer[1024];
         sprintf_s(buffer, "%s -y %s%s%s %s", document.config.ffmpeg.c_str(), inputs, audioOptions, containerOptions, destFile);
