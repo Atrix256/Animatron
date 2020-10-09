@@ -82,11 +82,15 @@ inline void Lerp(const T& A, const T& B, T& Result, float t)
 
 // Basic types
 
+// The test for equality is due to numerical problems where if A==B, the result of the lerp math is not always A!
 #define STANDARD_LERP(_TYPE) \
     template<> \
     inline void Lerp<_TYPE>(const _TYPE& A, const _TYPE& B, _TYPE& Result, float t) \
     { \
-        Result = (_TYPE)Lerp((float)A, (float)B, t); \
+        if (A == B) \
+            Result = A; \
+        else \
+            Result = (_TYPE)Lerp((float)A, (float)B, t); \
     }
 
 #define BINARY_LERP(_TYPE) \

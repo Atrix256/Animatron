@@ -336,9 +336,6 @@ int main(int argc, char** argv)
     // process each key frame
     for (const Data::KeyFrame& keyFrame : document.keyFrames)
     {
-        if (keyFrame.newValue.empty())
-            continue;
-
         auto it = entityTimelinesMap.find(keyFrame.entityId);
         if (it == entityTimelinesMap.end())
         {
@@ -360,25 +357,28 @@ int main(int argc, char** argv)
         newKeyFrame.entity = it->second.keyFrames.rbegin()->entity;
 
         // load the sparse json data over the keyframe data
-        bool error = false;
-        switch (newKeyFrame.entity.data._index)
+        if (!keyFrame.newValue.empty())
         {
-            #include "df_serialize/df_serialize/_common.h"
-            #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                        case Data::EntityVariant::c_index_##_NAME: error = !ReadFromJSONBuffer(newKeyFrame.entity.data.##_NAME, keyFrame.newValue); break;
-            #include "df_serialize/df_serialize/_fillunsetdefines.h"
-            #include "schemas/schemas_entities.h"
-            default:
+            bool error = false;
+            switch (newKeyFrame.entity.data._index)
             {
-                printf("unhandled entity type in variant\n");
+                #include "df_serialize/df_serialize/_common.h"
+                #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
+                            case Data::EntityVariant::c_index_##_NAME: error = !ReadFromJSONBuffer(newKeyFrame.entity.data.##_NAME, keyFrame.newValue); break;
+                #include "df_serialize/df_serialize/_fillunsetdefines.h"
+                #include "schemas/schemas_entities.h"
+                default:
+                {
+                    printf("unhandled entity type in variant\n");
+                    return 1;
+                }
+            }
+            if (error)
+            {
+                printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
+                system("pause");
                 return 1;
             }
-        }
-        if (error)
-        {
-            printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
-            system("pause");
-            return 1;
         }
         it->second.keyFrames.push_back(newKeyFrame);
     }
