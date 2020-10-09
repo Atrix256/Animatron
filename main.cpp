@@ -532,6 +532,8 @@ int main(int argc, char** argv)
     return 0;
 }
 
+// TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it.
+
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
 
 // TODO: i think canvas to pixel and pixel to canvas need to flip the y axis over. the gradient suggests that.  investigate to be sure.

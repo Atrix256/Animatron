@@ -6,8 +6,8 @@
   "outputSizeX": 1920, //480, //1920,
   "outputSizeY": 1080, //270, //1080,
   "FPS": 30,
-  "duration": 2, // 35
-  "startTime": 30, // TODO: delete!
+  "duration": 35,
+  "startTime": 0,
 
   "audioFile": "assets/3.wav",
 
@@ -275,12 +275,12 @@
         "line": {
           "width": 0.25,
           "A": {
-            "X": 12,
-            "Y": 40
+            "X": -8,
+            "Y": 20
           },
           "B": {
-            "X": 25.5,
-            "Y": 30
+            "X": 5.5,
+            "Y": 10
           }
         }
       }
@@ -293,12 +293,12 @@
         "line": {
           "width": 0.25,
           "A": {
-            "X": 12,
-            "Y": 20
+            "X": -8,
+            "Y": 0
           },
           "B": {
-            "X": 25.5,
-            "Y": 30
+            "X": 5.5,
+            "Y": 10
           }
         }
       }
@@ -311,12 +311,12 @@
         "line": {
           "width": 0.25,
           "A": {
-            "X": -25.5,
-            "Y": 40
+            "X": -45.5,
+            "Y": 20
           },
           "B": {
-            "X": -12,
-            "Y": 40
+            "X": -32,
+            "Y": 20
           }
         }
       }
@@ -329,12 +329,12 @@
         "line": {
           "width": 0.25,
           "A": {
-            "X": 12,
-            "Y": 0
+            "X": -8,
+            "Y": -20
           },
           "B": {
-            "X": 25.5,
-            "Y": 0
+            "X": 5.5,
+            "Y": -20
           }
         }
       }
@@ -347,12 +347,12 @@
         "line": {
           "width": 0.25,
           "A": {
-            "X": 49.5,
-            "Y": 30
+            "X": 29.5,
+            "Y": 10
           },
           "B": {
-            "X": 63,
-            "Y": 15
+            "X": 43,
+            "Y": -5
           }
         }
       }
@@ -365,12 +365,12 @@
         "line": {
           "width": 0.25,
           "A": {
-            "X": 49.5,
-            "Y": 0
+            "X": 29.5,
+            "Y": -20
           },
           "B": {
-            "X": 63,
-            "Y": 15
+            "X": 43,
+            "Y": -5
           }
         }
       }
@@ -471,7 +471,7 @@
       "entityId": "NodeBoxWatermelon",
       "time": 6.5,
       "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":0,\"Y\":40}}"
+      "newValue": "{\"center\":{\"X\":-20,\"Y\":20}}"
     },
     {
       "entityId": "NodeBoxRake",
@@ -481,7 +481,7 @@
       "entityId": "NodeBoxRake",
       "time": 7.5,
       "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":0,\"Y\":20}}"
+      "newValue": "{\"center\":{\"X\":-20,\"Y\":0}}"
     },
     {
       "entityId": "NodeBoxTrash",
@@ -491,7 +491,7 @@
       "entityId": "NodeBoxTrash",
       "time": 8.5,
       "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":37.5,\"Y\":30}}"
+      "newValue": "{\"center\":{\"X\":17.5,\"Y\":10}}"
     },
 
     // move dishes into place
@@ -504,7 +504,7 @@
       "entityId": "NodeBoxDishes",
       "time": 12.5,
       "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-37.5, \"Y\":40}}"
+      "newValue": "{\"center\":{\"X\":-57.5, \"Y\":20}}"
     },
 
     // laundry
@@ -517,7 +517,7 @@
       "entityId": "NodeBoxWashClothes",
       "time": 17.5,
       "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":0, \"Y\":0}}"
+      "newValue": "{\"center\":{\"X\":-20, \"Y\":-20}}"
     },
 
     {
@@ -528,7 +528,7 @@
       "entityId": "NodeBoxFoldLaundry",
       "time": 19.5,
       "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":37.5, \"Y\":0}}"
+      "newValue": "{\"center\":{\"X\":17.5, \"Y\":-20}}"
     },
 
     // Move Relax into place
@@ -541,10 +541,9 @@
       "entityId": "NodeBoxRelax",
       "time": 26.5,
       "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":75, \"Y\":15}}"
+      "newValue": "{\"center\":{\"X\":55, \"Y\":-5}}"
     }
   ]
 }
 
-    // TODO: why does watermelon jitter?
-    // TODO: should center the DAG better i think.
+    // TODO: why does watermelon jitter??
