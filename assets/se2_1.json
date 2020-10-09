@@ -6,7 +6,7 @@
   "outputSizeX": 1920,
   "outputSizeY": 1080,
   "FPS": 30,
-  "duration": 11,
+  "duration": 12,
 
   "audioFile": "assets/1.wav",
 
@@ -342,12 +342,12 @@
     },
     {
       "entityId": "TransitionOut",
-      "time": 10,
+      "time": 11.65,
       "newValue": "{\"alpha\":0}"
     },
     {
       "entityId": "TransitionOut",
-      "time": 10.9,
+      "time": 11.9,
       "newValue": "{\"alpha\":1}"
     }
   ]

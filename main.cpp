@@ -508,10 +508,10 @@ int main(int argc, char** argv)
             sprintf(audioOptions, " ");
 
         char containerOptions[1024];
-        sprintf(containerOptions, "-framerate %i -frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p -filter_complex \"[1:0] apad \" -shortest", document.FPS, framesTotal);
+        sprintf(containerOptions, "-frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p -filter_complex \"[1:0] apad \" -shortest", framesTotal);
 
         char buffer[1024];
-        sprintf_s(buffer, "%s -y %s%s%s %s", document.config.ffmpeg.c_str(), inputs, audioOptions, containerOptions, destFile);
+        sprintf_s(buffer, "%s -y -framerate %i %s%s%s %s", document.config.ffmpeg.c_str(), document.FPS, inputs, audioOptions, containerOptions, destFile);
 
         system(buffer);
     }

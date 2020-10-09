@@ -6,7 +6,7 @@
   "outputSizeX": 1920,
   "outputSizeY": 1080,
   "FPS": 30,
-  "duration": 2,
+  "duration": 28,
 
   "audioFile": "assets/2.wav",
 
@@ -64,6 +64,66 @@
       }
     },
     {
+      "id": "Title",
+      "data": {
+        "latex": {
+          "latex": "Dependency Graph:",
+          "position": {
+            "Y": 20
+          },
+          "scale": 2
+        }
+      }
+    },
+    {
+      "id": "GoodDef",
+      "data": {
+        "latex": {
+          "latex": "Actions to do, with optional ordering constraints",
+          "position": {
+            "Y": 0
+          },
+          "foreground": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          },
+          // TODO: why is scale not working here? this text is the same size as the title!
+          "scale": 8
+        }
+      }
+    },
+    {
+      "id": "Wikipedia",
+      "data": {
+        "image": {
+          "fileName": "assets/wikipedia.png",
+          "radius": {
+            "X": 74.8,
+            "Y": 8
+          }
+        }
+      }
+    },
+    {
+      "id": "Foot",
+      "zorder": 1,
+      "data": {
+        "image": {
+          "fileName": "assets/mpfoot.png",
+          "radius": {
+            "X": 53.28,
+            "Y": 48
+          },
+          "position": {
+            "X": 0,
+            "Y": 98
+          }
+        }
+      }
+    },
+    {
       "id": "NodeBoxTrash",
       "data": {
         "rectangle": {
@@ -75,7 +135,8 @@
           "color": {
             "R": 1,
             "G": 1,
-            "B": 0
+            "B": 0,
+            "A": 0
           }
         }
       }
@@ -87,7 +148,10 @@
       "data": {
         "latex": {
           "latex": "Trash",
-          "scale": 0.5
+          "scale": 0.5,
+          "foreground": {
+            "A": 0
+          }
         }
       }
     },
@@ -107,7 +171,8 @@
           "color": {
             "R": 1,
             "G": 1,
-            "B": 0
+            "B": 0,
+            "A": 0
           }
         }
       }
@@ -119,7 +184,10 @@
       "data": {
         "latex": {
           "latex": "Watermelon",
-          "scale": 0.5
+          "scale": 0.5,
+          "foreground": {
+            "A": 0
+          }
         }
       }
     },
@@ -139,7 +207,8 @@
           "color": {
             "R": 1,
             "G": 1,
-            "B": 0
+            "B": 0,
+            "A": 0
           }
         }
       }
@@ -151,7 +220,10 @@
       "data": {
         "latex": {
           "latex": "Rake",
-          "scale": 0.5
+          "scale": 0.5,
+          "foreground": {
+            "A": 0
+          }
         }
       }
     },
@@ -171,7 +243,8 @@
           "color": {
             "R": 1,
             "G": 1,
-            "B": 0
+            "B": 0,
+            "A": 0
           }
         }
       }
@@ -183,7 +256,10 @@
       "data": {
         "latex": {
           "latex": "Dishes",
-          "scale": 0.5
+          "scale": 0.5,
+          "foreground": {
+            "A": 0
+          }
         }
       }
     },
@@ -203,7 +279,8 @@
           "color": {
             "R": 1,
             "G": 1,
-            "B": 0
+            "B": 0,
+            "A": 0
           }
         }
       }
@@ -215,7 +292,10 @@
       "data": {
         "latex": {
           "latex": "Wash Clothes",
-          "scale": 0.5
+          "scale": 0.5,
+          "foreground": {
+            "A": 0
+          }
         }
       }
     },
@@ -235,7 +315,8 @@
           "color": {
             "R": 1,
             "G": 1,
-            "B": 0
+            "B": 0,
+            "A": 0
           }
         }
       }
@@ -247,7 +328,10 @@
       "data": {
         "latex": {
           "latex": "Fold Laundry",
-          "scale": 0.5
+          "scale": 0.5,
+          "foreground": {
+            "A": 0
+          }
         }
       }
     },
@@ -267,7 +351,8 @@
           "color": {
             "R": 1,
             "G": 1,
-            "B": 0
+            "B": 0,
+            "A": 0
           }
         }
       }
@@ -279,7 +364,10 @@
       "data": {
         "latex": {
           "latex": "Relax",
-          "scale": 0.5
+          "scale": 0.5,
+          "foreground": {
+            "A": 0
+          }
         }
       }
     }
@@ -287,8 +375,220 @@
   "keyFrames": [
     {
       "entityId": "TransitionIn",
-      "time": 1,
+      "time": 0.25,
       "newValue": "{\"alpha\":0}"
+    },
+
+    // Foot coming down
+    {
+      "entityId": "Foot",
+      "time": 3.5,
+      "newValue": "{\"position\":{\"Y\":98}}" // TODO: probably don't need to set y to 98. it already is!
+    },
+    {
+      "entityId": "Foot",
+      "time": 3.6,
+      "newValue": "{\"position\":{\"Y\":30}}"
+    },
+
+    // Foot and wikipedia disappear
+    {
+      "entityId": "Foot",
+      "time": 5,
+      "newValue": "{}"
+    },
+    {
+      "entityId": "Foot",
+      "time": 6,
+      "newValue": "{\"tint\":{\"A\":0}}"
+    },
+    {
+      "entityId": "Wikipedia",
+      "time": 5,
+      "newValue": "{}"
+    },
+    {
+      "entityId": "Wikipedia",
+      "time": 6,
+      "newValue": "{\"tint\":{\"A\":0}}"
+    },
+
+    // TODO: maybe make newValue default to "{}" in the schema so you can leave it blank when needed?
+
+    // Title and GoodDef disappear from 14 to 15
+    {
+      "entityId": "Title",
+      "time": 14,
+      "newValue": "{}"
+    },
+    {
+      "entityId": "GoodDef",
+      "time": 14,
+      "newValue": "{}"
+    },
+    {
+      "entityId": "Title",
+      "time": 15,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "GoodDef",
+      "time": 15,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+
+    // Trash Node Appear
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 17,
+      "newValue": "{\"color\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 17.1,
+      "newValue": "{\"color\":{\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextTrash",
+      "time": 17,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeTextTrash",
+      "time": 17.1,
+      "newValue": "{\"foreground\":{\"A\":1}}"
+    },
+
+    // Watermellon Node Appear
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 18.5,
+      "newValue": "{\"color\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 18.6,
+      "newValue": "{\"color\":{\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextWatermelon",
+      "time": 18.5,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeTextWatermelon",
+      "time": 18.6,
+      "newValue": "{\"foreground\":{\"A\":1}}"
+    },
+
+    // Rake Node Appear
+    {
+      "entityId": "NodeBoxRake",
+      "time": 20,
+      "newValue": "{\"color\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeBoxRake",
+      "time": 20.1,
+      "newValue": "{\"color\":{\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextRake",
+      "time": 20,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeTextRake",
+      "time": 20.1,
+      "newValue": "{\"foreground\":{\"A\":1}}"
+    },
+
+    // Dish Washer Node Appear
+    {
+      "entityId": "NodeBoxDishes",
+      "time": 21,
+      "newValue": "{\"color\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeBoxDishes",
+      "time": 21.1,
+      "newValue": "{\"color\":{\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextDishes",
+      "time": 21,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeTextDishes",
+      "time": 21.1,
+      "newValue": "{\"foreground\":{\"A\":1}}"
+    },
+
+    // Clothes Washer Node Appear
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 23,
+      "newValue": "{\"color\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 23.1,
+      "newValue": "{\"color\":{\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextWashClothes",
+      "time": 23,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeTextWashClothes",
+      "time": 23.1,
+      "newValue": "{\"foreground\":{\"A\":1}}"
+    },
+
+    // Laundry Node Appear
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 25,
+      "newValue": "{\"color\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 25.1,
+      "newValue": "{\"color\":{\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextFoldLaundry",
+      "time": 25,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeTextFoldLaundry",
+      "time": 25.1,
+      "newValue": "{\"foreground\":{\"A\":1}}"
+    },
+
+    // Relax Node Appear
+    {
+      "entityId": "NodeBoxRelax",
+      "time": 27,
+      "newValue": "{\"color\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeBoxRelax",
+      "time": 27.1,
+      "newValue": "{\"color\":{\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextRelax",
+      "time": 27,
+      "newValue": "{\"foreground\":{\"A\":0}}"
+    },
+    {
+      "entityId": "NodeTextRelax",
+      "time": 27.1,
+      "newValue": "{\"foreground\":{\"A\":1}}"
     }
   ]
 }
