@@ -235,6 +235,7 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD(int, renderSizeX, 0, "The size of the render on the X axis. 0 means use output size. The rendered image will be sized down (for AA) or up to match the output size.")
     STRUCT_FIELD(int, renderSizeY, 0, "The size of the render on the Y axis. 0 means use output size. The rendered image will be sized down (for AA) or up to match the output size.")
     STRUCT_FIELD(float, duration, 4.0f, "The duration of the rendering")
+    STRUCT_FIELD(float, startTime, 0.0f, "The time to start at")
     STRUCT_FIELD(int, FPS, 30, "The frame rate of the render")
 
     STRUCT_FIELD(std::string, audioFile, "", "The name of the audio file to attach to the video. Later on there will be better audio support.")

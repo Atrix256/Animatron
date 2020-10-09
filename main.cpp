@@ -43,7 +43,7 @@ struct EntityTimeline
 bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::ColorPMA>& pixels, int frameIndex)
 {
     // setup for the frame
-    float frameTime = float(frameIndex) / float(document.FPS);
+    float frameTime = (float(frameIndex) / float(document.FPS)) + document.startTime;
     pixels.resize(document.renderSizeX*document.renderSizeY);
     std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 0.0f });
 
@@ -531,6 +531,8 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+// TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
 
 // TODO: i think canvas to pixel and pixel to canvas need to flip the y axis over. the gradient suggests that.  investigate to be sure.
 

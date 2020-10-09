@@ -55,6 +55,9 @@
     <None Include="assets\se2_3.json">
       <Filter>assets</Filter>
     </None>
+    <None Include="assets\clip2.json">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="internal\BlueNoiseRGBA.png">

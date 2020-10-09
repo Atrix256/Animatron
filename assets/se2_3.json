@@ -3,14 +3,14 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 1920,
-  "outputSizeY": 1080,
-/*
-  "outputSizeX": 960,
-  "outputSizeY": 540,
-  */
+  "outputSizeX": 1920, //480, //1920,
+  "outputSizeY": 1080, //270, //1080,
   "FPS": 30,
-  "duration": 5,
+  "duration": 2, // 35
+  "startTime": 30, // TODO: delete!
+
+  "audioFile": "assets/3.wav",
+
   "entities": [
     {
       "id": "Background",
@@ -52,39 +52,16 @@
       }
     },
     {
-      "id": "box1",
+      "id": "NodeBoxTrash",
       "data": {
         "rectangle": {
-          "center": {
-            "X": -20
-          },
           "radius": {
             "X": 10,
-            "Y": 5
+            "Y": 3
           },
+          "expansion": 2,
           "color": {
             "R": 1,
-            "G": 0,
-            "B": 0,
-            "A": 1
-          }
-        }
-      }
-    },
-    {
-      "id": "box2",
-      "data": {
-        "rectangle": {
-          "center": {
-            "X": 20
-          },
-          "radius": {
-            "X": 10,
-            "Y": 5
-          },
-          "expansion": 0,
-          "color": {
-            "R": 0,
             "G": 1,
             "B": 0,
             "A": 1
@@ -93,131 +70,481 @@
       }
     },
     {
-      "id": "curve1",
+      "id": "NodeTextTrash",
       "zorder": 1,
+      "parent": "NodeBoxTrash",
       "data": {
-        "cubicBezier": {
-          "width": 0.1,
+        "latex": {
+          "latex": "Trash",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWatermelon",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -30,
+            "Y": 0
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWatermelon",
+      "zorder": 1,
+      "parent": "NodeBoxWatermelon",
+      "data": {
+        "latex": {
+          "latex": "Watermelon",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRake",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 30,
+            "Y": 0
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRake",
+      "zorder": 1,
+      "parent": "NodeBoxRake",
+      "data": {
+        "latex": {
+          "latex": "Rake",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxDishes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 30,
+            "Y": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextDishes",
+      "zorder": 1,
+      "parent": "NodeBoxDishes",
+      "data": {
+        "latex": {
+          "latex": "Dishes",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWashClothes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 0,
+            "Y": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWashClothes",
+      "zorder": 1,
+      "parent": "NodeBoxWashClothes",
+      "data": {
+        "latex": {
+          "latex": "Wash Clothes",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxFoldLaundry",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -30,
+            "Y": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextFoldLaundry",
+      "zorder": 1,
+      "parent": "NodeBoxFoldLaundry",
+      "data": {
+        "latex": {
+          "latex": "Fold Laundry",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRelax",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 0,
+            "Y": 20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 1,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "ConnectWatermelonTrash",
+      "zorder": 2,
+      "createTime": 8.5,
+      "data": {
+        "line": {
+          "width": 0.25,
           "A": {
-            "X": -10,
-            "Y": -10,
-            "Z": 1
+            "X": 12,
+            "Y": 40
           },
           "B": {
-            "X": -10,
-            "Y": 10,
-            "Z": 8
-          },
-          "C": {
-            "X": 10,
-            "Y": 10,
-            "Z": 8
-          },
-          "D": {
-            "X": 10,
-            "Y": -10,
-            "Z": 1
+            "X": 25.5,
+            "Y": 30
           }
         }
       }
     },
     {
-      "id": "CPA",
+      "id": "ConnectRakeTrash",
+      "zorder": 2,
+      "createTime": 8.5,
       "data": {
-        "circle": {
-          "innerRadius": 0,
-          "outerRadius": 1,
-          "center": {
-            "X": -10,
-            "Y": -10
+        "line": {
+          "width": 0.25,
+          "A": {
+            "X": 12,
+            "Y": 20
           },
-          "color": {
-            "R": 0.5,
-            "G": 0,
-            "B": 0,
-            "A": 1
+          "B": {
+            "X": 25.5,
+            "Y": 30
           }
         }
       }
     },
     {
-      "id": "CPB",
+      "id": "ConnectDishesWatermellon",
+      "zorder": 2,
+      "createTime": 12.5,
       "data": {
-        "circle": {
-          "innerRadius": 0,
-          "outerRadius": 1,
-          "center": {
-            "X": -10,
-            "Y": 10
+        "line": {
+          "width": 0.25,
+          "A": {
+            "X": -25.5,
+            "Y": 40
           },
-          "color": {
-            "R": 0,
-            "G": 0.5,
-            "B": 0,
-            "A": 1
+          "B": {
+            "X": -12,
+            "Y": 40
           }
         }
       }
     },
     {
-      "id": "CPC",
+      "id": "ConnectLaundry",
+      "zorder": 2,
+      "createTime": 19.5,
       "data": {
-        "circle": {
-          "innerRadius": 0,
-          "outerRadius": 1,
-          "center": {
-            "X": 10,
-            "Y": 10
+        "line": {
+          "width": 0.25,
+          "A": {
+            "X": 12,
+            "Y": 0
           },
-          "color": {
-            "R": 0,
-            "G": 0,
-            "B": 0.5,
-            "A": 1
+          "B": {
+            "X": 25.5,
+            "Y": 0
           }
         }
       }
     },
     {
-      "id": "CPD",
+      "id": "ConnectTrashRelax",
+      "zorder": 2,
+      "createTime": 26.5,
       "data": {
-        "circle": {
-          "innerRadius": 0,
-          "outerRadius": 1,
-          "center": {
-            "X": 10,
-            "Y": -10
+        "line": {
+          "width": 0.25,
+          "A": {
+            "X": 49.5,
+            "Y": 30
           },
-          "color": {
-            "R": 0.5,
-            "G": 0.5,
-            "B": 0,
-            "A": 1
+          "B": {
+            "X": 63,
+            "Y": 15
           }
+        }
+      }
+    },
+    {
+      "id": "ConnectLaundryRelax",
+      "zorder": 2,
+      "createTime": 26.5,
+      "data": {
+        "line": {
+          "width": 0.25,
+          "A": {
+            "X": 49.5,
+            "Y": 0
+          },
+          "B": {
+            "X": 63,
+            "Y": 15
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRelax",
+      "zorder": 1,
+      "parent": "NodeBoxRelax",
+      "data": {
+        "latex": {
+          "latex": "Relax",
+          "scale": 1
         }
       }
     }
   ],
   "keyFrames": [
+
+    // Move all the blocks down to the bottom
     {
-      "entityId": "box2",
-      "time": 5,
-      "newValue": "{\"expansion\":10}"
+      "entityId": "NodeBoxTrash",
+      "time": 1
     },
     {
-      "entityId": "curve1",
-      "time": 5,
-      "newValue": "{\"B\":{\"X\":10},\"C\":{\"X\":-10}}"
+      "entityId": "NodeBoxTrash",
+      "time": 1.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":-75, \"Y\":-40}}"
     },
     {
-      "entityId": "CPB",
-      "time": 5,
-      "newValue": "{\"center\":{\"X\":10}}"
+      "entityId": "NodeBoxWatermelon",
+      "time": 1
     },
     {
-      "entityId": "CPC",
-      "time": 5,
-      "newValue": "{\"center\":{\"X\":-10}}"
+      "entityId": "NodeBoxWatermelon",
+      "time": 1.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":-50, \"Y\":-40}}"
+    },
+    {
+      "entityId": "NodeBoxRake",
+      "time": 1
+    },
+    {
+      "entityId": "NodeBoxRake",
+      "time": 1.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":-25, \"Y\":-40}}"
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 1
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 1.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":0, \"Y\":-40}}"
+    },
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 1
+    },
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 1.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":25, \"Y\":-40}}"
+    },
+    {
+      "entityId": "NodeBoxDishes",
+      "time": 1
+    },
+    {
+      "entityId": "NodeBoxDishes",
+      "time": 1.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":50, \"Y\":-40}}"
+    },
+    {
+      "entityId": "NodeBoxRelax",
+      "time": 1
+    },
+    {
+      "entityId": "NodeBoxRelax",
+      "time": 1.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":75, \"Y\":-40}}"
+    },
+
+
+    // Move watermelon, rake and trash into place
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 6
+    },
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 6.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":0,\"Y\":40}}"
+    },
+    {
+      "entityId": "NodeBoxRake",
+      "time": 7
+    },
+    {
+      "entityId": "NodeBoxRake",
+      "time": 7.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":0,\"Y\":20}}"
+    },
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 8
+    },
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 8.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":37.5,\"Y\":30}}"
+    },
+
+    // move dishes into place
+
+    {
+      "entityId": "NodeBoxDishes",
+      "time": 12
+    },
+    {
+      "entityId": "NodeBoxDishes",
+      "time": 12.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":-37.5, \"Y\":40}}"
+    },
+
+    // laundry
+
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 17
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 17.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":0, \"Y\":0}}"
+    },
+
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 19
+    },
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 19.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":37.5, \"Y\":0}}"
+    },
+
+    // Move Relax into place
+
+    {
+      "entityId": "NodeBoxRelax",
+      "time": 26.0
+    },
+    {
+      "entityId": "NodeBoxRelax",
+      "time": 26.5,
+      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "newValue": "{\"center\":{\"X\":75, \"Y\":15}}"
     }
   ]
 }
+
+    // TODO: why does watermelon jitter?
+    // TODO: should center the DAG better i think.

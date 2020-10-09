@@ -1,0 +1,223 @@
+{
+  "program": "animatron",
+  "versionMajor": 1,
+  "versionMinor": 0,
+
+  "outputSizeX": 1920,
+  "outputSizeY": 1080,
+/*
+  "outputSizeX": 960,
+  "outputSizeY": 540,
+  */
+  "FPS": 30,
+  "duration": 5,
+  "entities": [
+    {
+      "id": "Background",
+      "zorder": -1000.0,
+      "data": {
+        "linearGradient": {
+          "halfSpace": {
+            "X": 0,
+            "Y": 1,
+            "Z": -20
+          },
+          "points": [
+            {
+              "value": -100,
+              "color": {
+                "R": 1,
+                "G": 1,
+                "B": 1,
+                "A": 1
+              }
+            },
+            {
+              "value": 100,
+              "color": {
+                "R": 0.0,
+                "G": 0.0,
+                "B": 0.0,
+                "A": 1
+              },
+              "blendControlPoints": [
+                0,
+                0,
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "box1",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 5
+          },
+          "color": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "box2",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 20
+          },
+          "radius": {
+            "X": 10,
+            "Y": 5
+          },
+          "expansion": 0,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "curve1",
+      "zorder": 1,
+      "data": {
+        "cubicBezier": {
+          "width": 0.1,
+          "A": {
+            "X": -10,
+            "Y": -10,
+            "Z": 1
+          },
+          "B": {
+            "X": -10,
+            "Y": 10,
+            "Z": 8
+          },
+          "C": {
+            "X": 10,
+            "Y": 10,
+            "Z": 8
+          },
+          "D": {
+            "X": 10,
+            "Y": -10,
+            "Z": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CPA",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": -10,
+            "Y": -10
+          },
+          "color": {
+            "R": 0.5,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CPB",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": -10,
+            "Y": 10
+          },
+          "color": {
+            "R": 0,
+            "G": 0.5,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CPC",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": 10,
+            "Y": 10
+          },
+          "color": {
+            "R": 0,
+            "G": 0,
+            "B": 0.5,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CPD",
+      "data": {
+        "circle": {
+          "innerRadius": 0,
+          "outerRadius": 1,
+          "center": {
+            "X": 10,
+            "Y": -10
+          },
+          "color": {
+            "R": 0.5,
+            "G": 0.5,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    }
+  ],
+  "keyFrames": [
+    {
+      "entityId": "box2",
+      "time": 5,
+      "newValue": "{\"expansion\":10}"
+    },
+    {
+      "entityId": "curve1",
+      "time": 5,
+      "newValue": "{\"B\":{\"X\":10},\"C\":{\"X\":-10}}"
+    },
+    {
+      "entityId": "CPB",
+      "time": 5,
+      "newValue": "{\"center\":{\"X\":10}}"
+    },
+    {
+      "entityId": "CPC",
+      "time": 5,
+      "newValue": "{\"center\":{\"X\":-10}}"
+    }
+  ]
+}
