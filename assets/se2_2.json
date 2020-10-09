@@ -89,8 +89,7 @@
             "B": 0,
             "A": 1
           },
-          // TODO: why is scale not working here? this text is the same size as the title!
-          "scale": 8
+          "scale": 1
         }
       }
     },
@@ -148,7 +147,7 @@
       "data": {
         "latex": {
           "latex": "Trash",
-          "scale": 0.5,
+          "scale": 1,
           "foreground": {
             "A": 0
           }
@@ -184,7 +183,7 @@
       "data": {
         "latex": {
           "latex": "Watermelon",
-          "scale": 0.5,
+          "scale": 1,
           "foreground": {
             "A": 0
           }
@@ -220,7 +219,7 @@
       "data": {
         "latex": {
           "latex": "Rake",
-          "scale": 0.5,
+          "scale": 1,
           "foreground": {
             "A": 0
           }
@@ -256,7 +255,7 @@
       "data": {
         "latex": {
           "latex": "Dishes",
-          "scale": 0.5,
+          "scale": 1,
           "foreground": {
             "A": 0
           }
@@ -292,7 +291,7 @@
       "data": {
         "latex": {
           "latex": "Wash Clothes",
-          "scale": 0.5,
+          "scale": 1,
           "foreground": {
             "A": 0
           }
@@ -328,7 +327,7 @@
       "data": {
         "latex": {
           "latex": "Fold Laundry",
-          "scale": 0.5,
+          "scale": 1,
           "foreground": {
             "A": 0
           }
@@ -364,7 +363,7 @@
       "data": {
         "latex": {
           "latex": "Relax",
-          "scale": 0.5,
+          "scale": 1,
           "foreground": {
             "A": 0
           }
@@ -383,7 +382,7 @@
     {
       "entityId": "Foot",
       "time": 3.5,
-      "newValue": "{\"position\":{\"Y\":98}}" // TODO: probably don't need to set y to 98. it already is!
+      "newValue": "{\"position\":{\"Y\":98}}"
     },
     {
       "entityId": "Foot",
@@ -412,8 +411,6 @@
       "time": 6,
       "newValue": "{\"tint\":{\"A\":0}}"
     },
-
-    // TODO: maybe make newValue default to "{}" in the schema so you can leave it blank when needed?
 
     // Title and GoodDef disappear from 14 to 15
     {
@@ -592,5 +589,3 @@
     }
   ]
 }
-
-// TODO: probably need some custom connect, not cubic bezier, to have more points, and to be able to parent the points? dunno.

@@ -508,7 +508,7 @@ int main(int argc, char** argv)
             sprintf(audioOptions, " ");
 
         char containerOptions[1024];
-        sprintf(containerOptions, "-frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p -filter_complex \"[1:0] apad \" -shortest", framesTotal);
+        sprintf(containerOptions, "-frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p %s", framesTotal, hasAudio ? "-filter_complex \"[1:0] apad \" -shortest" : "");
 
         char buffer[1024];
         sprintf_s(buffer, "%s -y -framerate %i %s%s%s %s", document.config.ffmpeg.c_str(), document.FPS, inputs, audioOptions, containerOptions, destFile);
@@ -550,6 +550,8 @@ int main(int argc, char** argv)
 
 /*
 TODO:
+
+* maybe instead of having parents like we do, each position should have an optional parent
 
 ! in the future, maybe need to have parenting take a whole transform, instead of just position. unsure what it means for some things to be parented. work it out?
 

@@ -74,7 +74,7 @@
             "B": 1,
             "A": 1
           },
-          "Scale": 2,
+          "scale": 2,
           "latex": "simplexplanations\n"
         }
       }
@@ -94,7 +94,7 @@
             "B": 0,
             "A": 0
           },
-          "Scale": 1,
+          "scale": 1,
           "latex": "Ep2: Flattening A Dependency Graph\n"
         }
       }
