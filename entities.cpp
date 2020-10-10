@@ -455,7 +455,7 @@ bool EntityLatex_Action::DoAction(
 
     // if it's completely off the screen, nothing to do
     if (minPixelX > document.renderSizeX - 1 || maxPixelX < 0 ||
-        maxPixelX > document.renderSizeY - 1 || maxPixelY < 0)
+        maxPixelY > document.renderSizeY - 1 || maxPixelY < 0)
     {
         return true;
     }
