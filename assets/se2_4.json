@@ -3,13 +3,13 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 1920,
-  "outputSizeY": 1080,
+  "outputSizeX": 480, //1920,
+  "outputSizeY": 270, //1080,
   "FPS": 30,
-  "duration": 35,
+  "duration": 2,
   "startTime": 0,
 
-  "audioFile": "assets/3.wav",
+  "audioFile": "assets/4.wav",
 
   "entities": [
     {
@@ -55,6 +55,10 @@
       "id": "NodeBoxTrash",
       "data": {
         "rectangle": {
+          "center": {
+            "X": 17.5,
+            "Y": 10
+          },
           "radius": {
             "X": 10,
             "Y": 3
@@ -85,8 +89,8 @@
       "data": {
         "rectangle": {
           "center": {
-            "X": -30,
-            "Y": 0
+            "X": -20,
+            "Y":  20
           },
           "radius": {
             "X": 10,
@@ -118,7 +122,7 @@
       "data": {
         "rectangle": {
           "center": {
-            "X": 30,
+            "X": -20,
             "Y": 0
           },
           "radius": {
@@ -151,8 +155,8 @@
       "data": {
         "rectangle": {
           "center": {
-            "X": 30,
-            "Y": -20
+            "X": -57.5,
+            "Y": 20
           },
           "radius": {
             "X": 10,
@@ -184,7 +188,7 @@
       "data": {
         "rectangle": {
           "center": {
-            "X": 0,
+            "X": -20,
             "Y": -20
           },
           "radius": {
@@ -217,7 +221,7 @@
       "data": {
         "rectangle": {
           "center": {
-            "X": -30,
+            "X": 17.5,
             "Y": -20
           },
           "radius": {
@@ -250,8 +254,8 @@
       "data": {
         "rectangle": {
           "center": {
-            "X": 0,
-            "Y": 20
+            "X": 55,
+            "Y": -5
           },
           "radius": {
             "X": 10,
@@ -270,7 +274,6 @@
     {
       "id": "ConnectWatermelonTrash",
       "zorder": 2,
-      "createTime": 8.5,
       "data": {
         "line": {
           "width": 0.25,
@@ -288,7 +291,6 @@
     {
       "id": "ConnectRakeTrash",
       "zorder": 2,
-      "createTime": 8.5,
       "data": {
         "line": {
           "width": 0.25,
@@ -306,7 +308,6 @@
     {
       "id": "ConnectDishesWatermellon",
       "zorder": 2,
-      "createTime": 12.5,
       "data": {
         "line": {
           "width": 0.25,
@@ -324,7 +325,6 @@
     {
       "id": "ConnectLaundry",
       "zorder": 2,
-      "createTime": 19.5,
       "data": {
         "line": {
           "width": 0.25,
@@ -342,7 +342,6 @@
     {
       "id": "ConnectTrashRelax",
       "zorder": 2,
-      "createTime": 26.5,
       "data": {
         "line": {
           "width": 0.25,
@@ -360,7 +359,6 @@
     {
       "id": "ConnectLaundryRelax",
       "zorder": 2,
-      "createTime": 26.5,
       "data": {
         "line": {
           "width": 0.25,
@@ -388,160 +386,5 @@
     }
   ],
   "keyFrames": [
-
-    // Move all the blocks down to the bottom
-    {
-      "entityId": "NodeBoxTrash",
-      "time": 1
-    },
-    {
-      "entityId": "NodeBoxTrash",
-      "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-75, \"Y\":-40}}"
-    },
-    {
-      "entityId": "NodeBoxWatermelon",
-      "time": 1
-    },
-    {
-      "entityId": "NodeBoxWatermelon",
-      "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-50, \"Y\":-40}}"
-    },
-    {
-      "entityId": "NodeBoxRake",
-      "time": 1
-    },
-    {
-      "entityId": "NodeBoxRake",
-      "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-25, \"Y\":-40}}"
-    },
-    {
-      "entityId": "NodeBoxWashClothes",
-      "time": 1
-    },
-    {
-      "entityId": "NodeBoxWashClothes",
-      "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":0, \"Y\":-40}}"
-    },
-    {
-      "entityId": "NodeBoxFoldLaundry",
-      "time": 1
-    },
-    {
-      "entityId": "NodeBoxFoldLaundry",
-      "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":25, \"Y\":-40}}"
-    },
-    {
-      "entityId": "NodeBoxDishes",
-      "time": 1
-    },
-    {
-      "entityId": "NodeBoxDishes",
-      "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":50, \"Y\":-40}}"
-    },
-    {
-      "entityId": "NodeBoxRelax",
-      "time": 1
-    },
-    {
-      "entityId": "NodeBoxRelax",
-      "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":75, \"Y\":-40}}"
-    },
-
-
-    // Move watermelon, rake and trash into place
-    {
-      "entityId": "NodeBoxWatermelon",
-      "time": 6
-    },
-    {
-      "entityId": "NodeBoxWatermelon",
-      "time": 6.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-20,\"Y\":20}}"
-    },
-    {
-      "entityId": "NodeBoxRake",
-      "time": 7
-    },
-    {
-      "entityId": "NodeBoxRake",
-      "time": 7.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-20,\"Y\":0}}"
-    },
-    {
-      "entityId": "NodeBoxTrash",
-      "time": 8
-    },
-    {
-      "entityId": "NodeBoxTrash",
-      "time": 8.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":17.5,\"Y\":10}}"
-    },
-
-    // move dishes into place
-
-    {
-      "entityId": "NodeBoxDishes",
-      "time": 12
-    },
-    {
-      "entityId": "NodeBoxDishes",
-      "time": 12.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-57.5, \"Y\":20}}"
-    },
-
-    // laundry
-
-    {
-      "entityId": "NodeBoxWashClothes",
-      "time": 17
-    },
-    {
-      "entityId": "NodeBoxWashClothes",
-      "time": 17.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":-20, \"Y\":-20}}"
-    },
-
-    {
-      "entityId": "NodeBoxFoldLaundry",
-      "time": 19
-    },
-    {
-      "entityId": "NodeBoxFoldLaundry",
-      "time": 19.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":17.5, \"Y\":-20}}"
-    },
-
-    // Move Relax into place
-
-    {
-      "entityId": "NodeBoxRelax",
-      "time": 26.0
-    },
-    {
-      "entityId": "NodeBoxRelax",
-      "time": 26.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
-      "newValue": "{\"center\":{\"X\":55, \"Y\":-5}}"
-    }
   ]
 }
