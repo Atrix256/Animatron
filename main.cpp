@@ -546,6 +546,10 @@ int main(int argc, char** argv)
     return 0;
 }
 
+// TODO: maybe have an option to output bmp instead of png? might be faster!
+
+// TODO: binary search in bezier to find where to start from, instead of just skipping past. also add the offset into pixel x instead of adding it to each point you are looking at (and copying!)
+
 // TODO: yeah probably could cache rendered frames for the times when there are sections of unanimated screen, and for interation
 
 // TODO: looking at the threads in sleepy, it looks like some threads finish their work long before others and stop helping.

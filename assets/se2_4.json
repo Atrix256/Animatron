@@ -3,8 +3,8 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 480, //1920,
-  "outputSizeY": 270, //1080,
+  "outputSizeX": 1920,
+  "outputSizeY": 1080,
   "FPS": 30,
   "duration": 47,
   "startTime": 0,
@@ -437,19 +437,138 @@
 
     // switch to gamedev work
     {
-      "entityId": "NodeTextRelax",
-      "time": 21.5
+      "entityId": "NodeTextDishes",
+      "time": 22,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"AI Planning\", \"foreground\":{\"R\":0.0,\"G\":0.5,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextWatermelon",
+      "time": 22,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Path Finding\", \"foreground\":{\"R\":0.0,\"G\":0.5,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextRake",
+      "time": 22,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Player Input\", \"foreground\":{\"R\":0.0,\"G\":0.5,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextTrash",
+      "time": 22,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"World Sim\", \"foreground\":{\"R\":0.0,\"G\":0.5,\"B\":0.0,\"A\":1}}"
     },
     {
       "entityId": "NodeTextRelax",
       "time": 22,
-      "newValue": "{\"latex\":\"Sleep\", \"foreground\":{\"R\":0,\"G\":1,\"B\":0,\"A\":1}}"
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Render\", \"foreground\":{\"R\":0.0,\"G\":0.5,\"B\":0.0,\"A\":1}}"
+    },
+
+    {
+      "entityId": "NodeTextWashClothes",
+      "time": 22,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Network I/O\", \"foreground\":{\"R\":0.0,\"G\":0.5,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextFoldLaundry",
+      "time": 22,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"UI Update\", \"foreground\":{\"R\":0.0,\"G\":0.5,\"B\":0.0,\"A\":1}}"
+    },
+
+    // switch to rendering work
+    {
+      "entityId": "NodeTextDishes",
+      "time": 30,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"GBuffer Fill\", \"foreground\":{\"R\":0.5,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextWatermelon",
+      "time": 30,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"RT Shadows\", \"foreground\":{\"R\":0.5,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextRake",
+      "time": 30,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"GI Probe Update\", \"foreground\":{\"R\":0.5,\"G\":0.0,\"B\":0.0,\"A\":1}, \"scale\":0.75}"
+    },
+    {
+      "entityId": "NodeTextTrash",
+      "time": 30,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Lighting\", \"foreground\":{\"R\":0.5,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextRelax",
+      "time": 30,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Display Adaptation\", \"foreground\":{\"R\":0.5,\"G\":0.0,\"B\":0.0,\"A\":1}, \"scale\":0.7}"
+    },
+
+    {
+      "entityId": "NodeTextWashClothes",
+      "time": 30,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Render UI\", \"foreground\":{\"R\":0.5,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextFoldLaundry",
+      "time": 30,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Upscale\", \"foreground\":{\"R\":0.5,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+
+    // back to chores
+    {
+      "entityId": "NodeTextDishes",
+      "time": 36,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Dishes\", \"foreground\":{\"R\":0.0,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextWatermelon",
+      "time": 36,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Watermelon\", \"foreground\":{\"R\":0.0,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextRake",
+      "time": 36,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Rake\", \"foreground\":{\"R\":0.0,\"G\":0.0,\"B\":0.0,\"A\":1}, \"scale\":1}"
+    },
+    {
+      "entityId": "NodeTextTrash",
+      "time": 36,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Trash\", \"foreground\":{\"R\":0.0,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextRelax",
+      "time": 36,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Relax\", \"foreground\":{\"R\":0.0,\"G\":0.0,\"B\":0.0,\"A\":1}, \"scale\":1}"
+    },
+
+    {
+      "entityId": "NodeTextWashClothes",
+      "time": 36,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Wash Clothes\", \"foreground\":{\"R\":0.0,\"G\":0.0,\"B\":0.0,\"A\":1}}"
+    },
+    {
+      "entityId": "NodeTextFoldLaundry",
+      "time": 36,
+      "blendControlPoints": [ 0, 0, 0, 0 ],
+      "newValue": "{\"latex\":\"Fold Laundry\", \"foreground\":{\"R\":0.0,\"G\":0.0,\"B\":0.0,\"A\":1}}"
     }
+
   ]
 }
-
-// TODO: at 22 seconds, convert all the labels to gamedev stuff and change text color
-
-// TODO: at 30 seconds, convert it all to rendering things and change text color
-
-// TODO: at 36 seconds, convert back to original labes and original color

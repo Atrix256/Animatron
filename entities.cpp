@@ -453,6 +453,13 @@ bool EntityLatex_Action::DoAction(
     int maxPixelX = minPixelX + imageWidth;
     int maxPixelY = minPixelY + imageHeight;
 
+    // if it's completely off the screen, nothing to do
+    if (minPixelX > document.renderSizeX - 1 || maxPixelX < 0 ||
+        maxPixelX > document.renderSizeY - 1 || maxPixelY < 0)
+    {
+        return true;
+    }
+
     // clip the bounding box to the screen
     int startPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
     int endPixelX = Clamp(maxPixelX, 0, document.renderSizeX);
@@ -884,16 +891,25 @@ bool EntityCubicBezier_Action::DoAction(
             {
                 Data::Point2D offset = document.jitterSequence.points[sampleIndex];
 
-                float pixelX = ix + offset.X;
-                float pixelY = iy + offset.Y;
+                float pixelX = ix + offset.X - offsetPx.X;
+                float pixelY = iy + offset.Y - offsetPx.Y;
+
+                // TODO: could also do a lookup table!
+
+                // binary search to find where to start the scan from
+                auto it = std::upper_bound(cubicBezierData.points, &cubicBezierData.points[cubicBezierData.pointCount], pixelX,
+                    [] (const float pixelX, const CubicBezierData::CurvePoint& curvePoint)
+                    {
+                        return pixelX < curvePoint.x;
+                    }
+                );
+                uint32_t startIndex = (uint32_t)(it - cubicBezierData.points);
 
                 // since the points of the curve are dense, we can find the distance to the closest point instead of line segments
                 float closestDistanceSquared = FLT_MAX;
-                for (uint32_t pointIndex = 0; pointIndex < cubicBezierData.pointCount; ++pointIndex)
+                for (uint32_t pointIndex = startIndex; pointIndex < cubicBezierData.pointCount; ++pointIndex)
                 {
-                    CubicBezierData::CurvePoint p = cubicBezierData.points[pointIndex];
-                    p.x += offsetPx.X;
-                    p.y += offsetPx.Y;
+                   const CubicBezierData::CurvePoint& p = cubicBezierData.points[pointIndex];
 
                     if (p.x < floor(pixelX - curveWidth))
                         continue;
