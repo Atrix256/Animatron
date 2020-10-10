@@ -549,24 +549,13 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// TODO: time to see if it's faster writing bmp or png.
-
-// TODO: binary search in bezier to find where to start from, instead of just skipping past. also add the offset into pixel x instead of adding it to each point you are looking at (and copying!)
-
 // TODO: yeah probably could cache rendered frames for the times when there are sections of unanimated screen, and for interation
 
-// TODO: looking at the threads in sleepy, it looks like some threads finish their work long before others and stop helping.
-// like maybe everything is assigned a range, and some ranges just take longer.
-// Is there a way for OMP to do better here? some kind of work stealing or something. or maybe make the ranges smaller.
-
-// TODO: bezier curve is not working now that it's cached!
 // TODO: after CAS is working and clip 4 is done, merge this branch back to master.
 
-// TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it.
-
+// TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it. also write up the blog post about how it works
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
 
-// TODO: i think canvas to pixel and pixel to canvas need to flip the y axis over. the gradient suggests that.  investigate to be sure.
 
 
 // TODO: maybe gaussian blur the intro screen away. if so, do separated blur. maybe entities (or entity types?) should be able to have per thread storage, so that it could keep a temporary pixel buffer there for the separated blur?

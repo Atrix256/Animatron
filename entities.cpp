@@ -328,9 +328,6 @@ bool EntityTransform_Action::FrameInitialize(const Data::Document& document, Dat
 
 static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, int DPI, uint32_t& width, uint32_t& height, unsigned char*& pixels, int threadId)
 {
-
-    // TODO: can change color of the text when you change it
-
     // try and get the data from the CAS
     size_t hash = 0;
     Hash(hash, latex);
@@ -426,11 +423,7 @@ bool EntityLatex_Action::DoAction(
 {
     const Data::EntityLatex& latex = entity.data.latex;
 
-    // TODO: what else is using the "no serialze" fields? may be able to get rid of more usages
-
-    // TODO: can cache off image loading / resizing!
-
-    // TODO: entityId in the other place should probably be thread Id, if it's even needed anymore. maybe it isn't
+    // TODO: put images in CAS too before merging
 
     uint32_t imageWidth, imageHeight;
     unsigned char* imagePixels;
@@ -893,8 +886,6 @@ bool EntityCubicBezier_Action::DoAction(
 
                 float pixelX = ix + offset.X - offsetPx.X;
                 float pixelY = iy + offset.Y - offsetPx.Y;
-
-                // TODO: could also do a lookup table!
 
                 // binary search to find where to start the scan from
                 auto it = std::upper_bound(cubicBezierData.points, &cubicBezierData.points[cubicBezierData.pointCount], pixelX,

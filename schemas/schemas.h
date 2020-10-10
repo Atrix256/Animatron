@@ -259,4 +259,3 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")
 STRUCT_END()
 
-// TODO: Bezier curve should be able to parent each point off of a different parent! Do this in next checkin, you are using it for clip 3!
