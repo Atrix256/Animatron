@@ -13,7 +13,8 @@ bool EntityCircle_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityCircle& circle = entity.data.circle;
     Data::Point2D center = circle.center + Point3D_XY(GetParentPosition(document, entityMap, entity));
@@ -73,7 +74,8 @@ bool EntityRectangle_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityRectangle& rectangle = entity.data.rectangle;
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(rectangle.color);
@@ -193,7 +195,8 @@ bool EntityLine3D_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityLine3D& line3d = entity.data.line3d;
     Data::Point3D offset = GetParentPosition(document, entityMap, entity);
@@ -246,7 +249,8 @@ bool EntityLines3D_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap, 
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityLines3D& lines3d = entity.data.lines3d;
     Data::Point3D offset = GetParentPosition(document, entityMap, entity);
@@ -322,7 +326,7 @@ bool EntityTransform_Action::FrameInitialize(const Data::Document& document, Dat
     return true;
 }
 
-static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, int DPI, uint32_t& width, uint32_t& height, unsigned char*& pixels)
+static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, int DPI, uint32_t& width, uint32_t& height, unsigned char*& pixels, int threadId)
 {
 
     // TODO: can change color of the text when you change it
@@ -336,14 +340,11 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
     // if it doesn't exist, create it
     if (!data)
     {
-        static int callIndex = 0;
-        callIndex++;
-
         char buffer[4096];
 
         // make the latex file
         {
-            sprintf_s(buffer, "build/latex%i.tex", callIndex);
+            sprintf_s(buffer, "build/latex%i.tex", threadId);
             FILE* file = nullptr;
             fopen_s(&file, buffer, "wb");
             if (!file)
@@ -365,16 +366,16 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
 
         // make a dvi and then convert it to a png
         {
-            sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex", latexBinaries, callIndex);
+            sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex", latexBinaries, threadId);
             system(buffer);
 
-            sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", latexBinaries, DPI, callIndex, callIndex);
+            sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", latexBinaries, DPI, threadId, threadId);
             system(buffer);
         }
 
         // load the image, store it in the cache and then get it again
         {
-            sprintf_s(buffer, "build/latex%i.png", callIndex);
+            sprintf_s(buffer, "build/latex%i.png", threadId);
 
             int w, h, channels;
             stbi_uc* filePixels = stbi_load(buffer, &w, &h, &channels, 1);
@@ -420,7 +421,8 @@ bool EntityLatex_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityLatex& latex = entity.data.latex;
 
@@ -437,7 +439,7 @@ bool EntityLatex_Action::DoAction(
         // Not the most elegant thing, but it makes it resolution independent.
         int DPI = int((float(CanvasSizeInPixels(document)) / 1080.0f) * latex.scale * 300.0f);
 
-        if (!GetOrMakeLatexImage(document.config.latexbinaries.c_str(), latex.latex.c_str(), DPI, imageWidth, imageHeight, imagePixels))
+        if (!GetOrMakeLatexImage(document.config.latexbinaries.c_str(), latex.latex.c_str(), DPI, imageWidth, imageHeight, imagePixels, threadId))
             return false;
     }
 
@@ -504,7 +506,8 @@ bool EntityLinearGradient_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityLinearGradient& linearGradient = entity.data.linearGradient;
 
@@ -574,7 +577,8 @@ bool EntityDigitalDissolve_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityDigitalDissolve& digitalDissolve = entity.data.digitalDissolve;
 
@@ -687,7 +691,8 @@ bool EntityImage_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityImage& image = entity.data.image;
 
@@ -805,8 +810,10 @@ static void GetOrMakeCubicBezierData(const Data::Document& document, const Data:
         *((uint32_t*)&newData[0]) = (uint32_t)points.size();
         memcpy(&newData[sizeof(uint32_t)], points.data(), points.size() * sizeof(points[0]));
 
+        // TODO: could make a Set that took a std::vector<T> and did the right thing internally
+
         // set the data
-        CAS::Get().Set(hash, newData.data());
+        CAS::Get().Set(hash, newData.data(), newData.size());
 
         // get the data
         data = CAS::Get().Get(hash);
@@ -821,21 +828,29 @@ bool EntityCubicBezier_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
-    const Data::Entity& entity)
+    const Data::Entity& entity,
+    int threadId)
 {
     const Data::EntityCubicBezier& cubicBezier = entity.data.cubicBezier;
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(cubicBezier.color);
 
-    Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));
+    Data::Point2D offsetCanvas = Point3D_XY(GetParentPosition(document, entityMap, entity));
+    Data::Point2D offsetPx;
+    CanvasToPixelFloat(document, offsetCanvas.X, offsetCanvas.Y, offsetPx.X, offsetPx.Y);
+
+    Data::Point2D originPx;
+    CanvasToPixelFloat(document, 0.0f, 0.0f, originPx.X, originPx.Y);
+    offsetPx = offsetPx - originPx;
+    // TODO: make a CanvasOffsetToPixelOffset function
 
     // get or make the cached bezier data (expensive to calculate each frame)
     CubicBezierData cubicBezierData;
     GetOrMakeCubicBezierData(document, cubicBezier, cubicBezierData);
 
-    Data::Point3D A = ToPoint3D(offset) + cubicBezier.A;
-    Data::Point3D B = ToPoint3D(offset) + cubicBezier.B;
-    Data::Point3D C = ToPoint3D(offset) + cubicBezier.C;
-    Data::Point3D D = ToPoint3D(offset) + cubicBezier.D;
+    Data::Point3D A = ToPoint3D(offsetCanvas) + cubicBezier.A;
+    Data::Point3D B = ToPoint3D(offsetCanvas) + cubicBezier.B;
+    Data::Point3D C = ToPoint3D(offsetCanvas) + cubicBezier.C;
+    Data::Point3D D = ToPoint3D(offsetCanvas) + cubicBezier.D;
 
     // get the bounding box of the curve, from the bounding box of its control points
     float minCanvasX, minCanvasY, maxCanvasX, maxCanvasY;
@@ -877,8 +892,8 @@ bool EntityCubicBezier_Action::DoAction(
                 for (uint32_t pointIndex = 0; pointIndex < cubicBezierData.pointCount; ++pointIndex)
                 {
                     CubicBezierData::CurvePoint p = cubicBezierData.points[pointIndex];
-                    p.x += offset.X;
-                    p.y += offset.Y;
+                    p.x += offsetPx.X;
+                    p.y += offsetPx.Y;
 
                     if (p.x < floor(pixelX - curveWidth))
                         continue;

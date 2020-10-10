@@ -41,7 +41,7 @@ struct EntityTimeline
     std::vector<EntityTimelineKeyframe> keyFrames;
 };
 
-bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::ColorPMA>& pixels, int frameIndex)
+bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::ColorPMA>& pixels, int frameIndex, int threadId)
 {
     // setup for the frame
     float frameTime = (float(frameIndex) / float(document.FPS)) + document.startTime;
@@ -138,7 +138,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity); break;
+                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity, threadId); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -426,9 +426,15 @@ int main(int argc, char** argv)
         omp_set_num_threads(1);
     #endif
 
-    #pragma omp parallel for
-    for (int frameIndex = 0; frameIndex < framesTotal; ++frameIndex)
+    std::atomic<int> nextFrameIndex;
+
+    #pragma omp parallel
+    while(1)
     {
+        int frameIndex = nextFrameIndex++;
+        if (frameIndex >= framesTotal)
+            break;
+
         ThreadData& threadData = threadsData[omp_get_thread_num()];
 
         // report progress
@@ -444,7 +450,7 @@ int main(int argc, char** argv)
         }
 
         // render a frame
-        if (!GenerateFrame(document, entityTimelines, threadData.pixelsPMA, frameIndex))
+        if (!GenerateFrame(document, entityTimelines, threadData.pixelsPMA, frameIndex, omp_get_thread_num()))
         {
             wasError = true;
             break;
@@ -540,8 +546,14 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// TODO: why does the first run of clip 4 make 7 latex CAS entries, and a second run makes 1 more?
-// TODO: also, many threads make the CAS item in parallel. that is not great ):   could maybe make an entry in the CAS that it's pending and have threads spinlock til it's ready?
+// TODO: yeah probably could cache rendered frames for the times when there are sections of unanimated screen, and for interation
+
+// TODO: looking at the threads in sleepy, it looks like some threads finish their work long before others and stop helping.
+// like maybe everything is assigned a range, and some ranges just take longer.
+// Is there a way for OMP to do better here? some kind of work stealing or something. or maybe make the ranges smaller.
+
+// TODO: bezier curve is not working now that it's cached!
+// TODO: after CAS is working and clip 4 is done, merge this branch back to master.
 
 // TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it.
 

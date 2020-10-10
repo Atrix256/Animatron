@@ -3,8 +3,8 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 960, //480, //1920,
-  "outputSizeY": 540, //270, //1080,
+  "outputSizeX": 480, //1920,
+  "outputSizeY": 270, //1080,
   "FPS": 30,
   "duration": 47,
   "startTime": 0,
@@ -386,6 +386,8 @@
     },
     {
       "id": "ConnectMakeLoop",
+      "createTime": 8,
+      "destroyTime": 16.5,
       "zorder": 2,
       "data": {
         "cubicBezier": {
@@ -403,7 +405,7 @@
             "Y": 30
           },
           "D": {
-            "X": 4.5,
+            "X": 5.5,
             "Y": 10
           },
           "color": {
@@ -416,7 +418,7 @@
   "keyFrames": [
     {
       "entityId": "ConnectMakeLoop",
-      "time": 8
+      "time": 8.1
     },
     {
       "entityId": "ConnectMakeLoop",
@@ -429,7 +431,7 @@
     },
     {
       "entityId": "ConnectMakeLoop",
-      "time": 16.5,
+      "time": 16.4,
       "newValue": "{\"color\": {\"A\":0}}"
     },
 
@@ -446,10 +448,8 @@
   ]
 }
 
-// TODO: oh. the reason why the text (and scale) won't change is cause the latex was already rendered! maybe time to make a CAS?
+// TODO: at 22 seconds, convert all the labels to gamedev stuff and change text color
 
-// TODO: at 22 seconds, convert all the labels to gamedev stuff
+// TODO: at 30 seconds, convert it all to rendering things and change text color
 
-// TODO: at 30 seconds, convert it all to rendering things
-
-// TODO: at 36 seconds, convert back to original labes
+// TODO: at 36 seconds, convert back to original labes and original color
