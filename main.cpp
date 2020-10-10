@@ -15,6 +15,7 @@
 #include "schemas/lerp.h"
 #include "config.h"
 #include "entities.h"
+#include "cas.h"
 
 #include "utils.h"
 
@@ -40,7 +41,7 @@ struct EntityTimeline
     std::vector<EntityTimelineKeyframe> keyFrames;
 };
 
-bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::ColorPMA>& pixels, int frameIndex)
+bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::ColorPMA>& pixels, int frameIndex, int threadId)
 {
     // setup for the frame
     float frameTime = (float(frameIndex) / float(document.FPS)) + document.startTime;
@@ -137,7 +138,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity); break;
+                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity, threadId); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -205,6 +206,13 @@ int main(int argc, char** argv)
     {
         printf("Wrong version number: %i.%i, not %i.%i\n", document.versionMajor, document.versionMinor, c_documentVersionMajor, c_documentVersionMinor);
         system("pause");
+        return 1;
+    }
+
+    // initialize CAS
+    if (!CAS::Get().Init())
+    {
+        printf("Could not init CAS\n");
         return 1;
     }
 
@@ -418,9 +426,15 @@ int main(int argc, char** argv)
         omp_set_num_threads(1);
     #endif
 
-    #pragma omp parallel for
-    for (int frameIndex = 0; frameIndex < framesTotal; ++frameIndex)
+    std::atomic<int> nextFrameIndex;
+
+    #pragma omp parallel
+    while(1)
     {
+        int frameIndex = nextFrameIndex++;
+        if (frameIndex >= framesTotal)
+            break;
+
         ThreadData& threadData = threadsData[omp_get_thread_num()];
 
         // report progress
@@ -436,7 +450,7 @@ int main(int argc, char** argv)
         }
 
         // render a frame
-        if (!GenerateFrame(document, entityTimelines, threadData.pixelsPMA, frameIndex))
+        if (!GenerateFrame(document, entityTimelines, threadData.pixelsPMA, frameIndex, omp_get_thread_num()))
         {
             wasError = true;
             break;
@@ -480,8 +494,11 @@ int main(int argc, char** argv)
         }
 
         // write it out
-        sprintf_s(threadData.outFileName, "build/%i.png", frameIndex);
-        stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+        sprintf_s(threadData.outFileName, "build/%i.%s", frameIndex, (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
+        if (document.config.writeFrames == Data::ImageFileType::PNG)
+            stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+        else
+            stbi_write_bmp(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data());
 
         framesDone++;
     }
@@ -497,9 +514,9 @@ int main(int argc, char** argv)
 
         char inputs[1024];
         if (!hasAudio)
-            sprintf_s(inputs, "-i build/%%d.png");
+            sprintf_s(inputs, "-i build/%%d.%s", (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
         else
-            sprintf_s(inputs, "-i build/%%d.png -i %s", document.audioFile.c_str());
+            sprintf_s(inputs, "-i build/%%d.%s -i %s", (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp", document.audioFile.c_str());
 
         char audioOptions[1024];
         if (hasAudio)
@@ -532,11 +549,15 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it.
+// TODO: yeah probably could cache rendered frames for the times when there are sections of unanimated screen, and for interation
 
+// TODO: after CAS is working and clip 4 is done, merge this branch back to master.
+
+// TODO: make (resized) images use CAS
+
+// TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it. also write up the blog post about how it works
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
 
-// TODO: i think canvas to pixel and pixel to canvas need to flip the y axis over. the gradient suggests that.  investigate to be sure.
 
 
 // TODO: maybe gaussian blur the intro screen away. if so, do separated blur. maybe entities (or entity types?) should be able to have per thread storage, so that it could keep a temporary pixel buffer there for the separated blur?
@@ -580,6 +601,7 @@ TODO:
  * a transform is probably a parent all it's own. local / global rotation pivot?
 
  * textures
+
 
  * Parent off of a layer to render into a sublayer which is then merged back into the main image with alpha blending.
 

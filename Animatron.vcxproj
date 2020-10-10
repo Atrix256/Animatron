@@ -120,14 +120,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cas.cpp" />
     <ClCompile Include="entities.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cas.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="entities.h" />
     <ClInclude Include="reflectedvectormath.h" />
+    <ClInclude Include="schemas\fnv1a.h" />
+    <ClInclude Include="schemas\hash.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="schemas\json.h" />

@@ -22,7 +22,8 @@ struct EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity)
+        const Data::Entity& entity,
+        int threadId)
     {
         return true;
     }
@@ -44,7 +45,8 @@ struct EntityFill_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity)
+        const Data::Entity& entity,
+        int threadId)
     {
         Fill(pixels, entity.data.fill.color);
         return true;
@@ -59,7 +61,8 @@ struct EntityCircle_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.circle.center); }
 };
@@ -70,7 +73,8 @@ struct EntityRectangle_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.rectangle.center); }
 };
@@ -81,7 +85,8 @@ struct EntityLine_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity)
+        const Data::Entity& entity,
+        int threadId)
     {
         Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));
 
@@ -98,7 +103,8 @@ struct EntityLine3D_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return (entity.data.line3d.A + entity.data.line3d.B) * 0.5f; }
 };
@@ -109,7 +115,8 @@ struct EntityLines3D_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity)
     {
@@ -155,7 +162,8 @@ struct EntityLatex_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.latex.position); }
 };
@@ -168,7 +176,8 @@ struct EntityLinearGradient_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return Data::Point3D{ 0.0f, 0.0f, 0.0f }; }
 };
@@ -179,7 +188,8 @@ struct EntityDigitalDissolve_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return Data::Point3D{ 0.0f, 0.0f, 0.0f }; }
 };
@@ -194,7 +204,8 @@ struct EntityImage_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.image.position); }
 };
@@ -205,7 +216,8 @@ struct EntityCubicBezier_Action : EntityActionBase
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
-        const Data::Entity& entity);
+        const Data::Entity& entity,
+        int threadId);
 
     static Data::Point3D GetPosition(const Data::Entity& entity)
     {

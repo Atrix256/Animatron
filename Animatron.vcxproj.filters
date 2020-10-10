@@ -4,6 +4,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="entities.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="cas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="schemas">
@@ -38,6 +39,13 @@
     <ClInclude Include="vectormath.h" />
     <ClInclude Include="reflectedvectormath.h" />
     <ClInclude Include="entities.h" />
+    <ClInclude Include="schemas\fnv1a.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="schemas\hash.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="cas.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json">

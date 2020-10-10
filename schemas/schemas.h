@@ -80,6 +80,11 @@ ENUM_BEGIN(Data, DigitalDissolveType, "Types of digital dissolve")
     ENUM_ITEM(BlueNoise, "2d blue noise texture, made with void and cluster.")
 ENUM_END()
 
+ENUM_BEGIN(Data, ImageFileType, "Types of image files")
+    ENUM_ITEM(BMP, "Lossless, uncompressed")
+    ENUM_ITEM(PNG, "Lossless, compressed")
+ENUM_END()
+
 // ----------------------------- Specific Entity Types -----------------------------
 
 STRUCT_BEGIN(Data, EntityFill, "Fills the screen")
@@ -157,9 +162,6 @@ STRUCT_BEGIN(Data, EntityLatex, "")
     STRUCT_FIELD(Data::Color, foreground, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 1.0f }, "The foreground color of the latex (where it's black in a rendered latex image)")
     STRUCT_FIELD(Data::Color, background, Data::Color{ 0.0f COMMA 0.0f COMMA 0.0f COMMA 0.0f }, "The foreground color of the latex (where it's white in a rendered latex image)")
     STRUCT_FIELD(std::string, latex, "", "The actual latex to render.")
-    STRUCT_FIELD_NO_SERIALIZE(uint32_t, _width, 0, "the width of the generated image")
-    STRUCT_FIELD_NO_SERIALIZE(uint32_t, _height, 0, "the height of the generated image")
-    STRUCT_FIELD_NO_SERIALIZE(std::vector<uint8_t>, _pixels, std::vector<uint8_t>(), "The U8 pixels of the generated image")
 STRUCT_END()
 
 STRUCT_BEGIN(Data, EntityLinearGradient, "A linear gradient: define a 2d half space and a mapping from the scalar values to colors")
@@ -219,6 +221,8 @@ STRUCT_BEGIN(Data, Configuration, "Application configuration, read from config.j
 
     STRUCT_FIELD(std::string, latexbinaries, "", "The path to where pdflatex.exe and dvipng.exe are. Used to render text and formulas. MikTex suggested!")
     STRUCT_FIELD(std::string, ffmpeg, "", "The path to where ffmpeg.exe is, including the exe name. Used to assemble frames into the final video. ")
+
+    STRUCT_FIELD(ImageFileType, writeFrames, ImageFileType::PNG, "The file type to write frames as. PNG takes more CPU to compress before write, BMP takes more disk bandwidth to write.")
 STRUCT_END()
 
 // ----------------------------- The Document -----------------------------
@@ -255,4 +259,3 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")
 STRUCT_END()
 
-// TODO: Bezier curve should be able to parent each point off of a different parent! Do this in next checkin, you are using it for clip 3!

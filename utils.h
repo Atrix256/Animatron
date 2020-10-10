@@ -82,6 +82,15 @@ inline float CanvasLengthToPixelLength(const Data::Document& document, float can
     return px2 - px1;
 }
 
+inline void CanvasOffsetToPixelOffset(const Data::Document& document, float canvasX, float canvasY, float& pixelX, float& pixelY)
+{
+    float px1, px2, py1, py2;
+    CanvasToPixelFloat(document, 0.0f, 0.0f, px1, py1);
+    CanvasToPixelFloat(document, canvasX, canvasY, px2, py2);
+    pixelX = px2 - px1;
+    pixelY = py2 - py1;
+}
+
 inline void CanvasToPixel(const Data::Document& document, float canvasX, float canvasY, int& pixelX, int& pixelY)
 {
     float pixelFloatX, pixelFloatY;
