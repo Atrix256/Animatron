@@ -494,8 +494,11 @@ int main(int argc, char** argv)
         }
 
         // write it out
-        sprintf_s(threadData.outFileName, "build/%i.png", frameIndex);
-        stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+        sprintf_s(threadData.outFileName, "build/%i.%s", frameIndex, (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
+        if (document.config.writeFrames == Data::ImageFileType::PNG)
+            stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+        else
+            stbi_write_bmp(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data());
 
         framesDone++;
     }
@@ -511,9 +514,9 @@ int main(int argc, char** argv)
 
         char inputs[1024];
         if (!hasAudio)
-            sprintf_s(inputs, "-i build/%%d.png");
+            sprintf_s(inputs, "-i build/%%d.%s", (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
         else
-            sprintf_s(inputs, "-i build/%%d.png -i %s", document.audioFile.c_str());
+            sprintf_s(inputs, "-i build/%%d.%s -i %s", (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp", document.audioFile.c_str());
 
         char audioOptions[1024];
         if (hasAudio)
@@ -546,7 +549,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// TODO: maybe have an option to output bmp instead of png? might be faster!
+// TODO: time to see if it's faster writing bmp or png.
 
 // TODO: binary search in bezier to find where to start from, instead of just skipping past. also add the offset into pixel x instead of adding it to each point you are looking at (and copying!)
 

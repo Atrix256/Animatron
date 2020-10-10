@@ -80,6 +80,11 @@ ENUM_BEGIN(Data, DigitalDissolveType, "Types of digital dissolve")
     ENUM_ITEM(BlueNoise, "2d blue noise texture, made with void and cluster.")
 ENUM_END()
 
+ENUM_BEGIN(Data, ImageFileType, "Types of image files")
+    ENUM_ITEM(BMP, "Lossless, uncompressed")
+    ENUM_ITEM(PNG, "Lossless, compressed")
+ENUM_END()
+
 // ----------------------------- Specific Entity Types -----------------------------
 
 STRUCT_BEGIN(Data, EntityFill, "Fills the screen")
@@ -216,6 +221,8 @@ STRUCT_BEGIN(Data, Configuration, "Application configuration, read from config.j
 
     STRUCT_FIELD(std::string, latexbinaries, "", "The path to where pdflatex.exe and dvipng.exe are. Used to render text and formulas. MikTex suggested!")
     STRUCT_FIELD(std::string, ffmpeg, "", "The path to where ffmpeg.exe is, including the exe name. Used to assemble frames into the final video. ")
+
+    STRUCT_FIELD(ImageFileType, writeFrames, ImageFileType::PNG, "The file type to write frames as. PNG takes more CPU to compress before write, BMP takes more disk bandwidth to write.")
 STRUCT_END()
 
 // ----------------------------- The Document -----------------------------
