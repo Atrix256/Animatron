@@ -3,10 +3,10 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 480, //1920,
-  "outputSizeY": 270, //1080,
+  "outputSizeX": 960, //480, //1920,
+  "outputSizeY": 540, //270, //1080,
   "FPS": 30,
-  "duration": 2,
+  "duration": 47,
   "startTime": 0,
 
   "audioFile": "assets/4.wav",
@@ -90,7 +90,7 @@
         "rectangle": {
           "center": {
             "X": -20,
-            "Y":  20
+            "Y": 20
           },
           "radius": {
             "X": 10,
@@ -272,6 +272,17 @@
       }
     },
     {
+      "id": "NodeTextRelax",
+      "zorder": 1,
+      "parent": "NodeBoxRelax",
+      "data": {
+        "latex": {
+          "latex": "Relax",
+          "scale": 1
+        }
+      }
+    },
+    {
       "id": "ConnectWatermelonTrash",
       "zorder": 2,
       "data": {
@@ -374,17 +385,71 @@
       }
     },
     {
-      "id": "NodeTextRelax",
-      "zorder": 1,
-      "parent": "NodeBoxRelax",
+      "id": "ConnectMakeLoop",
+      "zorder": 2,
       "data": {
-        "latex": {
-          "latex": "Relax",
-          "scale": 1
+        "cubicBezier": {
+          "width": 0.25,
+          "A": {
+            "X": 67,
+            "Y": -5
+          },
+          "B": {
+            "X": 90,
+            "Y": 30
+          },
+          "C": {
+            "X": -10,
+            "Y": 30
+          },
+          "D": {
+            "X": 4.5,
+            "Y": 10
+          },
+          "color": {
+            "A": 0
+          }
         }
       }
     }
   ],
   "keyFrames": [
+    {
+      "entityId": "ConnectMakeLoop",
+      "time": 8
+    },
+    {
+      "entityId": "ConnectMakeLoop",
+      "time": 8.5,
+      "newValue": "{\"color\": {\"A\":1}}"
+    },
+    {
+      "entityId": "ConnectMakeLoop",
+      "time": 16
+    },
+    {
+      "entityId": "ConnectMakeLoop",
+      "time": 16.5,
+      "newValue": "{\"color\": {\"A\":0}}"
+    },
+
+    // switch to gamedev work
+    {
+      "entityId": "NodeTextRelax",
+      "time": 21.5
+    },
+    {
+      "entityId": "NodeTextRelax",
+      "time": 22,
+      "newValue": "{\"latex\":\"Sleep\", \"foreground\":{\"R\":0,\"G\":1,\"B\":0,\"A\":1}}"
+    }
   ]
 }
+
+// TODO: oh. the reason why the text (and scale) won't change is cause the latex was already rendered! maybe time to make a CAS?
+
+// TODO: at 22 seconds, convert all the labels to gamedev stuff
+
+// TODO: at 30 seconds, convert it all to rendering things
+
+// TODO: at 36 seconds, convert back to original labes

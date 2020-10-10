@@ -15,6 +15,7 @@
 #include "schemas/lerp.h"
 #include "config.h"
 #include "entities.h"
+#include "cas.h"
 
 #include "utils.h"
 
@@ -205,6 +206,13 @@ int main(int argc, char** argv)
     {
         printf("Wrong version number: %i.%i, not %i.%i\n", document.versionMajor, document.versionMinor, c_documentVersionMajor, c_documentVersionMinor);
         system("pause");
+        return 1;
+    }
+
+    // initialize CAS
+    if (!CAS::Get().Init())
+    {
+        printf("Could not init CAS\n");
         return 1;
     }
 
@@ -532,6 +540,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
+// TODO: why does the first run of clip 4 make 7 latex CAS entries, and a second run makes 1 more?
+// TODO: also, many threads make the CAS item in parallel. that is not great ):   could maybe make an entry in the CAS that it's pending and have threads spinlock til it's ready?
+
 // TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it.
 
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
@@ -580,6 +591,7 @@ TODO:
  * a transform is probably a parent all it's own. local / global rotation pivot?
 
  * textures
+
 
  * Parent off of a layer to render into a sublayer which is then merged back into the main image with alpha blending.
 

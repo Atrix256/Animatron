@@ -6,6 +6,8 @@
 #include "schemas/lerp.h"
 #include <algorithm>
 #include "entities.h"
+#include "schemas/hash.h"
+#include "cas.h"
 
 bool EntityCircle_Action::DoAction(
     const Data::Document& document,
@@ -320,70 +322,97 @@ bool EntityTransform_Action::FrameInitialize(const Data::Document& document, Dat
     return true;
 }
 
+static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, int DPI, uint32_t& width, uint32_t& height, unsigned char*& pixels)
+{
+
+    // TODO: can change color of the text when you change it
+
+    // try and get the data from the CAS
+    size_t hash = 0;
+    Hash(hash, latex);
+    Hash(hash, DPI);
+    unsigned char* data = (unsigned char*)CAS::Get().Get(hash);
+
+    // if it doesn't exist, create it
+    if (!data)
+    {
+        static int callIndex = 0;
+        callIndex++;
+
+        char buffer[4096];
+
+        // make the latex file
+        {
+            sprintf_s(buffer, "build/latex%i.tex", callIndex);
+            FILE* file = nullptr;
+            fopen_s(&file, buffer, "wb");
+            if (!file)
+            {
+                printf("Could not open file for write: %s\n", buffer);
+                return false;
+            }
+
+            fprintf(file,
+                "\\documentclass[preview]{standalone}\n"
+                "\\begin{document}\n"
+                "%s\n"
+                "\\end{document}\n",
+                latex
+            );
+
+            fclose(file);
+        }
+
+        // make a dvi and then convert it to a png
+        {
+            sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex", latexBinaries, callIndex);
+            system(buffer);
+
+            sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", latexBinaries, DPI, callIndex, callIndex);
+            system(buffer);
+        }
+
+        // load the image, store it in the cache and then get it again
+        {
+            sprintf_s(buffer, "build/latex%i.png", callIndex);
+
+            int w, h, channels;
+            stbi_uc* filePixels = stbi_load(buffer, &w, &h, &channels, 1);
+
+            if (filePixels == nullptr)
+            {
+                printf("could not load file %s\n", buffer);
+                return false;
+            }
+
+            // store this data in the CAS
+            width = w;
+            height = h;
+            std::vector<unsigned char> newData;
+            newData.resize(sizeof(width) + sizeof(height) + width * height);
+            *((uint32_t*)&newData[sizeof(uint32_t) * 0]) = width;
+            *((uint32_t*)&newData[sizeof(uint32_t) * 1]) = height;
+            memcpy(&newData[sizeof(uint32_t) * 2], filePixels, width * height);
+            CAS::Get().Set(hash, newData.data(), newData.size());
+
+            // free the memory
+            stbi_image_free(filePixels);
+        }
+
+        // Get the data from the CAS now that we have set it
+        data = (unsigned char*)CAS::Get().Get(hash);
+    }
+
+    // set the data we got from the CAS
+    width = ((uint32_t*)data)[0];
+    height = ((uint32_t*)data)[1];
+    pixels = &data[sizeof(uint32_t) * 2];
+
+    return true;
+}
 
 bool EntityLatex_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
 {
-    Data::EntityLatex& latex = entity.data.latex;
-
-    char buffer[4096];
-
-    // make the latex file
-    {
-        sprintf_s(buffer, "build/latex%i.tex", entityIndex);
-        FILE* file = nullptr;
-        fopen_s(&file, buffer, "wb");
-        if (!file)
-        {
-            printf("Could not open file for write: %s\n", buffer);
-            return false;
-        }
-
-        fprintf(file,
-            "\\documentclass[preview]{standalone}\n"
-            "\\begin{document}\n"
-            "%s\n"
-            "\\end{document}\n",
-            latex.latex.c_str()
-        );
-
-        fclose(file);
-    }
-
-    // make a dvi and then convert it to a png
-    {
-        // dvipng -T tight -D 300 test.dvi
-        sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex", document.config.latexbinaries.c_str(), entityIndex);
-        system(buffer);
-
-        // At 1920x1080, a scale of 1.0 gives you 300 DPI rendering from latex.
-        // Not the most elegant thing, but it makes it resolution independent.
-        int DPI = int((float(CanvasSizeInPixels(document)) / 1080.0f) * latex.scale * 300.0f);
-
-        sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", document.config.latexbinaries.c_str(), DPI, entityIndex, entityIndex);
-        system(buffer);
-    }
-
-    // load the image
-    {
-        sprintf_s(buffer, "build/latex%i.png", entityIndex);
-
-        int w, h, channels;
-        stbi_uc* pixels = stbi_load(buffer, &w, &h, &channels, 1);
-
-        if (pixels == nullptr)
-        {
-            printf("could not load file %s\n", buffer);
-            return false;
-        }
-
-        // set the width and height and copy the pixels
-        latex._width = w;
-        latex._height = h;
-        latex._pixels.resize(w * h);
-        memcpy(latex._pixels.data(), pixels, w * h);
-
-        stbi_image_free(pixels);
-    }
     return true;
 }
 
@@ -395,15 +424,32 @@ bool EntityLatex_Action::DoAction(
 {
     const Data::EntityLatex& latex = entity.data.latex;
 
+    // TODO: what else is using the "no serialze" fields? may be able to get rid of more usages
+
+    // TODO: can cache off image loading / resizing!
+
+    // TODO: entityId in the other place should probably be thread Id, if it's even needed anymore. maybe it isn't
+
+    uint32_t imageWidth, imageHeight;
+    unsigned char* imagePixels;
+    {
+        // At 1920x1080, a scale of 1.0 gives you 300 DPI rendering from latex.
+        // Not the most elegant thing, but it makes it resolution independent.
+        int DPI = int((float(CanvasSizeInPixels(document)) / 1080.0f) * latex.scale * 300.0f);
+
+        if (!GetOrMakeLatexImage(document.config.latexbinaries.c_str(), latex.latex.c_str(), DPI, imageWidth, imageHeight, imagePixels))
+            return false;
+    }
+
     Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));
 
     // Get the box of the latex image
     int positionX, positionY;
     CanvasToPixel(document, latex.position.X + offset.X, latex.position.Y + offset.Y, positionX, positionY);
-    int minPixelX = positionX - latex._width / 2;
-    int minPixelY = positionY - latex._height / 2;
-    int maxPixelX = minPixelX + latex._width;
-    int maxPixelY = minPixelY + latex._height;
+    int minPixelX = positionX - imageWidth / 2;
+    int minPixelY = positionY - imageHeight / 2;
+    int maxPixelX = minPixelX + imageWidth;
+    int maxPixelY = minPixelY + imageHeight;
 
     // clip the bounding box to the screen
     int startPixelX = Clamp(minPixelX, 0, document.renderSizeX - 1);
@@ -421,7 +467,7 @@ bool EntityLatex_Action::DoAction(
     // Draw the image
     for (int iy = startPixelY; iy < endPixelY; ++iy)
     {
-        const uint8_t* srcPixel = &latex._pixels[(iy - startPixelY + offsetY) * latex._width + offsetX];
+        const uint8_t* srcPixel = &imagePixels[(iy - startPixelY + offsetY) * imageWidth + offsetX];
         Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + startPixelX];
 
         for (int ix = startPixelX; ix < endPixelX; ++ix)
@@ -679,6 +725,97 @@ bool EntityImage_Action::DoAction(
     return true;
 }
 
+// TODO: put this and the other cached functiosn somewhere else?
+
+struct CubicBezierData
+{
+    struct CurvePoint
+    {
+        float t;
+        float x, y;
+    };
+
+    uint32_t pointCount = 0;
+    CurvePoint* points = nullptr;
+};
+
+static void GetOrMakeCubicBezierData(const Data::Document& document, const Data::EntityCubicBezier& cubicBezier, CubicBezierData& cubicBezierData)
+{
+    // hash the input
+    size_t hash = 0;
+    Hash(hash, document.renderSizeX);
+    Hash(hash, document.renderSizeY);
+    Hash(hash, cubicBezier.A);
+    Hash(hash, cubicBezier.B);
+    Hash(hash, cubicBezier.C);
+    Hash(hash, cubicBezier.D);
+
+    const Data::Point3D& A = cubicBezier.A;
+    const Data::Point3D& B = cubicBezier.B;
+    const Data::Point3D& C = cubicBezier.C;
+    const Data::Point3D& D = cubicBezier.D;
+
+    // if the data isn't already in the CAS make it and then put it in
+    void* data = CAS::Get().Get(hash);
+    if (!data)
+    {
+        // first we want to turn the curve into a bunch of line segments which are no more than 1 pixel long
+        std::vector<CubicBezierData::CurvePoint> points;
+        auto InsertCurvePoint = [&](float t)
+        {
+            float cz = CubicBezierInterpolation(A.Z, B.Z, C.Z, D.Z, t);
+
+            float cx = CubicBezierInterpolation(A.X * A.Z, B.X * B.Z, C.X * C.Z, D.X * D.Z, t);
+            cx /= cz;
+
+            float cy = CubicBezierInterpolation(A.Y * A.Z, B.Y * B.Z, C.Y * C.Z, D.Y * D.Z, t);
+            cy /= cz;
+
+            float px, py;
+            CanvasToPixelFloat(document, cx, cy, px, py);
+
+            points.push_back({ t, px, py });
+            std::sort(points.begin(), points.end(), [](const CubicBezierData::CurvePoint& A, const CubicBezierData::CurvePoint& B) { return A.t < B.t; });
+        };
+        InsertCurvePoint(0.0f);
+        InsertCurvePoint(1.0f);
+        int index = 0;
+        while (index + 1 < points.size())
+        {
+            vec2 a = vec2{ points[index].x, points[index].y };
+            vec2 b = vec2{ points[index + 1].x, points[index + 1].y };
+
+            float length = Length(b - a);
+            if (length > 1.0f)
+            {
+                InsertCurvePoint((points[index].t + points[index + 1].t) / 2.0f);
+            }
+            else
+            {
+                index++;
+            }
+        }
+
+        // Now sort the points by x coordinate, so that we can do dimensional reduction and only test the points near our point on one axis
+        std::sort(points.begin(), points.end(), [](const CubicBezierData::CurvePoint& A, const CubicBezierData::CurvePoint& B) { return A.x < B.x; });
+
+        // put the data into contiguous memory and put it in the CAS
+        std::vector<unsigned char> newData;
+        newData.resize(sizeof(uint32_t) + points.size() * sizeof(points[0]));
+        *((uint32_t*)&newData[0]) = (uint32_t)points.size();
+        memcpy(&newData[sizeof(uint32_t)], points.data(), points.size() * sizeof(points[0]));
+
+        // set the data
+        CAS::Get().Set(hash, newData.data());
+
+        // get the data
+        data = CAS::Get().Get(hash);
+    }
+
+    // Fill out the data from the CAS
+    cubicBezierData.pointCount = ((uint32_t*)data)[0];
+    cubicBezierData.points = (CubicBezierData::CurvePoint*) &((unsigned char*)data)[sizeof(uint32_t)];
+}
 
 bool EntityCubicBezier_Action::DoAction(
     const Data::Document& document,
@@ -691,55 +828,14 @@ bool EntityCubicBezier_Action::DoAction(
 
     Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));
 
+    // get or make the cached bezier data (expensive to calculate each frame)
+    CubicBezierData cubicBezierData;
+    GetOrMakeCubicBezierData(document, cubicBezier, cubicBezierData);
+
     Data::Point3D A = ToPoint3D(offset) + cubicBezier.A;
     Data::Point3D B = ToPoint3D(offset) + cubicBezier.B;
     Data::Point3D C = ToPoint3D(offset) + cubicBezier.C;
     Data::Point3D D = ToPoint3D(offset) + cubicBezier.D;
-
-    // first we want to turn the curve into a bunch of line segments which are no more than 1 pixel long
-    struct CurvePoint
-    {
-        float t;
-        float x, y;
-    };
-    std::vector<CurvePoint> points;
-    auto InsertCurvePoint = [&](float t)
-    {
-        float cz = CubicBezierInterpolation(A.Z, B.Z, C.Z, D.Z, t);
-
-        float cx = CubicBezierInterpolation(A.X * A.Z, B.X * B.Z, C.X * C.Z, D.X * D.Z, t);
-        cx /= cz;  
-
-        float cy = CubicBezierInterpolation(A.Y * A.Z, B.Y * B.Z, C.Y * C.Z, D.Y * D.Z, t);
-        cy /= cz;
-
-        float px, py;
-        CanvasToPixelFloat(document, cx, cy, px, py);
-
-        points.push_back({ t, px, py });
-        std::sort(points.begin(), points.end(), [](const CurvePoint& A, const CurvePoint& B) { return A.t < B.t; });
-    };
-    InsertCurvePoint(0.0f);
-    InsertCurvePoint(1.0f);
-    int index = 0;
-    while (index + 1 < points.size())
-    {
-        vec2 a = vec2{ points[index].x, points[index].y };
-        vec2 b = vec2{ points[index + 1].x, points[index + 1].y };
-
-        float length = Length(b - a);
-        if (length > 1.0f)
-        {
-            InsertCurvePoint((points[index].t + points[index + 1].t) / 2.0f);
-        }
-        else
-        {
-            index++;
-        }
-    }
-
-    // Now sort the points by x coordinate, so that we can do dimensional reduction and only test the points near our point on one axis
-    std::sort(points.begin(), points.end(), [](const CurvePoint& A, const CurvePoint& B) { return A.x < B.x; });
 
     // get the bounding box of the curve, from the bounding box of its control points
     float minCanvasX, minCanvasY, maxCanvasX, maxCanvasY;
@@ -778,8 +874,12 @@ bool EntityCubicBezier_Action::DoAction(
 
                 // since the points of the curve are dense, we can find the distance to the closest point instead of line segments
                 float closestDistanceSquared = FLT_MAX;
-                for (const CurvePoint& p : points)
+                for (uint32_t pointIndex = 0; pointIndex < cubicBezierData.pointCount; ++pointIndex)
                 {
+                    CubicBezierData::CurvePoint p = cubicBezierData.points[pointIndex];
+                    p.x += offset.X;
+                    p.y += offset.Y;
+
                     if (p.x < floor(pixelX - curveWidth))
                         continue;
 
