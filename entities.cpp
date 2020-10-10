@@ -423,8 +423,6 @@ bool EntityLatex_Action::DoAction(
 {
     const Data::EntityLatex& latex = entity.data.latex;
 
-    // TODO: put images in CAS too before merging
-
     uint32_t imageWidth, imageHeight;
     unsigned char* imagePixels;
     {
