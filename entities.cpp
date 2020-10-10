@@ -391,7 +391,7 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
             *((uint32_t*)&newData[sizeof(uint32_t) * 0]) = width;
             *((uint32_t*)&newData[sizeof(uint32_t) * 1]) = height;
             memcpy(&newData[sizeof(uint32_t) * 2], filePixels, width * height);
-            CAS::Get().Set(hash, newData.data(), newData.size());
+            CAS::Get().Set(hash, newData);
 
             // free the memory
             stbi_image_free(filePixels);
@@ -730,8 +730,6 @@ bool EntityImage_Action::DoAction(
     return true;
 }
 
-// TODO: put this and the other cached functiosn somewhere else?
-
 struct CubicBezierData
 {
     struct CurvePoint
@@ -810,10 +808,8 @@ static void GetOrMakeCubicBezierData(const Data::Document& document, const Data:
         *((uint32_t*)&newData[0]) = (uint32_t)points.size();
         memcpy(&newData[sizeof(uint32_t)], points.data(), points.size() * sizeof(points[0]));
 
-        // TODO: could make a Set that took a std::vector<T> and did the right thing internally
-
         // set the data
-        CAS::Get().Set(hash, newData.data(), newData.size());
+        CAS::Get().Set(hash, newData);
 
         // get the data
         data = CAS::Get().Get(hash);
@@ -836,12 +832,7 @@ bool EntityCubicBezier_Action::DoAction(
 
     Data::Point2D offsetCanvas = Point3D_XY(GetParentPosition(document, entityMap, entity));
     Data::Point2D offsetPx;
-    CanvasToPixelFloat(document, offsetCanvas.X, offsetCanvas.Y, offsetPx.X, offsetPx.Y);
-
-    Data::Point2D originPx;
-    CanvasToPixelFloat(document, 0.0f, 0.0f, originPx.X, originPx.Y);
-    offsetPx = offsetPx - originPx;
-    // TODO: make a CanvasOffsetToPixelOffset function
+    CanvasOffsetToPixelOffset(document, offsetCanvas.X, offsetCanvas.Y, offsetPx.X, offsetPx.Y);
 
     // get or make the cached bezier data (expensive to calculate each frame)
     CubicBezierData cubicBezierData;

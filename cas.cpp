@@ -93,7 +93,7 @@ void CAS::Set(size_t key, const void* data, size_t size)
 		return;
 	}
 
-	// TODO: could return an error if the key already exists but is not the same value. probably best actually!
+	printf("Warning: CAS::Set() got an existing key but with new data. CAS may be stale and need to be deleted?\n");
 
 	// nobody should be using this memory, but in case they are, stash it off to be destroyed on shutdown, instead of right now
 	if (existing.data)

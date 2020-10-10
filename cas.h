@@ -27,6 +27,12 @@ public:
 		Get().Set(key, &data, sizeof(data));
 	}
 
+	template <typename T>
+	static void Set(size_t key, const std::vector<T>& data)
+	{
+		Get().Set(key, data.data(), data.size() * sizeof(data[0]));
+	}
+
 	// Happens when destructor is called, but you can call it manually if you want to
 	void FlushToDisk();
 
