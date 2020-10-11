@@ -148,6 +148,7 @@
     <None Include="assets\se2_2.json" />
     <None Include="assets\se2_3.json" />
     <None Include="assets\se2_4.json" />
+    <None Include="assets\se2_5.json" />
     <None Include="internal\config.json" />
   </ItemGroup>
   <ItemGroup>

@@ -673,12 +673,14 @@ int main(int argc, char** argv)
 
 // TODO: put resized image into CAS
 
+// TODO: may be able to use ffmpeg with pattern type "none" and give the file name for each frmae, which means you don't need to make it sparse? https://www.ffmpeg.org/ffmpeg-formats.html#image2-1
+// would be 1400+ files in the list though!!
 
 // TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it. also write up the blog post about how it works
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
 
 
-// TODO: maybe try a windows API to copy the file instead of what you are doing?
+// TODO: maybe try a windows API to copy the file instead of what you are doing? CopyFileExA or CopyFileExW
 
 // TODO: maybe gaussian blur the intro screen away. if so, do separated blur. maybe entities (or entity types?) should be able to have per thread storage, so that it could keep a temporary pixel buffer there for the separated blur?
 
