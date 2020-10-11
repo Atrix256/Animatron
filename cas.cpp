@@ -8,6 +8,9 @@ void CAS::FlushToDisk()
 
 	for (auto& pair : m_storage)
 	{
+		if (pair.second.transient)
+			continue;
+
 		sprintf_s(fileName, "build/CAS/%zu.dat", pair.first);
 		FILE* file = nullptr;
 		fopen_s(&file, fileName, "wb");
@@ -40,7 +43,7 @@ CAS::~CAS()
 	omp_destroy_lock(&m_lock);
 }
 
-void* CAS::Get(size_t key)
+void* CAS::Get(size_t key, size_t* _size)
 {
 	omp_set_lock(&m_lock);
 
@@ -49,6 +52,8 @@ void* CAS::Get(size_t key)
 	if (it != m_storage.end())
 	{
 		void* ret = it->second.data;
+		if (_size)
+			*_size = it->second.size;
 		omp_unset_lock(&m_lock);
 		return ret;
 	}
@@ -73,11 +78,14 @@ void* CAS::Get(size_t key)
 	m_storage[key] = { newData, size };
 	fclose(file);
 
+	if (_size)
+		*_size = size;
+
 	omp_unset_lock(&m_lock);
 	return newData;
 }
 
-void CAS::Set(size_t key, const void* data, size_t size)
+void CAS::Set(size_t key, const void* data, size_t size, bool transient)
 {
 	omp_set_lock(&m_lock);
 
@@ -93,15 +101,16 @@ void CAS::Set(size_t key, const void* data, size_t size)
 		return;
 	}
 
-	printf("Warning: CAS::Set() got an existing key but with new data. CAS may be stale and need to be deleted?\n");
-
 	// nobody should be using this memory, but in case they are, stash it off to be destroyed on shutdown, instead of right now
 	if (existing.data)
+	{
+		printf("Warning: CAS::Set() got an existing key but with new data. CAS may be stale and need to be deleted?\n");
 		m_orphanedMemory.push_back(existing.data);
+	}
 
 	unsigned char* newData = new unsigned char[size];
 	memcpy(newData, data, size);
-	m_storage[key] = { newData, size };
+	m_storage[key] = { newData, size, transient };
 
 	omp_unset_lock(&m_lock);
 }

@@ -13,6 +13,7 @@
 #include "schemas/types.h"
 #include "schemas/json.h"
 #include "schemas/lerp.h"
+#include "schemas/hash.h"
 #include "config.h"
 #include "entities.h"
 #include "cas.h"
@@ -24,6 +25,58 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
+
+// Many frames are pixel identical. This allows that to be detected and a frame on disk be copied instead of re-rendered
+class FrameCache
+{
+public:
+    FrameCache()
+    {
+        omp_init_lock(&m_lock);
+    }
+
+    ~FrameCache()
+    {
+        omp_destroy_lock(&m_lock);
+    }
+
+    int GetFrame(size_t hash)
+    {
+        int ret = -1;
+
+        omp_set_lock(&m_lock);
+
+        auto it = m_frames.find(hash);
+        if (it != m_frames.end())
+            ret = it->second;
+
+        omp_unset_lock(&m_lock);
+
+        return ret;
+    }
+
+    void SetFrame(size_t hash, int frameNumber)
+    {
+        omp_set_lock(&m_lock);
+
+        m_frames[hash] = frameNumber;
+
+        omp_unset_lock(&m_lock);
+    }
+
+private:
+    omp_lock_t m_lock;
+    std::unordered_map<size_t, int> m_frames;
+};
+
+struct ThreadData
+{
+    int threadId = -1;
+    char outFileName[1024];
+    std::vector<Data::ColorPMA> pixelsPMA;
+    std::vector<Data::Color> pixels;
+    std::vector<Data::ColorU8> pixelsU8;
+};
 
 struct EntityTimelineKeyframe
 {
@@ -41,14 +94,56 @@ struct EntityTimeline
     std::vector<EntityTimelineKeyframe> keyFrames;
 };
 
-bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, std::vector<Data::ColorPMA>& pixels, int frameIndex, int threadId)
+void CopyFile(const char* src, const char* dest)
 {
+    std::vector<unsigned char> data;
+
+    // read the data into memory
+    {
+        FILE* file = nullptr;
+        fopen_s(&file, src, "rb");
+        if (!file)
+        {
+            printf("Failed to copy file!! Could not open %s for read.\n", src);
+            return;
+        }
+
+        fseek(file, 0, SEEK_END);
+        data.resize(ftell(file));
+        fseek(file, 0, SEEK_SET);
+
+        fread(data.data(), data.size(), 1, file);
+        fclose(file);
+    }
+
+    // write the new file
+    {
+        FILE* file = nullptr;
+        fopen_s(&file, dest, "wb");
+        if (!file)
+        {
+            printf("Failed to copy file!! Could not open %s for write.\n", dest);
+            return;
+        }
+
+        fwrite(data.data(), data.size(), 1, file);
+        fclose(file);
+    }
+}
+
+bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, bool& frameRecycled, int frameIndex, ThreadData& threadData, FrameCache& frameCache)
+{
+    frameRecycled = false;
+
+    std::vector<Data::ColorPMA>& pixels = threadData.pixelsPMA;
+
     // setup for the frame
     float frameTime = (float(frameIndex) / float(document.FPS)) + document.startTime;
     pixels.resize(document.renderSizeX*document.renderSizeY);
     std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 0.0f });
 
     // Get the key frame interpolated state of each entity first, so that they can look at eachother (like 3d objects looking at their camera)
+    size_t frameHash = 0;
     std::unordered_map<std::string, Data::Entity> entityMap;
     {
         for (const EntityTimeline* timeline_ : entityTimelines)
@@ -118,9 +213,29 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
                 return false;
             }
 
+            Hash(frameHash, entity);
+
             entityMap[timeline.id] = entity;
         }
     }
+
+    // if we have already rendered a frame with this hash, just copy that file
+    {
+        int recycleFrame = frameCache.GetFrame(frameHash);
+        if (recycleFrame >= 0)
+        {
+            frameRecycled = true;
+            const char* extension = (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp";
+            char fileName1[256];
+            sprintf_s(fileName1, "build/%i.%s", recycleFrame, extension);
+            char fileName2[256];
+            sprintf_s(fileName2, "build/%i.%s", frameIndex, extension);
+            CopyFile(fileName1, fileName2);
+            return true;
+        }
+    }
+
+    // otherwise, render it again
 
     // process the entities in zorder
     for (const EntityTimeline* timeline_ : entityTimelines)
@@ -138,7 +253,7 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity, threadId); break;
+                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity, threadData.threadId); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:
@@ -150,6 +265,53 @@ bool GenerateFrame(const Data::Document& document, const std::vector<const Entit
         if (error)
             return false;
     }
+
+    // convert from PMA to non PMA
+    threadData.pixels.resize(threadData.pixelsPMA.size());
+    for (size_t index = 0; index < threadData.pixelsPMA.size(); ++index)
+        threadData.pixels[index] = FromPremultipliedAlpha(threadData.pixelsPMA[index]);
+
+    // resize from the rendered size to the output size
+    Resize(threadData.pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
+
+    // Do blue noise dithering if we should
+    if (document.blueNoiseDither)
+    {
+        for (size_t iy = 0; iy < document.outputSizeY; ++iy)
+        {
+            const Data::ColorU8* blueNoiseRow = &document.blueNoisePixels[(iy % document.blueNoiseHeight) * document.blueNoiseWidth];
+            Data::Color* destPixel = &threadData.pixels[iy * document.outputSizeX];
+
+            for (size_t ix = 0; ix < document.outputSizeX; ++ix)
+            {
+                destPixel->R += (float(blueNoiseRow[ix % document.blueNoiseWidth].R) / 255.0f) / 255.0f;
+                destPixel->G += (float(blueNoiseRow[ix % document.blueNoiseWidth].G) / 255.0f) / 255.0f;
+                destPixel->B += (float(blueNoiseRow[ix % document.blueNoiseWidth].B) / 255.0f) / 255.0f;
+                destPixel->A += (float(blueNoiseRow[ix % document.blueNoiseWidth].A) / 255.0f) / 255.0f;
+                destPixel++;
+            }
+        }
+    }
+
+    // Convert it to RGBAU8
+    ColorToColorU8(threadData.pixels, threadData.pixelsU8);
+
+    // force to opaque if we should
+    if (document.forceOpaqueOutput)
+    {
+        for (Data::ColorU8& pixel : threadData.pixelsU8)
+            pixel.A = 255;
+    }
+
+    // write it out
+    sprintf_s(threadData.outFileName, "build/%i.%s", frameIndex, (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
+    if (document.config.writeFrames == Data::ImageFileType::PNG)
+        stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+    else
+        stbi_write_bmp(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data());
+
+    // Set this frame in the frame cache for recycling
+    frameCache.SetFrame(frameHash, frameIndex);
 
     return true;
 }
@@ -409,17 +571,12 @@ int main(int argc, char** argv)
     }
 
     // Render and write out each frame multithreadedly
-    struct ThreadData
-    {
-        char outFileName[1024];
-        std::vector<Data::ColorPMA> pixelsPMA;
-        std::vector<Data::Color> pixels;
-        std::vector<Data::ColorU8> pixelsU8;
-    };
     std::vector<ThreadData> threadsData(omp_get_max_threads());
 
     bool wasError = false;
     std::atomic<int> framesDone(0);
+    std::atomic<int> framesRendered(0);
+    std::atomic<int> framesRecycled(0);
 
     // debug builds are single threaded
     #if _DEBUG
@@ -427,6 +584,7 @@ int main(int argc, char** argv)
     #endif
 
     std::atomic<int> nextFrameIndex;
+    FrameCache frameCache;
 
     #pragma omp parallel
     while(1)
@@ -436,6 +594,7 @@ int main(int argc, char** argv)
             break;
 
         ThreadData& threadData = threadsData[omp_get_thread_num()];
+        threadData.threadId = omp_get_thread_num();
 
         // report progress
         //if (omp_get_thread_num() == 0)
@@ -450,55 +609,17 @@ int main(int argc, char** argv)
         }
 
         // render a frame
-        if (!GenerateFrame(document, entityTimelines, threadData.pixelsPMA, frameIndex, omp_get_thread_num()))
+        bool frameRecycled = false;
+        if (!GenerateFrame(document, entityTimelines, frameRecycled, frameIndex, threadData, frameCache))
         {
             wasError = true;
             break;
         }
-        
-        // convert from PMA to non PMA
-        threadData.pixels.resize(threadData.pixelsPMA.size());
-        for (size_t index = 0; index < threadData.pixelsPMA.size(); ++index)
-            threadData.pixels[index] = FromPremultipliedAlpha(threadData.pixelsPMA[index]);
 
-        // resize from the rendered size to the output size
-        Resize(threadData.pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
-
-        // Do blue noise dithering if we should
-        if (document.blueNoiseDither)
-        {
-            for (size_t iy = 0; iy < document.outputSizeY; ++iy)
-            {
-                const Data::ColorU8* blueNoiseRow = &document.blueNoisePixels[(iy % document.blueNoiseHeight) * document.blueNoiseWidth];
-                Data::Color* destPixel = &threadData.pixels[iy * document.outputSizeX];
-
-                for (size_t ix = 0; ix < document.outputSizeX; ++ix)
-                {
-                    destPixel->R += (float(blueNoiseRow[ix % document.blueNoiseWidth].R) / 255.0f) / 255.0f;
-                    destPixel->G += (float(blueNoiseRow[ix % document.blueNoiseWidth].G) / 255.0f) / 255.0f;
-                    destPixel->B += (float(blueNoiseRow[ix % document.blueNoiseWidth].B) / 255.0f) / 255.0f;
-                    destPixel->A += (float(blueNoiseRow[ix % document.blueNoiseWidth].A) / 255.0f) / 255.0f;
-                    destPixel++;
-                }
-            }
-        }
-
-        // Convert it to RGBAU8
-        ColorToColorU8(threadData.pixels, threadData.pixelsU8);
-
-        // force to opaque if we should
-        if (document.forceOpaqueOutput)
-        {
-            for (Data::ColorU8& pixel : threadData.pixelsU8)
-                pixel.A = 255;
-        }
-
-        // write it out
-        sprintf_s(threadData.outFileName, "build/%i.%s", frameIndex, (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
-        if (document.config.writeFrames == Data::ImageFileType::PNG)
-            stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
+        if (frameRecycled)
+            framesRecycled++;
         else
-            stbi_write_bmp(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data());
+            framesRendered++;
 
         framesDone++;
     }
@@ -533,11 +654,12 @@ int main(int argc, char** argv)
         system(buffer);
     }
 
-    // report how long it took
+    // report how long it took and other stats
     {
         std::chrono::duration<float> seconds = (std::chrono::high_resolution_clock::now() - timeStart);
         float secondsPerFrame = seconds.count() / float(framesTotal);
         printf("Render Time: %0.3f seconds.\n  %0.3f seconds per frame average wall time (more threads make this lower)\n  %0.3f seconds per frame average actual computation time\n", seconds.count(), secondsPerFrame, secondsPerFrame * float(threadsData.size()));
+        printf("frames rendered: %i\nframes recycled: %i\n", framesRendered.load(), framesRecycled.load());
     }
 
     if (wasError)
@@ -549,11 +671,6 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// TODO: yeah probably could cache rendered frames for the times when there are sections of unanimated screen, and for interation
-
-// TODO: after CAS is working and clip 4 is done, merge this branch back to master.
-
-// TODO: make (resized) images use CAS
 
 // TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it. also write up the blog post about how it works
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
@@ -675,5 +792,5 @@ TODO:
 * trying to keep focused on only implementing features as i need them mostly. mixed results
 * a simple editor seems like it'd be real helpful and real easy to make... a list of entities and key frames in the file. a property sheet for each and ability to add / delete. then a scrub bar with a preview window. maybe make this program able to generate a specific frame instead of a full movie and use it for the preview? dunno if responsive enough
  * a simple editor for df_serialize would be nice, and this could be an extension of that. Basically just adding a scrub bar and preview window
-
+* CAS cache. transient and not. how many frames are actually rendered?
 */

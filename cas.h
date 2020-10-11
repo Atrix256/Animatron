@@ -18,19 +18,19 @@ public:
 		return Get(0) == nullptr;
 	}
 
-	void* Get(size_t key);
-	void Set(size_t key, const void* data, size_t size);
+	void* Get(size_t key, size_t* size = nullptr);
+	void Set(size_t key, const void* data, size_t size, bool transient);
 
 	template <typename T>
-	static void Set(size_t key, const T& data)
+	static void Set(size_t key, const T& data, bool transient)
 	{
-		Get().Set(key, &data, sizeof(data));
+		Get().Set(key, &data, sizeof(data), transient);
 	}
 
 	template <typename T>
-	static void Set(size_t key, const std::vector<T>& data)
+	static void Set(size_t key, const std::vector<T>& data, bool transient)
 	{
-		Get().Set(key, data.data(), data.size() * sizeof(data[0]));
+		Get().Set(key, data.data(), data.size() * sizeof(data[0]), transient);
 	}
 
 	// Happens when destructor is called, but you can call it manually if you want to
@@ -48,6 +48,7 @@ private:
 	{
 		void* data = nullptr;
 		size_t size = 0;
+		bool transient = false;
 	};
 
 	omp_lock_t m_lock;

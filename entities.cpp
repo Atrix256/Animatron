@@ -363,10 +363,10 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
 
         // make a dvi and then convert it to a png
         {
-            sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex", latexBinaries, threadId);
+            sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex > NUL", latexBinaries, threadId);
             system(buffer);
 
-            sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi", latexBinaries, DPI, threadId, threadId);
+            sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi > NUL", latexBinaries, DPI, threadId, threadId);
             system(buffer);
         }
 
@@ -391,7 +391,7 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
             *((uint32_t*)&newData[sizeof(uint32_t) * 0]) = width;
             *((uint32_t*)&newData[sizeof(uint32_t) * 1]) = height;
             memcpy(&newData[sizeof(uint32_t) * 2], filePixels, width * height);
-            CAS::Get().Set(hash, newData);
+            CAS::Set(hash, newData, false);
 
             // free the memory
             stbi_image_free(filePixels);
@@ -807,7 +807,7 @@ static void GetOrMakeCubicBezierData(const Data::Document& document, const Data:
         memcpy(&newData[sizeof(uint32_t)], points.data(), points.size() * sizeof(points[0]));
 
         // set the data
-        CAS::Get().Set(hash, newData);
+        CAS::Set(hash, newData, false);
 
         // get the data
         data = CAS::Get().Get(hash);
