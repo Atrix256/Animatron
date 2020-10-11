@@ -671,21 +671,18 @@ int main(int argc, char** argv)
     return 0;
 }
 
+// TODO: put resized image into CAS
+
 
 // TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it. also write up the blog post about how it works
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
 
 
+// TODO: maybe try a windows API to copy the file instead of what you are doing?
 
 // TODO: maybe gaussian blur the intro screen away. if so, do separated blur. maybe entities (or entity types?) should be able to have per thread storage, so that it could keep a temporary pixel buffer there for the separated blur?
 
-// TODO: latex DPI is not resolution independent. smaller movie = bigger latex. should fix!
-// TODO: the digital disolve isn't either. should fix that too. give size in canvas units perhaps
-
 // TODO: i think the camera look at is wrong. test it and see. clip.json is not doing right things
-
-// TODO: have a cache for latex since it's static. that means it won't be created every run. it will also stop copying those pixels around. could just have a CAS cache in build folder.
-// TODO: also have a cache for resized images!
 
 // TODO: need to clip lines against the z plane! can literally just do that, shouldn't be hard, but need z projections in matrices
 
@@ -703,8 +700,6 @@ TODO:
 
 // TODO: i think things need to parent off of scenes (to get camera) and transforms, instead of getting them by name (maybe?)
 
-* for non 
-
 ! flatten checkins for v1
 
 * NEXT: the goal is to make the intro screen for simplexplanations2 which is about Kahns algorithm.
@@ -717,13 +712,10 @@ TODO:
 * add object parenting and getting transforms from parents.
  * a transform is probably a parent all it's own. local / global rotation pivot?
 
- * textures
-
-
  * Parent off of a layer to render into a sublayer which is then merged back into the main image with alpha blending.
 
 * Gaussian blur action for fun.
-* Bloom?
+* Bloom?  Ruby has awesome bloom, ask!
 * Tone map.
 
 * be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
@@ -739,11 +731,6 @@ TODO:
  * This lets you make dice etc that are reusable.
 
 ? are frame init and do action both really needed? right now no, but maybe can make it be later.
-
-* certain things are calculated per frame that don't change from frame to frame, but frames aren't processed in order so can't really cache them in a straightforward way.
- * maybe if there's a long stretch where something doesn't change (no active keyframe? or constant section) could calculate once and re-use.
- * this would be good for things like bezier curve points, and image resizing.
- * could probably store this in the CAS?
 
 ----- Low Priority Features -----
 
