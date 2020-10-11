@@ -1,0 +1,288 @@
+{
+  "program": "animatron",
+  "versionMajor": 1,
+  "versionMinor": 0,
+
+  "outputSizeX": 480,//1920,
+  "outputSizeY": 270,//1080,
+  "FPS": 30,
+  "duration": 55,
+  "startTime": 0,
+
+  "audioFile": "assets/6.wav",
+
+  "entities": [
+    {
+      "id": "Background",
+      "zorder": -1000.0,
+      "data": {
+        "linearGradient": {
+          "halfSpace": {
+            "X": 0,
+            "Y": 1,
+            "Z": -20
+          },
+          "points": [
+            {
+              "value": -100,
+              "color": {
+                "R": 1,
+                "G": 1,
+                "B": 1,
+                "A": 1
+              }
+            },
+            {
+              "value": 100,
+              "color": {
+                "R": 0.0,
+                "G": 0.0,
+                "B": 0.0,
+                "A": 1
+              },
+              "blendControlPoints": [
+                0,
+                0,
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "NodeBoxTrash",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 25,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextTrash",
+      "zorder": 1,
+      "parent": "NodeBoxTrash",
+      "data": {
+        "latex": {
+          "latex": "Trash",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWatermelon",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 0,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWatermelon",
+      "zorder": 1,
+      "parent": "NodeBoxWatermelon",
+      "data": {
+        "latex": {
+          "latex": "Watermelon",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRake",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -25,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRake",
+      "zorder": 1,
+      "parent": "NodeBoxRake",
+      "data": {
+        "latex": {
+          "latex": "Rake",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxDishes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -75,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextDishes",
+      "zorder": 1,
+      "parent": "NodeBoxDishes",
+      "data": {
+        "latex": {
+          "latex": "Dishes",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWashClothes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -50,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWashClothes",
+      "zorder": 1,
+      "parent": "NodeBoxWashClothes",
+      "data": {
+        "latex": {
+          "latex": "Wash Clothes",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxFoldLaundry",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 50,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextFoldLaundry",
+      "zorder": 1,
+      "parent": "NodeBoxFoldLaundry",
+      "data": {
+        "latex": {
+          "latex": "Fold Laundry",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRelax",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 75,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRelax",
+      "zorder": 1,
+      "parent": "NodeBoxRelax",
+      "data": {
+        "latex": {
+          "latex": "Relax",
+          "scale": 1
+        }
+      }
+    },
+  ],
+  "keyFrames": [
+  ]
+}

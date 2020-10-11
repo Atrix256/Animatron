@@ -312,6 +312,63 @@
           }
         }
       }
+    },
+    {
+      "id": "TwitterLogo",
+      "zorder": 10,
+      "data": {
+        "image": {
+          "fileName": "assets/Twitter_Logo_Blue.png",
+          "position": {
+            "X": -13,
+            "Y": -35
+          },
+          "radius": {
+            "X": 5,
+            "Y": 5
+          }
+        }
+      }
+    },
+    {
+      "id": "TwitterHandle",
+      "zorder": 10.0,
+      "data": {
+        "latex": {
+          "position": {
+            "X": 0,
+            "Y": -35
+          },
+          "foreground": {
+            "R": 1,
+            "G": 0.5,
+            "B": 1,
+            "A": 1
+          },
+          "scale": 1,
+          "latex": "@Atrix256"
+        }
+      }
+    },
+    {
+      "id": "Website",
+      "zorder": 10.0,
+      "data": {
+        "latex": {
+          "position": {
+            "X": 0,
+            "Y": -30
+          },
+          "foreground": {
+            "R": 1,
+            "G": 0.5,
+            "B": 1,
+            "A": 1
+          },
+          "scale": 1,
+          "latex": "https://blog.demofox.org"
+        }
+      }
     }
   ],
   "keyFrames": [
