@@ -75,6 +75,9 @@
     <None Include="assets\se2_6.json">
       <Filter>assets</Filter>
     </None>
+    <None Include="assets\se2_7.json">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="internal\BlueNoiseRGBA.png">

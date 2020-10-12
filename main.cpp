@@ -402,6 +402,19 @@ int main(int argc, char** argv)
         printf("Could not load internal/config.json!");
         return 1;
     }
+
+    // give names to any entities which don't have names
+    {
+        for (size_t index = 0; index < document.entities.size(); ++index)
+        {
+            if (document.entities[index].id.empty())
+            {
+                char buffer[256];
+                sprintf_s(buffer, "__ entity %zu", index);
+                document.entities[index].id = buffer;
+            }
+        }
+    }
     
     // data interpretation and fixup
     {
@@ -691,6 +704,8 @@ int main(int argc, char** argv)
 
 /*
 TODO:
+
+* be able to halign and valign latex. maybe images too?
 
 * maybe instead of having parents like we do, each position should have an optional parent
 

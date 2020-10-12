@@ -1,0 +1,487 @@
+{
+  "program": "animatron",
+  "versionMajor": 1,
+  "versionMinor": 0,
+
+  "outputSizeX": 1920,
+  "outputSizeY": 1080,
+  "FPS": 30,
+  "duration": 96,
+  "startTime": 0,
+
+  "audioFile": "assets/7.wav",
+
+  "entities": [
+    {
+      "id": "Background",
+      "zorder": -1000.0,
+      "data": {
+        "linearGradient": {
+          "halfSpace": {
+            "X": 0,
+            "Y": 1,
+            "Z": -20
+          },
+          "points": [
+            {
+              "value": -100,
+              "color": {
+                "R": 1,
+                "G": 1,
+                "B": 1,
+                "A": 1
+              }
+            },
+            {
+              "value": 100,
+              "color": {
+                "R": 0.0,
+                "G": 0.0,
+                "B": 0.0,
+                "A": 1
+              },
+              "blendControlPoints": [
+                0,
+                0,
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "NodeBoxTrash",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 25,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextTrash",
+      "zorder": 1,
+      "parent": "NodeBoxTrash",
+      "data": {
+        "latex": {
+          "latex": "Trash",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWatermelon",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 0,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWatermelon",
+      "zorder": 1,
+      "parent": "NodeBoxWatermelon",
+      "data": {
+        "latex": {
+          "latex": "Watermelon",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRake",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -25,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRake",
+      "zorder": 1,
+      "parent": "NodeBoxRake",
+      "data": {
+        "latex": {
+          "latex": "Rake",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxDishes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -75,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextDishes",
+      "zorder": 1,
+      "parent": "NodeBoxDishes",
+      "data": {
+        "latex": {
+          "latex": "Dishes",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxWashClothes",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": -50,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextWashClothes",
+      "zorder": 1,
+      "parent": "NodeBoxWashClothes",
+      "data": {
+        "latex": {
+          "latex": "Wash Clothes",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxFoldLaundry",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 50,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextFoldLaundry",
+      "zorder": 1,
+      "parent": "NodeBoxFoldLaundry",
+      "data": {
+        "latex": {
+          "latex": "Fold Laundry",
+          "scale": 1
+        }
+      }
+    },
+    {
+      "id": "NodeBoxRelax",
+      "data": {
+        "rectangle": {
+          "center": {
+            "X": 75,
+            "Y": 40
+          },
+          "radius": {
+            "X": 10,
+            "Y": 3
+          },
+          "expansion": 2,
+          "color": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "NodeTextRelax",
+      "zorder": 1,
+      "parent": "NodeBoxRelax",
+      "data": {
+        "latex": {
+          "latex": "Relax",
+          "scale": 1
+        }
+      }
+    },
+
+    // How to find the best ordering?
+    {
+      "destroyTime": 18,
+      "data": {
+        "latex": {
+          "latex": "How To Find The Best Ordering?",
+          "position": {
+            "Y": 10
+          },
+          "scale": 1.5
+        }
+      }
+    },
+    {
+      "createTime": 6,
+      "destroyTime": 18,
+      "data": {
+        "latex": {
+          "latex": "Brute Force - Try 'em all if you can!",
+          "position": {
+            "Y": 0
+          }
+        }
+      }
+    },
+    {
+      "createTime": 6,
+      "destroyTime": 18,
+      "data": {
+        "latex": {
+          "latex": "Stochastic search if too many.",
+          "position": {
+            "Y": -5
+          }
+        }
+      }
+    },
+
+    // Multi threaded execution?
+    {
+      "createTime": 18,
+      "data": {
+        "latex": {
+          "latex": "What About Multithreaded Execution?",
+          "position": {
+            "Y": 10
+          },
+          "scale": 1.5
+        }
+      }
+    },
+    {
+      "createTime": 25,
+      "data": {
+        "latex": {
+          "latex": "GPU:",
+          "position": {
+            "X": -70,
+            "Y": -5
+          },
+          "foreground": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          },
+          "scale": 2
+        }
+      }
+    },
+    {
+      "createTime": 25,
+      "data": {
+        "latex": {
+          "latex": "Work submitted in single threaded fashion anyways",
+          "position": {
+            "X": -5,
+            "Y": 0
+          },
+          "foreground": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "createTime": 25,
+      "data": {
+        "latex": {
+          "latex": "Great optimizations, minimize resource transitions / scratch memory usage",
+          "position": {
+            "X": 15.5,
+            "Y": -5
+          },
+          "foreground": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "createTime": 25,
+      "data": {
+        "latex": {
+          "latex": "\\underline{Render Graph}: Can handle a lot of tedious, error prone tasks for you!",
+          "position": {
+            "X": 11,
+            "Y": -10
+          },
+          "foreground": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "createTime": 60,
+      "data": {
+        "latex": {
+          "latex": "CPU:",
+          "position": {
+            "X": -70,
+            "Y": -25
+          },
+          "foreground": {
+            "R": 0,
+            "G": 0,
+            "B": 1,
+            "A": 1
+          },
+          "scale": 2
+        }
+      }
+    },
+    {
+      "createTime": 60,
+      "data": {
+        "latex": {
+          "latex": "Yes, multithreaded execution possible",
+          "position": {
+            "X": -16,
+            "Y": -20
+          },
+          "foreground": {
+            "R": 0,
+            "G": 0,
+            "B": 1,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "createTime": 60,
+      "data": {
+        "latex": {
+          "latex": "Great optimizations, threading nearly a solved problem",
+          "position": {
+            "X": -0.5,
+            "Y": -25
+          },
+          "foreground": {
+            "R": 0,
+            "G": 0,
+            "B": 1,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "createTime": 60,
+      "data": {
+        "latex": {
+          "latex": "\\underline{Job System}: Can also handle a lot of tedious, error prone tasks for you!",
+          "position": {
+            "X": 13,
+            "Y": -30
+          },
+          "foreground": {
+            "R": 0,
+            "G": 0,
+            "B": 1,
+            "A": 1
+          }
+        }
+      }
+    }
+
+  ],
+  "keyFrames": [
+  ]
+}
