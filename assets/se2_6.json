@@ -3,8 +3,8 @@
   "versionMajor": 1,
   "versionMinor": 0,
 
-  "outputSizeX": 480,//1920,
-  "outputSizeY": 270,//1080,
+  "outputSizeX": 1920,
+  "outputSizeY": 1080,
   "FPS": 30,
   "duration": 55,
   "startTime": 0,
@@ -282,7 +282,189 @@
         }
       }
     },
+    {
+      "id": "LabelLessWalking",
+      "zorder": 1,
+      "createTime": 18,
+      "destroyTime": 26,
+      "data": {
+        "latex": {
+          "latex": "Optimized for LESS walking, still respects DAG ordering constraints",
+          "foreground": {
+            "R": 0,
+            "G": 1,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "LabelMoreWalking",
+      "zorder": 1,
+      "createTime": 26,
+      "destroyTime": 30,
+      "data": {
+        "latex": {
+          "latex": "Optimized for MORE walking, still respects DAG ordering constraints",
+          "foreground": {
+            "R": 1,
+            "G": 0,
+            "B": 0,
+            "A": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "OtherOptTitle",
+      "zorder": 1,
+      "createTime": 30,
+      "data": {
+        "latex": {
+          "latex": "Computing Optimization Possibilities Include:",
+          "scale": 1.5,
+          "position": {
+            "Y": 15
+          }
+        }
+      }
+    },
+    {
+      "id": "Opt1",
+      "zorder": 1,
+      "createTime": 32,
+      "data": {
+        "latex": {
+          "latex": "Minimize Thread Synchronization (Mutex / Semaphore usage)",
+          "position": {
+            "Y": 5
+          }
+        }
+      }
+    },
+    {
+      "id": "Opt2",
+      "zorder": 1,
+      "createTime": 37,
+      "data": {
+        "latex": {
+          "latex": "Consolidate Disk Reads",
+          "position": {
+            "Y": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "Opt3",
+      "zorder": 1,
+      "createTime": 45,
+      "data": {
+        "latex": {
+          "latex": "Minimize Scratch Memory",
+          "position": {
+            "Y": -5
+          }
+        }
+      }
+    },
+    {
+      "id": "Opt4",
+      "zorder": 1,
+      "createTime": 48,
+      "data": {
+        "latex": {
+          "latex": "\\underline{Whatever You Want!}",
+          "foreground": {
+            "R": 0.75,
+            "G": 0.25,
+            "B": 0,
+            "A": 1
+          },
+          "position": {
+            "Y": -10
+          }
+        }
+      }
+    }
   ],
   "keyFrames": [
+
+    // Walking less configuration
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 18
+    },
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 18.5,
+      "newValue": "{\"center\":{\"X\":-50}}"
+    },
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 18
+    },
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 18.5,
+      "newValue": "{\"center\":{\"X\":0}}"
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 18
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 18.5,
+      "newValue": "{\"center\":{\"X\":25}}"
+    },
+
+    // walking more
+    {
+      "entityId": "NodeBoxRake",
+      "time": 26
+    },
+    {
+      "entityId": "NodeBoxRake",
+      "time": 26.5,
+      "newValue": "{\"center\":{\"X\":-50}}"
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 26
+    },
+    {
+      "entityId": "NodeBoxWashClothes",
+      "time": 26.5,
+      "newValue": "{\"center\":{\"X\":-25}}"
+    },
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 26
+    },
+    {
+      "entityId": "NodeBoxWatermelon",
+      "time": 26.5,
+      "newValue": "{\"center\":{\"X\":0}}"
+    },
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 26
+    },
+    {
+      "entityId": "NodeBoxFoldLaundry",
+      "time": 26.5,
+      "newValue": "{\"center\":{\"X\":25}}"
+    },
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 26
+    },
+    {
+      "entityId": "NodeBoxTrash",
+      "time": 26.5,
+      "newValue": "{\"center\":{\"X\":50}}"
+    }
   ]
 }

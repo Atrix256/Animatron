@@ -720,6 +720,8 @@ TODO:
 * Bloom?  Ruby has awesome bloom, ask!
 * Tone map.
 
+? if a node is un-named in the json file, maybe auto give it a unique name based on it's node index? you don't always need a name... only when referencing a node!
+
 * be able to have different animation tracks for an object. have a keyframe specify the track number (sorts for applying them, so probably a float)
  * should probably have a bitset of what fields are present in json data.
  * this could be a feature of df_serialize to reflect out this parallel object of bools and also fill it in.
