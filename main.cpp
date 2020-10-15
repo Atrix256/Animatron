@@ -684,6 +684,14 @@ int main(int argc, char** argv)
     return 0;
 }
 
+/*
+Animatron Editor
+* put entities in a tree view and show their properties in a property panel
+* scrub bar and preview window.
+* unsure how to show keyframes. could be tree view for now probably.
+
+*/
+
 // TODO: put resized image into CAS
 
 // TODO: may be able to use ffmpeg with pattern type "none" and give the file name for each frmae, which means you don't need to make it sparse? https://www.ffmpeg.org/ffmpeg-formats.html#image2-1
