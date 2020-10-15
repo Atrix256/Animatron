@@ -128,6 +128,7 @@
   <ItemGroup>
     <ClInclude Include="cas.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="df_serialize_editor_config.h" />
     <ClInclude Include="entities.h" />
     <ClInclude Include="reflectedvectormath.h" />
     <ClInclude Include="schemas\fnv1a.h" />

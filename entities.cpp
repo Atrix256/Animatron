@@ -157,8 +157,8 @@ bool EntityCamera_Action::FrameInitialize(const Data::Document& document, Data::
         float yscale = 1.0f / tanf(FOVRadians / 2.0f);
         float xscale = yscale / (aspectRatio);
 
-        float zf = camera.far;
-        float zn = camera.near;
+        float zf = camera.farZ;
+        float zn = camera.nearZ;
 
         projMtx.X = Data::Point4D{ xscale,   0.0f,             0.0f,  0.0f };
         projMtx.Y = Data::Point4D{   0.0f, yscale,             0.0f,  0.0f };
@@ -168,8 +168,8 @@ bool EntityCamera_Action::FrameInitialize(const Data::Document& document, Data::
     else
     {
         // ortho matrix leaving x and y alone so it's the same results as if using canvas space coordinates
-        float zf = camera.far;
-        float zn = camera.near;
+        float zf = camera.farZ;
+        float zn = camera.nearZ;
 
         projMtx.X = Data::Point4D{ -1.0f,  0.0f,         0.0f, 0.0f };
         projMtx.Y = Data::Point4D{  0.0f, -1.0f,         0.0f, 0.0f };

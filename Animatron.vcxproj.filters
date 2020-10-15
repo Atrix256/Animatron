@@ -35,7 +35,6 @@
       <Filter>schemas</Filter>
     </ClInclude>
     <ClInclude Include="utils.h" />
-    <ClInclude Include="config.h" />
     <ClInclude Include="vectormath.h" />
     <ClInclude Include="reflectedvectormath.h" />
     <ClInclude Include="entities.h" />
@@ -46,6 +45,8 @@
       <Filter>schemas</Filter>
     </ClInclude>
     <ClInclude Include="cas.h" />
+    <ClInclude Include="df_serialize_editor_config.h" />
+    <ClInclude Include="config.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\clip.json">
