@@ -409,11 +409,6 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
     return true;
 }
 
-bool EntityLatex_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
-{
-    return true;
-}
-
 bool EntityLatex_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,

@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 // ----------------------------- Utility Types -----------------------------
 
@@ -212,6 +213,22 @@ STRUCT_BEGIN(Data, KeyFrame, "A KeyFrame")
     STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, {0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f}, "Cubic Bezier control points for blending from the previous value")
 STRUCT_END()
 
+// ----------------------------- Runtime Types -----------------------------
+
+STRUCT_BEGIN(Data, RuntimeEntityTimelineKeyframe, "")
+    STRUCT_FIELD_NO_SERIALIZE(float, time, 0.0f, "")
+    STRUCT_FIELD_NO_SERIALIZE(std::array<float COMMA 4>, blendControlPoints, std::array<float COMMA 4>{ 0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f }, "")
+    STRUCT_FIELD_NO_SERIALIZE(Data::Entity, entity, Data::Entity(), "")
+STRUCT_END()
+
+STRUCT_BEGIN(Data, RuntimeEntityTimeline, "")
+    STRUCT_FIELD_NO_SERIALIZE(std::string, id, "", "")
+    STRUCT_FIELD_NO_SERIALIZE(float, zorder, 0.0f, "")
+    STRUCT_FIELD_NO_SERIALIZE(float, createTime, 0.0f, "")
+    STRUCT_FIELD_NO_SERIALIZE(float, destroyTime, -1.0f, "")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<Data::RuntimeEntityTimelineKeyframe>, keyFrames, std::vector<Data::RuntimeEntityTimelineKeyframe>(), "")
+STRUCT_END()
+
 // ----------------------------- Application Settings File -----------------------------
 
 STRUCT_BEGIN(Data, Configuration, "Application configuration, read from config.json")
@@ -255,7 +272,10 @@ STRUCT_BEGIN(Data, Document, "A document")
     STRUCT_FIELD_NO_SERIALIZE(int, blueNoiseHeight, 0, "Height of loaded blue noise tetxure")
     STRUCT_FIELD_NO_SERIALIZE(std::vector<Data::ColorU8>, blueNoisePixels, std::vector<Data::ColorU8>(), "pixels of loaded blue noise tetxure")
 
+    // timeline for entities
+    STRUCT_FIELD_NO_SERIALIZE(std::unordered_map<std::string COMMA Data::RuntimeEntityTimeline>, runtimeEntityTimelinesMap, std::unordered_map<std::string COMMA Data::RuntimeEntityTimeline>(), "")
+    STRUCT_FIELD_NO_SERIALIZE(std::vector<Data::RuntimeEntityTimeline*>, runtimeEntityTimelines, std::vector<Data::RuntimeEntityTimeline*>(), "")
+
     STRUCT_DYNAMIC_ARRAY(Entity, entities, "")
     STRUCT_DYNAMIC_ARRAY(KeyFrame, keyFrames, "")
 STRUCT_END()
-
