@@ -310,25 +310,48 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 ImGui::EndMenuBar();
             }
 
-            // TODO: temp!
-            static size_t selected = 0;
             {
-                ImGui::BeginChild("entities", ImVec2(150, 0), true);
-                for (size_t index = 0; index < g_rootDocument.entities.size(); ++index)
+                ImGui::Columns(2);
+
+                // entity list and property panel
                 {
-                    if (ImGui::Selectable(g_rootDocument.entities[index].id.c_str(), selected == index))
-                        selected = index;
+                    // TODO: a static for selected ins't great. make a global! :P
+                    // Show entity list
+                    static size_t selected = 0;
+                    {
+                        ImGui::BeginChild("entities", ImVec2(150, 0), true);
+                        for (size_t index = 0; index < g_rootDocument.entities.size(); ++index)
+                        {
+                            if (ImGui::Selectable(g_rootDocument.entities[index].id.c_str(), selected == index))
+                                selected = index;
+                        }
+                        ImGui::EndChild();
+                    }
+
+                    // Show entity being edited
+                    ImGui::SameLine();
+                    {
+                        ImGui::BeginChild("entity", ImVec2(0, 0), true);
+
+                        if (selected < g_rootDocument.entities.size())
+                        {
+                            bool changed = ShowUI(g_rootDocument.entities[selected]);
+                            if (changed && !g_rootDocumentDirty)
+                            {
+                                g_rootDocumentDirty = true;
+                                UpdateWindowTitle();
+                            }
+                        }
+
+                        ImGui::EndChild();
+                    }
                 }
-                ImGui::EndChild();
-            }
-            ImGui::SameLine();
-            {
-                ImGui::BeginChild("entity", ImVec2(0, 0), true);
 
-                if (selected < g_rootDocument.entities.size())
-                    ShowUI(g_rootDocument.entities[selected]);
+                ImGui::NextColumn();
 
-                ImGui::EndChild();
+                ImGui::Text("Render goes here!");
+
+                ImGui::NextColumn();
             }
 
             // Document UI
@@ -692,4 +715,5 @@ TODO:
 * text label for entity list
 * could make a file name type, where you click it to choose a file.
 * more hotkeys like for opening file and saving as?
+* need to be able to edit keyframes
 */
