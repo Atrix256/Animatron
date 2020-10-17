@@ -136,6 +136,123 @@ bool Load(const char* load)
     return true;
 }
 
+int g_previewWidth = -1;
+int g_previewHeight = -1;
+ID3D12Resource* g_previewTexture = nullptr;
+ID3D12Resource* g_previewUploadBuffers[NUM_FRAMES_IN_FLIGHT] = { nullptr };
+D3D12_CPU_DESCRIPTOR_HANDLE  g_previewCpuDescHandle = {};
+D3D12_GPU_DESCRIPTOR_HANDLE  g_previewGpuDescHandle = {};
+
+void ReleasePreviewResources()
+{
+    if (g_previewTexture)
+    {
+        g_previewTexture->Release();
+        g_previewTexture = nullptr;
+    }
+
+    for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+    {
+        if (g_previewUploadBuffers[i])
+        {
+            g_previewUploadBuffers[i]->Release();
+            g_previewUploadBuffers[i] = nullptr;
+        }
+    }
+    g_previewWidth = -1;
+    g_previewHeight = -1;
+}
+
+void UpdatePreviewResources()
+{
+    // TODO: we should probably render to a smaller window with same aspect ratio. Whatever the actual size of the preview is.
+    int desiredWidth = g_rootDocument.outputSizeX;
+    int desiredHeight = g_rootDocument.outputSizeY;
+
+    // if invalid size, leave alone
+    if (desiredWidth <= 0 || desiredHeight <= 0)
+        return;
+
+    // if the preview resources are already the right size, nothing to do
+    if (g_previewWidth == desiredWidth && g_previewHeight == desiredHeight)
+        return;
+
+    // destroy the existing resources if they exist
+    ReleasePreviewResources();
+
+    // make the preview texture
+    D3D12_HEAP_PROPERTIES props;
+    memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
+    props.Type = D3D12_HEAP_TYPE_DEFAULT;
+    props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+    D3D12_RESOURCE_DESC desc;
+    ZeroMemory(&desc, sizeof(desc));
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    desc.Alignment = 0;
+    desc.Width = desiredWidth;
+    desc.Height = desiredHeight;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    HRESULT hr = g_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, IID_PPV_ARGS(&g_previewTexture));
+    IM_ASSERT(SUCCEEDED(hr));
+
+    // get the handles
+    UINT size = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    g_previewCpuDescHandle = g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+    g_previewGpuDescHandle = g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+    g_previewCpuDescHandle.ptr += size;
+    g_previewGpuDescHandle.ptr += size;
+
+    // Create the texture view
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    ZeroMemory(&srvDesc, sizeof(srvDesc));
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = desc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    g_pd3dDevice->CreateShaderResourceView(g_previewTexture, &srvDesc, g_previewCpuDescHandle);
+
+    // describe the upload buffers needed to update that texture when needed
+    UINT uploadPitch = (desiredWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+    UINT uploadSize = desiredHeight * uploadPitch;
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    desc.Alignment = 0;
+    desc.Width = uploadSize;
+    desc.Height = 1;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_UNKNOWN;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    props.Type = D3D12_HEAP_TYPE_UPLOAD;
+    props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+    // make the upload buffers
+    for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+    {
+        hr = g_pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+            D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&g_previewUploadBuffers[i]));
+        IM_ASSERT(SUCCEEDED(hr));
+    }
+
+    g_previewWidth = desiredWidth;
+    g_previewHeight = desiredHeight;
+}
+
 // Main code
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
@@ -229,6 +346,11 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        static int frameIndex = 0;
+        frameIndex = (frameIndex + 1) % NUM_FRAMES_IN_FLIGHT;
+
+        UpdatePreviewResources();
+
         // Save hotkey
         if (!g_rootDocumentFileName.empty() && g_ctrl_s && g_rootDocumentDirty)
         {
@@ -315,16 +437,24 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                 // entity list and property panel
                 {
-                    // TODO: a static for selected ins't great. make a global! :P
                     // Show entity list
                     static size_t selected = 0;
                     {
                         ImGui::BeginChild("entities", ImVec2(150, 0), true);
+
+                        if (ImGui::Selectable("Document", selected == 0))
+                            selected = 0;
+
+                        ImGui::Indent(5.0f);
+
                         for (size_t index = 0; index < g_rootDocument.entities.size(); ++index)
                         {
-                            if (ImGui::Selectable(g_rootDocument.entities[index].id.c_str(), selected == index))
-                                selected = index;
+                            if (ImGui::Selectable(g_rootDocument.entities[index].id.c_str(), selected == index + 1))
+                                selected = index + 1;
                         }
+
+                        ImGui::Unindent();
+
                         ImGui::EndChild();
                     }
 
@@ -333,9 +463,19 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                     {
                         ImGui::BeginChild("entity", ImVec2(0, 0), true);
 
-                        if (selected < g_rootDocument.entities.size())
+                        if (selected-1 < g_rootDocument.entities.size())
                         {
-                            bool changed = ShowUI(g_rootDocument.entities[selected]);
+                            bool changed = ShowUI(g_rootDocument.entities[selected-1]);
+                            if (changed && !g_rootDocumentDirty)
+                            {
+                                g_rootDocumentDirty = true;
+                                UpdateWindowTitle();
+                            }
+                        }
+                        else
+                        {
+                            selected = 0;
+                            bool changed = ShowUI(g_rootDocument);
                             if (changed && !g_rootDocumentDirty)
                             {
                                 g_rootDocumentDirty = true;
@@ -349,30 +489,23 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                 ImGui::NextColumn();
 
+                /*
+                    TODO:
+                    * make more descriptors in g_pd3dSrvDescHeap
+                    * make one be upload heap
+                    * write to that from the scrub bar.
+                    ? what about size of the image and stuff? and when it changes size?
+                */
                 ImGui::Text("Render goes here!");
+
+                ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
+                ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
+                ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
+                ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+                ImGui::Image((ImTextureID)g_previewGpuDescHandle.ptr, ImVec2((float)g_previewWidth, (float)g_previewHeight), uv_min, uv_max, tint_col, border_col);
 
                 ImGui::NextColumn();
             }
-
-            // Document UI
-            /*
-            {
-                ImGui::Columns(2);
-                static bool haveSetColumnWidth = false;
-                if (!haveSetColumnWidth)
-                {
-                    ImGui::SetColumnWidth(0, 200.0f);
-                    haveSetColumnWidth = true;
-                }
-                bool changed = ShowUI(g_rootDocument);
-                if (changed && !g_rootDocumentDirty)
-                {
-                    g_rootDocumentDirty = true;
-                    UpdateWindowTitle();
-                }
-                ImGui::Columns(1);
-            }
-            */
 
             ImGui::End();
 
@@ -397,6 +530,10 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         g_pd3dCommandList->ClearRenderTargetView(g_mainRenderTargetDescriptor[backBufferIdx], (float*)&clear_color, 0, NULL);
         g_pd3dCommandList->OMSetRenderTargets(1, &g_mainRenderTargetDescriptor[backBufferIdx], FALSE, NULL);
         g_pd3dCommandList->SetDescriptorHeaps(1, &g_pd3dSrvDescHeap);
+
+        // TODO: do the map & copy to preview textures here!
+        // g_pd3dCommandList
+
         ImGui::Render();
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), g_pd3dCommandList);
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -414,6 +551,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         g_fenceLastSignaledValue = fenceValue;
         frameCtxt->FenceValue = fenceValue;
     }
+
+    ReleasePreviewResources();
 
     WaitForLastSubmittedFrame();
     ImGui_ImplDX12_Shutdown();
@@ -496,7 +635,7 @@ bool CreateDeviceD3D(HWND hWnd)
     {
         D3D12_DESCRIPTOR_HEAP_DESC desc = {};
         desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        desc.NumDescriptors = 1;
+        desc.NumDescriptors = 2; // 1 for font, 1 for preview texture
         desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         if (g_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&g_pd3dSrvDescHeap)) != S_OK)
             return false;
