@@ -15,14 +15,6 @@
 #include "../df_serialize/MakeTypes.h"
 #include "editor_config.h"
 
-#include "../df_serialize/MakeBinaryReadHeader.h"
-#include "editor_config.h"
-#include "../df_serialize/MakeBinaryReadFooter.h"
-
-#include "../df_serialize/MakeBinaryWriteHeader.h"
-#include "editor_config.h"
-#include "../df_serialize/MakeBinaryWriteFooter.h"
-
 #include "../df_serialize/MakeEqualityTests.h"
 #include "editor_config.h"
 
@@ -59,19 +51,11 @@
 #pragma comment(lib, "dxguid.lib")
 #endif
 
-enum class EDocumentType
-{
-    JSON,
-    Binary,
-    Unknown
-};
-
 int g_width = 0;
 int g_height = 0;
 
 RootDocumentType g_rootDocument;
 std::string g_rootDocumentFileName = "";
-EDocumentType g_rootDocumentLoadedAs = EDocumentType::Unknown;
 bool g_rootDocumentDirty = false;
 
 bool g_ctrl_s = false;
@@ -119,7 +103,7 @@ void UpdateWindowTitle()
     if (g_rootDocumentFileName.empty())
         sprintf_s(buffer, "<untitled>%s - Editor", g_rootDocumentDirty ? "*" : "");
     else
-        sprintf_s(buffer, "%s (%s)%s - Editor", g_rootDocumentFileName.c_str(), g_rootDocumentLoadedAs == EDocumentType::JSON ? "JSON" : "Binary", g_rootDocumentDirty ? "*" : "");
+        sprintf_s(buffer, "%s%s - Editor", g_rootDocumentFileName.c_str(), g_rootDocumentDirty ? "*" : "");
 
     bool ret = SetWindowTextA(g_hwnd, buffer);
 }
@@ -141,102 +125,26 @@ bool HasFileExtension(const char* fileName, const char* extension)
     return !_stricmp(&fileName[fileNameLen - extensionLen], extension);
 }
 
-EDocumentType GetDocumentType(const char* fileName)
-{
-    if (HasFileExtension(fileName, ".json"))
-        return EDocumentType::JSON;
-    else if (HasFileExtension(fileName, ".bin"))
-        return EDocumentType::Binary;
-    else
-        return EDocumentType::Unknown;
-}
-
 bool Load(const char* load)
 {
-    switch (GetDocumentType(load))
-    {
-        case EDocumentType::JSON:
+        if (!ReadFromJSONFile(g_rootDocument, load))
         {
-            if (!ReadFromJSONFile(g_rootDocument, load))
-            {
-                printf("Could not load JSON file %s\n", load);
-                return false;
-            }
-            break;
-        }
-        case EDocumentType::Binary:
-        {
-            if (!ReadFromBinaryFile(g_rootDocument, load))
-            {
-                printf("Could not load binary file %s\n", load);
-                return false;
-            }
-            break;
-        }
-        default:
-        {
-            printf("Unknown document type: %s\n", load);
+            printf("Could not load JSON file %s\n", load);
             return false;
         }
-    }
 
-    return true;
-}
-
-bool LoadAndSave(const char* load, const char* save)
-{
-    if (!Load(load))
-        return false;
-
-    switch (GetDocumentType(save))
-    {
-        case EDocumentType::JSON:
-        {
-            if (!WriteToJSONFile(g_rootDocument, save))
-            {
-                printf("Could not write JSON file %s\n", save);
-                return false;
-            }
-            break;
-        }
-        case EDocumentType::Binary:
-        {
-            if (!WriteToBinaryFile(g_rootDocument, save))
-            {
-                printf("Could not write binary file %s\n", save);
-                return false;
-            }
-            break;
-        }
-        default:
-        {
-            printf("Unknown document type: %s\n", save);
-            return false;
-        }
-    }
     return true;
 }
 
 // Main code
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
-    if (__argc == 3)
-    {
-        LoadAndSave(__argv[1], __argv[2]);
-        printf("Loaded %s and saved it as %s\n", __argv[1], __argv[2]);
-        return 0;
-    }
-    else if (__argc == 2)
+    if (__argc > 1)
     {
         if (!Load(__argv[1]))
-        {
             printf("could not load file %s\n", __argv[1]);
-        }
         else
-        {
             g_rootDocumentFileName = __argv[1];
-            g_rootDocumentLoadedAs = GetDocumentType(__argv[1]);
-        }
     }
 
     char currentDirectory[1024];
@@ -322,18 +230,10 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         ImGui::NewFrame();
 
         // Save hotkey
-        if (g_rootDocumentLoadedAs != EDocumentType::Unknown && g_ctrl_s && g_rootDocumentDirty)
+        if (!g_rootDocumentFileName.empty() && g_ctrl_s && g_rootDocumentDirty)
         {
-            if (g_rootDocumentLoadedAs == EDocumentType::JSON)
-            {
-                if (!WriteToJSONFile(g_rootDocument, g_rootDocumentFileName.c_str()))
-                    MessageBoxA(nullptr, "Could not save JSON file", "Error", MB_OK);
-            }
-            else
-            {
-                if (!WriteToBinaryFile(g_rootDocument, g_rootDocumentFileName.c_str()))
-                    MessageBoxA(nullptr, "Could not save binary file", "Error", MB_OK);
-            }
+            if (!WriteToJSONFile(g_rootDocument, g_rootDocumentFileName.c_str()))
+                MessageBoxA(nullptr, "Could not save JSON file", "Error", MB_OK);
             g_rootDocumentDirty = false;
             UpdateWindowTitle();
         }
@@ -353,16 +253,15 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
             {
                 if (ImGui::BeginMenu("File"))
                 {
-                    if (ImGui::MenuItem("New") && ConfirmLoseChanges())
+                    if (ImGui::MenuItem("New", "Ctrl+N") && ConfirmLoseChanges())
                     {
                         g_rootDocument = RootDocumentType{};
                         g_rootDocumentFileName = "";
-                        g_rootDocumentLoadedAs = EDocumentType::Unknown;
                         g_rootDocumentDirty = false;
                         UpdateWindowTitle();
                     }
 
-                    if (ImGui::MenuItem("Open JSON File") && ConfirmLoseChanges())
+                    if (ImGui::MenuItem("Open", "Ctrl+O") && ConfirmLoseChanges())
                     {
                         nfdchar_t* output = nullptr;
                         if (NFD_OpenDialog("json", currentDirectory, &output) == NFD_OKAY)
@@ -377,50 +276,20 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                             else
                             {
                                 g_rootDocumentFileName = output;
-                                g_rootDocumentLoadedAs = EDocumentType::JSON;
                                 UpdateWindowTitle();
                             }
                         }
                     }
 
-                    if (ImGui::MenuItem("Open Binary File") && ConfirmLoseChanges())
+                    if (!g_rootDocumentFileName.empty() && ImGui::MenuItem("Save", "Ctrl+S") && g_rootDocumentDirty)
                     {
-                        nfdchar_t* output = nullptr;
-                        if (NFD_OpenDialog("bin", currentDirectory, &output) == NFD_OKAY)
-                        {
-                            g_rootDocumentDirty = false;
-                            g_rootDocument = RootDocumentType{};
-                            if (!ReadFromBinaryFile(g_rootDocument, output))
-                            {
-                                g_rootDocument = RootDocumentType{};
-                                MessageBoxA(nullptr, "Could not load binary file", "Error", MB_OK);
-                            }
-                            else
-                            {
-                                g_rootDocumentFileName = output;
-                                g_rootDocumentLoadedAs = EDocumentType::Binary;
-                                UpdateWindowTitle();
-                            }
-                        }
-                    }
-
-                    if (g_rootDocumentLoadedAs != EDocumentType::Unknown && ImGui::MenuItem("Save", "Ctrl+S") && g_rootDocumentDirty)
-                    {
-                        if (g_rootDocumentLoadedAs == EDocumentType::JSON)
-                        {
-                            if (!WriteToJSONFile(g_rootDocument, g_rootDocumentFileName.c_str()))
-                                MessageBoxA(nullptr, "Could not save JSON file", "Error", MB_OK);
-                        }
-                        else
-                        {
-                            if (!WriteToBinaryFile(g_rootDocument, g_rootDocumentFileName.c_str()))
-                                MessageBoxA(nullptr, "Could not save binary file", "Error", MB_OK);
-                        }
+                        if (!WriteToJSONFile(g_rootDocument, g_rootDocumentFileName.c_str()))
+                            MessageBoxA(nullptr, "Could not save JSON file", "Error", MB_OK);
                         g_rootDocumentDirty = false;
                         UpdateWindowTitle();
                     }
 
-                    if (ImGui::MenuItem("Save As JSON"))
+                    if (ImGui::MenuItem("Save As...", "Ctrl+A"))
                     {
                         nfdchar_t* output = nullptr;
                         if (NFD_SaveDialog("json", currentDirectory, &output) == NFD_OKAY)
@@ -430,35 +299,40 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                             else
                             {
                                 g_rootDocumentFileName = output;
-                                g_rootDocumentLoadedAs = EDocumentType::JSON;
                                 g_rootDocumentDirty = false;
                                 UpdateWindowTitle();
                             }
                         }
                     }
-                    if (ImGui::MenuItem("Save As Binary"))
-                    {
-                        nfdchar_t* output = nullptr;
-                        if (NFD_SaveDialog("bin", currentDirectory, &output) == NFD_OKAY)
-                        {
-                            if (!WriteToBinaryFile(g_rootDocument, output))
-                                MessageBoxA(nullptr, "Could not save binary file", "Error", MB_OK);
-                            else
-                            {
-                                g_rootDocumentFileName = output;
-                                g_rootDocumentLoadedAs = EDocumentType::Binary;
-                                g_rootDocumentDirty = false;
-                                UpdateWindowTitle();
-                            }
-                        }
-                    }
-                    if (ImGui::MenuItem("Exit") && ConfirmLoseChanges()) { ::PostQuitMessage(0); }
+                    if (ImGui::MenuItem("Exit","Alt+f4") && ConfirmLoseChanges()) { ::PostQuitMessage(0); }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
             }
 
+            // TODO: temp!
+            static size_t selected = 0;
+            {
+                ImGui::BeginChild("entities", ImVec2(150, 0), true);
+                for (size_t index = 0; index < g_rootDocument.entities.size(); ++index)
+                {
+                    if (ImGui::Selectable(g_rootDocument.entities[index].id.c_str(), selected == index))
+                        selected = index;
+                }
+                ImGui::EndChild();
+            }
+            ImGui::SameLine();
+            {
+                ImGui::BeginChild("entity", ImVec2(0, 0), true);
+
+                if (selected < g_rootDocument.entities.size())
+                    ShowUI(g_rootDocument.entities[selected]);
+
+                ImGui::EndChild();
+            }
+
             // Document UI
+            /*
             {
                 ImGui::Columns(2);
                 static bool haveSetColumnWidth = false;
@@ -475,6 +349,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 }
                 ImGui::Columns(1);
             }
+            */
 
             ImGui::End();
 
@@ -805,3 +680,16 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
+/*
+TODO:
+* expanded tree view list of entities on left, property panel on right
+* scrub bar on bottom w/ preview window showing currently rendered frame
+* i think maybe the frame cache may not be super useful here since things change a lot? maybe need to clear the frame cache each time the document goes dirty?? dunno...
+* when making a new document, fill out the versions and program and stuff
+? how do you edit document properties like render size? it's not an entity (or is it??)
+* add & delete entity buttons.
+* text label for entity list
+* could make a file name type, where you click it to choose a file.
+* more hotkeys like for opening file and saving as?
+*/
