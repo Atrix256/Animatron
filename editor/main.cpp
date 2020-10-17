@@ -97,6 +97,17 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 HWND g_hwnd;
 
+template <typename T>
+T Clamp(T value, T min, T max)
+{
+    if (value <= min)
+        return min;
+    else if (value >= max)
+        return max;
+    else
+        return value;
+}
+
 void UpdateWindowTitle()
 {
     char buffer[1024];
@@ -143,11 +154,15 @@ ID3D12Resource* g_previewUploadBuffers[NUM_FRAMES_IN_FLIGHT] = { nullptr };
 D3D12_CPU_DESCRIPTOR_HANDLE  g_previewCpuDescHandle = {};
 D3D12_GPU_DESCRIPTOR_HANDLE  g_previewGpuDescHandle = {};
 
+// TODO: need to release these as we can (like put a frame # in here and release em when that frame # is hit again)
+// TODO: possibly rename since it also contains upload buffers!
+std::vector<ID3D12Resource*> g_oldPreviewTextures;
+
 void ReleasePreviewResources()
 {
     if (g_previewTexture)
     {
-        g_previewTexture->Release();
+        g_oldPreviewTextures.push_back(g_previewTexture);
         g_previewTexture = nullptr;
     }
 
@@ -155,7 +170,7 @@ void ReleasePreviewResources()
     {
         if (g_previewUploadBuffers[i])
         {
-            g_previewUploadBuffers[i]->Release();
+            g_oldPreviewTextures.push_back(g_previewUploadBuffers[i]);
             g_previewUploadBuffers[i] = nullptr;
         }
     }
@@ -489,15 +504,6 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                 ImGui::NextColumn();
 
-                /*
-                    TODO:
-                    * make more descriptors in g_pd3dSrvDescHeap
-                    * make one be upload heap
-                    * write to that from the scrub bar.
-                    ? what about size of the image and stuff? and when it changes size?
-                */
-                ImGui::Text("Render goes here!");
-
                 ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
                 ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
                 ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
@@ -532,7 +538,88 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         g_pd3dCommandList->SetDescriptorHeaps(1, &g_pd3dSrvDescHeap);
 
         // TODO: do the map & copy to preview textures here!
-        // g_pd3dCommandList
+        // TODO: only do this (and call into animatron lib to render a frame) when hash of contents of preview frame mismatches the current frame.
+        {
+            // Copy textures from CPU to upload buffer
+            {
+                static unsigned char blue = 0;
+                blue++;
+
+                void* mapped = NULL;
+                HRESULT hr = g_previewUploadBuffers[frameIndex]->Map(0, nullptr, &mapped);
+                IM_ASSERT(SUCCEEDED(hr));
+
+                // TODO: you aren't handling pitch correctly, which you can see when using strange resolutions.
+
+                unsigned char* pixels = (unsigned char*)mapped;
+
+                for (int y = 0; y < g_previewHeight; ++y)
+                {
+                    float py = float(y) / float(g_previewHeight - 1);
+
+                    for (int x = 0; x < g_previewWidth; ++x)
+                    {
+                        float px = float(x) / float(g_previewWidth - 1);
+
+                        pixels[0] = (unsigned char)Clamp(px * 256.0f, 0.0f, 255.0f);
+                        pixels[1] = (unsigned char)Clamp(py * 256.0f, 0.0f, 255.0f);
+                        pixels[2] = blue;
+                        pixels[3] = 255;
+
+                        pixels += 4;
+                    }
+                }
+
+                g_previewUploadBuffers[frameIndex]->Unmap(0, nullptr);
+            }
+
+            // transition preview texture from shader resource to copy dest
+            {
+                D3D12_RESOURCE_BARRIER barrier = {};
+                barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+                barrier.Transition.pResource = g_previewTexture;
+                barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+                barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+                barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+
+                g_pd3dCommandList->ResourceBarrier(1, &barrier);
+            }
+
+            // copy from upload buffer to texture
+            {
+                UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+
+                D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+                srcLocation.pResource = g_previewUploadBuffers[frameIndex];
+                srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+                srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                srcLocation.PlacedFootprint.Footprint.Width = g_previewWidth;
+                srcLocation.PlacedFootprint.Footprint.Height = g_previewHeight;
+                srcLocation.PlacedFootprint.Footprint.Depth = 1;
+                srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+
+                D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+                dstLocation.pResource = g_previewTexture;
+                dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                dstLocation.SubresourceIndex = 0;
+
+                g_pd3dCommandList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
+            }
+
+            // transition preview texture from copy dest to shader resource
+            {
+                D3D12_RESOURCE_BARRIER barrier = {};
+                barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+                barrier.Transition.pResource = g_previewTexture;
+                barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+                barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+                barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+                g_pd3dCommandList->ResourceBarrier(1, &barrier);
+            }
+        }
 
         ImGui::Render();
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), g_pd3dCommandList);
@@ -558,6 +645,11 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
     ImGui_ImplDX12_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    // TODO: clean this up
+    for (ID3D12Resource* res : g_oldPreviewTextures)
+        res->Release();
+    g_oldPreviewTextures.clear();
 
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
