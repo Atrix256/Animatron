@@ -268,6 +268,11 @@ void UpdatePreviewResources()
     g_previewHeight = desiredHeight;
 }
 
+void OnDocumentChange()
+{
+    // TODO: reset animatron lib stuff like the document and the cas and the frame cache.
+}
+
 // Main code
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
@@ -337,6 +342,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    OnDocumentChange();
     UpdateWindowTitle();
 
     // Main loop
@@ -395,6 +401,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                         g_rootDocument = RootDocumentType{};
                         g_rootDocumentFileName = "";
                         g_rootDocumentDirty = false;
+                        OnDocumentChange();
                         UpdateWindowTitle();
                     }
 
@@ -415,6 +422,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                                 g_rootDocumentFileName = output;
                                 UpdateWindowTitle();
                             }
+                            OnDocumentChange();
                         }
                     }
 
@@ -481,20 +489,28 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                         if (selected-1 < g_rootDocument.entities.size())
                         {
                             bool changed = ShowUI(g_rootDocument.entities[selected-1]);
-                            if (changed && !g_rootDocumentDirty)
+                            if (changed)
                             {
-                                g_rootDocumentDirty = true;
-                                UpdateWindowTitle();
+                                OnDocumentChange();
+                                if (!g_rootDocumentDirty)
+                                {
+                                    g_rootDocumentDirty = true;
+                                    UpdateWindowTitle();
+                                }
                             }
                         }
                         else
                         {
                             selected = 0;
                             bool changed = ShowUI(g_rootDocument);
-                            if (changed && !g_rootDocumentDirty)
+                            if (changed)
                             {
-                                g_rootDocumentDirty = true;
-                                UpdateWindowTitle();
+                                OnDocumentChange();
+                                if (!g_rootDocumentDirty)
+                                {
+                                    g_rootDocumentDirty = true;
+                                    UpdateWindowTitle();
+                                }
                             }
                         }
 
@@ -549,12 +565,12 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 HRESULT hr = g_previewUploadBuffers[frameIndex]->Map(0, nullptr, &mapped);
                 IM_ASSERT(SUCCEEDED(hr));
 
-                // TODO: you aren't handling pitch correctly, which you can see when using strange resolutions.
-
-                unsigned char* pixels = (unsigned char*)mapped;
+                UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
 
                 for (int y = 0; y < g_previewHeight; ++y)
                 {
+                    unsigned char* pixels = &((unsigned char*)mapped)[y * uploadPitch];
+
                     float py = float(y) / float(g_previewHeight - 1);
 
                     for (int x = 0; x < g_previewWidth; ++x)
