@@ -12,8 +12,7 @@
 
 // --------------------------- DF_SERIALIZE expansion ---------------------------
 
-#include "../df_serialize/MakeTypes.h"
-#include "editor_config.h"
+#include "../animatron.h"
 
 #include "../df_serialize/MakeEqualityTests.h"
 #include "editor_config.h"
@@ -24,15 +23,9 @@
 #include "../rapidjson/prettywriter.h"
 #include "../rapidjson/stringbuffer.h"
 
-#include "../df_serialize/MakeJSONReadHeader.h"
-#include "editor_config.h"
-#include "../df_serialize/MakeJSONReadFooter.h"
-
 #include "../df_serialize/MakeJSONWriteHeader.h"
 #include "editor_config.h"
 #include "../df_serialize/MakeJSONWriteFooter.h"
-
-// --------------------------- DF_SERIALIZE expansion ---------------------------
 
 #include "internal/VariantTypeInfo.h"
 #include "editor_config.h"
@@ -40,7 +33,7 @@
 #include "internal/SchemaUI.h"
 #include "editor_config.h"
 
-// custom expansion above
+// --------------------------- DF_SERIALIZE expansion ---------------------------
 
 #ifdef _DEBUG
 #define DX12_ENABLE_DEBUG_LAYER
@@ -57,6 +50,10 @@ int g_height = 0;
 RootDocumentType g_rootDocument;
 std::string g_rootDocumentFileName = "";
 bool g_rootDocumentDirty = false;
+
+RootDocumentType g_renderDocument;
+Context g_renderDocumentContext;
+ThreadContext g_renderDocumentThreadContext;
 
 bool g_ctrl_s = false;
 
@@ -96,17 +93,6 @@ void ResizeSwapChain(HWND hWnd, int width, int height);
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 HWND g_hwnd;
-
-template <typename T>
-T Clamp(T value, T min, T max)
-{
-    if (value <= min)
-        return min;
-    else if (value >= max)
-        return max;
-    else
-        return value;
-}
 
 void UpdateWindowTitle()
 {
@@ -270,7 +256,36 @@ void UpdatePreviewResources()
 
 void OnDocumentChange()
 {
-    // TODO: reset animatron lib stuff like the document and the cas and the frame cache.
+    // We keep a separate render document because the validation and fixup modifies the document data
+    g_renderDocument = g_rootDocument;
+    // TOOD: does the frame cache include render size? if not it should
+    g_renderDocumentContext.frameCache.Reset();  // TODO: this might not be needed. different hash? only risk is running out of memory. maybe start to purge it if memory use is too high, can purge the ones that were least recently used or something.
+    g_renderDocumentThreadContext.threadId = 0;
+    ValidateAndFixupDocument(g_renderDocument);
+    // TODO: what if ValidateAndFixupDocument returns false?
+    // TODO: it can't load the blue noise dither texture. need config to say where the root directory is (../ here!)
+}
+
+void LoadConfig()
+{
+    // TODO: report if this fails?
+    ReadFromJSONFile(g_rootDocument.config, "internal/config.json");
+}
+
+void NewDocument()
+{
+    g_rootDocument = RootDocumentType{};
+    g_rootDocumentFileName = "";
+    g_rootDocumentDirty = false;
+
+    g_rootDocument.program = "animatron";
+    g_rootDocument.versionMajor = c_documentVersionMajor;
+    g_rootDocument.versionMinor = c_documentVersionMinor;
+
+    g_rootDocument.config.versionMajor = c_configVersionMajor;
+    g_rootDocument.config.versionMinor = c_configVersionMinor;
+
+    LoadConfig();
 }
 
 // Main code
@@ -279,9 +294,18 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
     if (__argc > 1)
     {
         if (!Load(__argv[1]))
+        {
             printf("could not load file %s\n", __argv[1]);
+            NewDocument();
+        }
         else
+        {
             g_rootDocumentFileName = __argv[1];
+        }
+    }
+    else
+    {
+        NewDocument();
     }
 
     char currentDirectory[1024];
@@ -370,8 +394,6 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         static int frameIndex = 0;
         frameIndex = (frameIndex + 1) % NUM_FRAMES_IN_FLIGHT;
 
-        UpdatePreviewResources();
-
         // Save hotkey
         if (!g_rootDocumentFileName.empty() && g_ctrl_s && g_rootDocumentDirty)
         {
@@ -398,9 +420,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 {
                     if (ImGui::MenuItem("New", "Ctrl+N") && ConfirmLoseChanges())
                     {
-                        g_rootDocument = RootDocumentType{};
-                        g_rootDocumentFileName = "";
-                        g_rootDocumentDirty = false;
+                        NewDocument();
                         OnDocumentChange();
                         UpdateWindowTitle();
                     }
@@ -422,6 +442,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                                 g_rootDocumentFileName = output;
                                 UpdateWindowTitle();
                             }
+                            LoadConfig();
                             OnDocumentChange();
                         }
                     }
@@ -520,11 +541,14 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                 ImGui::NextColumn();
 
-                ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
-                ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-                ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-                ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-                ImGui::Image((ImTextureID)g_previewGpuDescHandle.ptr, ImVec2((float)g_previewWidth, (float)g_previewHeight), uv_min, uv_max, tint_col, border_col);
+                if (g_previewGpuDescHandle.ptr)
+                {
+                    ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
+                    ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
+                    ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
+                    ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+                    ImGui::Image((ImTextureID)g_previewGpuDescHandle.ptr, ImVec2((float)g_previewWidth, (float)g_previewHeight), uv_min, uv_max, tint_col, border_col);
+                }
 
                 ImGui::NextColumn();
             }
@@ -533,6 +557,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
             g_ctrl_s = false;
         }
+
+        UpdatePreviewResources();
 
         // Rendering
         FrameContext* frameCtxt = WaitForNextFrameResources();
@@ -558,6 +584,34 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         {
             // Copy textures from CPU to upload buffer
             {
+                // TODO: get rid of else when this is working
+#if 1
+                size_t frameHash = 0;
+                int recycledFrameIndex = -1;
+                RenderFrame(g_renderDocument, 0, g_renderDocumentThreadContext, g_renderDocumentContext, recycledFrameIndex, frameHash);
+
+                // TODO: store the frame hash? or maybe not... i dunno
+
+
+                void* mapped = NULL;
+                HRESULT hr = g_previewUploadBuffers[frameIndex]->Map(0, nullptr, &mapped);
+                IM_ASSERT(SUCCEEDED(hr));
+
+                UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+
+                for (int y = 0; y < g_previewHeight; ++y)
+                {
+                    unsigned char* dest = &((unsigned char*)mapped)[y * uploadPitch];
+                    const Data::ColorU8* src = &g_renderDocumentThreadContext.pixelsU8[y * g_renderDocument.renderSizeX];
+                    memcpy(dest, src, g_renderDocument.renderSizeX * 4);
+                }
+
+                g_previewUploadBuffers[frameIndex]->Unmap(0, nullptr);
+
+                // TODO: gotta put this frame into the frame cache.
+                int ijkl = 0;
+
+#else
                 static unsigned char blue = 0;
                 blue++;
 
@@ -587,6 +641,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 }
 
                 g_previewUploadBuffers[frameIndex]->Unmap(0, nullptr);
+#endif
             }
 
             // transition preview texture from shader resource to copy dest
@@ -963,4 +1018,9 @@ TODO:
 * could make a file name type, where you click it to choose a file.
 * more hotkeys like for opening file and saving as?
 * need to be able to edit keyframes
+* need to be able to "press play" and see the video play
+* need to be able to export the video (probably use animatron command line)
+? maybe be able to edit the config in this editor/
+
+! retest command line animatron
 */

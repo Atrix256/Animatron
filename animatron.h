@@ -31,6 +31,17 @@ public:
     ~FrameCache()
     {
         omp_destroy_lock(&m_lock);
+        m_lock = nullptr;
+    }
+
+    void Reset()
+    {
+        omp_set_lock(&m_lock);
+
+        m_frameData.clear();
+        m_frames.clear();
+
+        omp_unset_lock(&m_lock);
     }
 
     const FrameData& GetFrame(size_t hash)

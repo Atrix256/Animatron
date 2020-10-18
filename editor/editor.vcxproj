@@ -170,6 +170,11 @@
     <ClInclude Include="editor_config.h" />
     <ClInclude Include="internal\VariantTypeInfo.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AnimatronLib\AnimatronLib.vcxproj">
+      <Project>{02a3eed7-8780-44b3-a5c0-3bce4dcc5fea}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
