@@ -141,6 +141,7 @@ ID3D12Resource* g_previewUploadBuffers[NUM_FRAMES_IN_FLIGHT] = { nullptr };
 D3D12_CPU_DESCRIPTOR_HANDLE  g_previewCpuDescHandle = {};
 D3D12_GPU_DESCRIPTOR_HANDLE  g_previewGpuDescHandle = {};
 int g_previewFrameIndex = 0;
+bool g_playMode = false;
 
 // TODO: need to release these as we can (like put a frame # in here and release em when that frame # is hit again)
 // TODO: possibly rename since it also contains upload buffers!
@@ -169,8 +170,8 @@ void ReleasePreviewResources()
 void UpdatePreviewResources()
 {
     // TODO: we should probably render to a smaller window with same aspect ratio. Whatever the actual size of the preview is.
-    int desiredWidth = g_rootDocument.outputSizeX;
-    int desiredHeight = g_rootDocument.outputSizeY;
+    int desiredWidth = g_renderDocument.outputSizeX;
+    int desiredHeight = g_renderDocument.outputSizeY;
 
     // if invalid size, leave alone
     if (desiredWidth <= 0 || desiredHeight <= 0)
@@ -260,7 +261,11 @@ void OnDocumentChange()
 {
     // We keep a separate render document because the validation and fixup modifies the document data
     g_renderDocument = g_rootDocument;
-    // TOOD: does the frame cache include render size? if not it should
+
+    // TODO: have a drop down of render sizes maybe? i dunno
+    g_renderDocument.outputSizeX = 640;
+    g_renderDocument.outputSizeY = int(float(g_renderDocument.outputSizeX) * float(g_rootDocument.outputSizeY) / float(g_rootDocument.outputSizeX));
+
     g_renderDocumentContext.frameCache.Reset();  // TODO: this might not be needed. different hash? only risk is running out of memory. maybe start to purge it if memory use is too high, can purge the ones that were least recently used or something.
     g_renderDocumentThreadContext.threadId = 0;
     ValidateAndFixupDocument(g_renderDocument);
@@ -544,8 +549,34 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 ImGui::NextColumn();
 
                 // frame scrubber
-                g_previewFrameIndex = Clamp(g_previewFrameIndex, 0, TotalFrameCount(g_rootDocument) - 1);
-                ImGui::SliderInt("Frame", &g_previewFrameIndex, 0, TotalFrameCount(g_rootDocument) - 1);
+                {
+                    int totalFrames = TotalFrameCount(g_rootDocument);
+                    if (g_playMode)
+                    {
+                        g_previewFrameIndex++;
+                        if (g_previewFrameIndex >= totalFrames)
+                            g_playMode = false;
+                    }
+
+                    g_previewFrameIndex = Clamp(g_previewFrameIndex, 0, totalFrames - 1);
+
+                    ImGui::Text("Frame");
+
+                    ImGui::SameLine();
+
+                    ImGui::PushID("Frame");
+
+                    ImGui::SliderInt("", &g_previewFrameIndex, 0, totalFrames - 1);
+
+                    ImGui::PopID();
+
+                    ImGui::SameLine();
+
+                    if (!g_playMode && ImGui::Button("Play"))
+                        g_playMode = true;
+                    else if (g_playMode && ImGui::Button("Stop"))
+                        g_playMode = false;
+                }
 
                 if (g_previewGpuDescHandle.ptr)
                 {
@@ -985,6 +1016,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /*
 TODO:
+* make the entity list use regular indent, but make regular indent smaller so property panel gets that benefit too.
 * put preview image in it's own sub window with it's own horizontal and vertical scroll bars
 * should launch latex and ffmpeg not with cmd but with something else.
 * scrub bar on bottom w/ preview window showing currently rendered frame
@@ -995,6 +1027,8 @@ TODO:
 * need to be able to edit keyframes
 * need to be able to "press play" and see the video play
 * need to be able to export the video (probably use animatron command line)
+* for certain edits (or all?), have a timeout before you apply them.  Like when changing resolution.
+* make the edit boxes take up the full width of the column. no reason to waste space
 
 ! retest command line animatron
 */

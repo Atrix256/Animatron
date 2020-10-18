@@ -52,7 +52,7 @@ public:
         if (it != m_frames.end())
         {
             omp_unset_lock(&m_lock);
-            return *it->second;
+            return m_frameData[it->second];
         }
 
         omp_unset_lock(&m_lock);
@@ -66,14 +66,14 @@ public:
         omp_set_lock(&m_lock);
 
         m_frameData.push_back(FrameData{ frameNumber, pixels });
-        m_frames[hash] = &(*m_frameData.rbegin());
+        m_frames[hash] = m_frameData.size() - 1;
 
         omp_unset_lock(&m_lock);
     }
 
 private:
     omp_lock_t m_lock;
-    std::unordered_map<size_t, FrameData*> m_frames;
+    std::unordered_map<size_t, size_t> m_frames;  // map frame hash to m_frameData index
     std::vector<FrameData> m_frameData;
 };
 
