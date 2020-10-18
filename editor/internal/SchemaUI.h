@@ -9,8 +9,8 @@
 #define ENUM_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
 	bool ShowUI(_NAMESPACE::_NAME& value) \
 	{ \
+        ImGui::SameLine(); \
         typedef _NAMESPACE::_NAME ThisType; \
-        ImGui::NextColumn(); \
         int v = (int)value; \
         bool ret = ImGui::Combo("", &v,
 
@@ -21,7 +21,6 @@
         ); \
         if (ret) \
             value = (ThisType)v; \
-        ImGui::NextColumn(); \
         return ret; \
     }
 
@@ -30,8 +29,6 @@
 #define STRUCT_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
 	bool ShowUI(_NAMESPACE::_NAME& value) \
 	{ \
-        ImGui::NextColumn(); \
-        ImGui::NextColumn(); \
         ImGui::Indent(); \
         using namespace _NAMESPACE; \
         ImGui::PushID(#_NAME); \
@@ -40,8 +37,6 @@
 #define STRUCT_INHERIT_BEGIN(_NAMESPACE, _NAME, _BASE, _DESCRIPTION) \
 	bool ShowUI(_NAMESPACE::_NAME& value) \
 	{ \
-        ImGui::NextColumn(); \
-        ImGui::NextColumn(); \
         ImGui::Indent(); \
         using namespace _NAMESPACE; \
         ImGui::PushID(#_NAME); \
@@ -59,8 +54,6 @@
 #define STRUCT_DYNAMIC_ARRAY(_TYPE, _NAME, _DESCRIPTION) \
         if (ImGui::TreeNode(#_NAME)) \
         { \
-            ImGui::NextColumn(); \
-            ImGui::NextColumn(); \
             int deleteIndex = -1; \
             for (size_t index = 0; index < TDYNAMICARRAY_SIZE(value._NAME); ++index) \
             { \
@@ -87,15 +80,11 @@
         } \
         else \
         { \
-            ImGui::NextColumn(); \
-            ImGui::NextColumn(); \
         }
 
 #define STRUCT_STATIC_ARRAY(_TYPE, _NAME, _SIZE, _DEFAULT, _DESCRIPTION) \
         if (ImGui::TreeNode(#_NAME "[" #_SIZE "]")) \
         { \
-            ImGui::NextColumn(); \
-            ImGui::NextColumn(); \
             for (size_t index = 0; index < _SIZE; ++index) \
             { \
                 ImGui::PushID((int)index); \
@@ -106,8 +95,6 @@
         } \
         else \
         { \
-            ImGui::NextColumn(); \
-            ImGui::NextColumn(); \
         }
 
 #define STRUCT_END() \
@@ -121,8 +108,6 @@
 #define VARIANT_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
 	bool ShowUI(_NAMESPACE::_NAME& value) \
 	{ \
-        ImGui::NextColumn(); \
-        ImGui::NextColumn(); \
         ImGui::Indent(); \
 		typedef _NAMESPACE::_NAME ThisType; \
         ImGui::PushID(#_NAME); \
@@ -137,7 +122,6 @@
         ImGui::PushID("_type"); \
         ImGui::Text("Object Type"); \
         ImGui::SameLine(); \
-        ImGui::NextColumn(); \
         if (ImGui::BeginCombo("", selectedIndex < sizeof(typeInfo) / sizeof(typeInfo[0]) ? typeInfo[selectedIndex].name.c_str() : "", 0)) \
         { \
             for (int n = 0; n < sizeof(typeInfo) / sizeof(typeInfo[0]); ++n) \
@@ -154,7 +138,6 @@
             } \
             ImGui::EndCombo(); \
         } \
-        ImGui::NextColumn(); \
         ImGui::PopID();
 
 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
@@ -171,136 +154,137 @@
 
 bool ShowUI(uint8_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (uint8_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(uint16_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (uint16_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(uint32_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (uint32_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(uint64_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (uint64_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(int8_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (int8_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(int16_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (int16_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(int32_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (int32_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(int64_t& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
     int v = (int)value;
     if (ImGui::InputInt("", &v))
     {
         value = (int64_t)v;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(float& value)
 {
-    ImGui::NextColumn();
+    ImGui::SameLine();
+
     bool ret = ImGui::InputFloat("", &value);
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(bool& value)
 {
-    ImGui::NextColumn();
+    ImGui::SameLine();
+
     bool ret = ImGui::Checkbox("", &value);
-    ImGui::NextColumn();
     return ret;
 }
 
 bool ShowUI(std::string& value)
 {
+    ImGui::SameLine();
+
     bool ret = false;
-    ImGui::NextColumn();
 
     char buffer[1024];
     strcpy_s(buffer, value.c_str());
@@ -309,6 +293,5 @@ bool ShowUI(std::string& value)
         value = buffer;
         ret = true;
     }
-    ImGui::NextColumn();
     return ret;
 }
