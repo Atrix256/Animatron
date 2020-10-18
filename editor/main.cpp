@@ -539,7 +539,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                         if (selected-1 < g_rootDocument.entities.size())
                         {
-                            bool changed = ShowUI(g_rootDocument.entities[selected-1]);
+                            bool changed = ShowUI(g_rootDocument.entities[selected-1], "");
                             if (changed)
                             {
                                 OnDocumentChange();
@@ -553,7 +553,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                         else
                         {
                             selected = 0;
-                            bool changed = ShowUI(g_rootDocument);
+                            bool changed = ShowUI(g_rootDocument, "");
                             if (changed)
                             {
                                 OnDocumentChange();
