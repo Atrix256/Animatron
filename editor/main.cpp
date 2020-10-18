@@ -135,6 +135,7 @@ bool Load(const char* load)
 
 int g_previewWidth = -1;
 int g_previewHeight = -1;
+size_t g_previewContextHash = 0;
 ID3D12Resource* g_previewTexture = nullptr;
 ID3D12Resource* g_previewUploadBuffers[NUM_FRAMES_IN_FLIGHT] = { nullptr };
 D3D12_CPU_DESCRIPTOR_HANDLE  g_previewCpuDescHandle = {};
@@ -579,116 +580,88 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         g_pd3dCommandList->OMSetRenderTargets(1, &g_mainRenderTargetDescriptor[backBufferIdx], FALSE, NULL);
         g_pd3dCommandList->SetDescriptorHeaps(1, &g_pd3dSrvDescHeap);
 
-        // TODO: do the map & copy to preview textures here!
-        // TODO: only do this (and call into animatron lib to render a frame) when hash of contents of preview frame mismatches the current frame.
+        // Render and display the frame
         {
-            // Copy textures from CPU to upload buffer
+            // render the current frame
+            size_t frameHash = 0;
             {
-                // TODO: get rid of else when this is working
-#if 1
-                size_t frameHash = 0;
+                int renderFrameIndex = 0;
                 int recycledFrameIndex = -1;
-                RenderFrame(g_renderDocument, 0, g_renderDocumentThreadContext, g_renderDocumentContext, recycledFrameIndex, frameHash);
+                RenderFrame(g_renderDocument, renderFrameIndex, g_renderDocumentThreadContext, g_renderDocumentContext, recycledFrameIndex, frameHash);
 
-                // TODO: store the frame hash? or maybe not... i dunno
+                if (recycledFrameIndex == -1)
+                    g_renderDocumentContext.frameCache.SetFrame(frameHash, renderFrameIndex, g_renderDocumentThreadContext.pixelsU8);
+            }
 
+            // If the preview hash is different than this frame's hash we need to upload it to the GPU and copy it into the preview texture
+            if (frameHash != g_previewContextHash)
+            {
+                g_previewContextHash = frameHash;
 
-                void* mapped = NULL;
-                HRESULT hr = g_previewUploadBuffers[frameIndex]->Map(0, nullptr, &mapped);
-                IM_ASSERT(SUCCEEDED(hr));
-
-                UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
-
-                for (int y = 0; y < g_previewHeight; ++y)
+                // Copy textures from CPU to upload buffer
                 {
-                    unsigned char* dest = &((unsigned char*)mapped)[y * uploadPitch];
-                    const Data::ColorU8* src = &g_renderDocumentThreadContext.pixelsU8[y * g_renderDocument.renderSizeX];
-                    memcpy(dest, src, g_renderDocument.renderSizeX * 4);
-                }
+                    void* mapped = NULL;
+                    HRESULT hr = g_previewUploadBuffers[frameIndex]->Map(0, nullptr, &mapped);
+                    IM_ASSERT(SUCCEEDED(hr));
 
-                g_previewUploadBuffers[frameIndex]->Unmap(0, nullptr);
+                    UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
 
-                // TODO: gotta put this frame into the frame cache.
-                int ijkl = 0;
-
-#else
-                static unsigned char blue = 0;
-                blue++;
-
-                void* mapped = NULL;
-                HRESULT hr = g_previewUploadBuffers[frameIndex]->Map(0, nullptr, &mapped);
-                IM_ASSERT(SUCCEEDED(hr));
-
-                UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
-
-                for (int y = 0; y < g_previewHeight; ++y)
-                {
-                    unsigned char* pixels = &((unsigned char*)mapped)[y * uploadPitch];
-
-                    float py = float(y) / float(g_previewHeight - 1);
-
-                    for (int x = 0; x < g_previewWidth; ++x)
+                    for (int y = 0; y < g_previewHeight; ++y)
                     {
-                        float px = float(x) / float(g_previewWidth - 1);
-
-                        pixels[0] = (unsigned char)Clamp(px * 256.0f, 0.0f, 255.0f);
-                        pixels[1] = (unsigned char)Clamp(py * 256.0f, 0.0f, 255.0f);
-                        pixels[2] = blue;
-                        pixels[3] = 255;
-
-                        pixels += 4;
+                        unsigned char* dest = &((unsigned char*)mapped)[y * uploadPitch];
+                        const Data::ColorU8* src = &g_renderDocumentThreadContext.pixelsU8[y * g_renderDocument.renderSizeX];
+                        memcpy(dest, src, g_renderDocument.renderSizeX * 4);
                     }
+
+                    g_previewUploadBuffers[frameIndex]->Unmap(0, nullptr);
                 }
 
-                g_previewUploadBuffers[frameIndex]->Unmap(0, nullptr);
-#endif
-            }
+                // transition preview texture from shader resource to copy dest
+                {
+                    D3D12_RESOURCE_BARRIER barrier = {};
+                    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+                    barrier.Transition.pResource = g_previewTexture;
+                    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+                    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+                    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
 
-            // transition preview texture from shader resource to copy dest
-            {
-                D3D12_RESOURCE_BARRIER barrier = {};
-                barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                barrier.Transition.pResource = g_previewTexture;
-                barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-                barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+                    g_pd3dCommandList->ResourceBarrier(1, &barrier);
+                }
 
-                g_pd3dCommandList->ResourceBarrier(1, &barrier);
-            }
+                // copy from upload buffer to texture
+                {
+                    UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
 
-            // copy from upload buffer to texture
-            {
-                UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+                    D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+                    srcLocation.pResource = g_previewUploadBuffers[frameIndex];
+                    srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+                    srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                    srcLocation.PlacedFootprint.Footprint.Width = g_previewWidth;
+                    srcLocation.PlacedFootprint.Footprint.Height = g_previewHeight;
+                    srcLocation.PlacedFootprint.Footprint.Depth = 1;
+                    srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
 
-                D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
-                srcLocation.pResource = g_previewUploadBuffers[frameIndex];
-                srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-                srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-                srcLocation.PlacedFootprint.Footprint.Width = g_previewWidth;
-                srcLocation.PlacedFootprint.Footprint.Height = g_previewHeight;
-                srcLocation.PlacedFootprint.Footprint.Depth = 1;
-                srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+                    D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+                    dstLocation.pResource = g_previewTexture;
+                    dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+                    dstLocation.SubresourceIndex = 0;
 
-                D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
-                dstLocation.pResource = g_previewTexture;
-                dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-                dstLocation.SubresourceIndex = 0;
+                    g_pd3dCommandList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
+                }
 
-                g_pd3dCommandList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
-            }
+                // transition preview texture from copy dest to shader resource
+                {
+                    D3D12_RESOURCE_BARRIER barrier = {};
+                    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+                    barrier.Transition.pResource = g_previewTexture;
+                    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+                    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+                    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
-            // transition preview texture from copy dest to shader resource
-            {
-                D3D12_RESOURCE_BARRIER barrier = {};
-                barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-                barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                barrier.Transition.pResource = g_previewTexture;
-                barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-                barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-                barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-
-                g_pd3dCommandList->ResourceBarrier(1, &barrier);
+                    g_pd3dCommandList->ResourceBarrier(1, &barrier);
+                }
             }
         }
 
@@ -1008,19 +981,16 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /*
 TODO:
-* expanded tree view list of entities on left, property panel on right
+* put preview image in it's own sub window with it's own horizontal and vertical scroll bars
+* should launch latex and ffmpeg not with cmd but with something else.
 * scrub bar on bottom w/ preview window showing currently rendered frame
-* i think maybe the frame cache may not be super useful here since things change a lot? maybe need to clear the frame cache each time the document goes dirty?? dunno...
-* when making a new document, fill out the versions and program and stuff
-? how do you edit document properties like render size? it's not an entity (or is it??)
 * add & delete entity buttons.
-* text label for entity list
 * could make a file name type, where you click it to choose a file.
+* also a color picker, and make point3d be a single line to edit!
 * more hotkeys like for opening file and saving as?
 * need to be able to edit keyframes
 * need to be able to "press play" and see the video play
 * need to be able to export the video (probably use animatron command line)
-? maybe be able to edit the config in this editor/
 
 ! retest command line animatron
 */
