@@ -143,15 +143,18 @@ D3D12_GPU_DESCRIPTOR_HANDLE  g_previewGpuDescHandle = {};
 int g_previewFrameIndex = 0;
 bool g_playMode = false;
 
-// TODO: need to release these as we can (like put a frame # in here and release em when that frame # is hit again)
-// TODO: possibly rename since it also contains upload buffers!
-std::vector<ID3D12Resource*> g_oldPreviewTextures;
+struct DelayedResourceDestruction
+{
+    ID3D12Resource* resource = nullptr;
+    UINT frameIndex = 0;
+};
+std::vector<DelayedResourceDestruction> g_delayedResourceDestruction;
 
 void ReleasePreviewResources()
 {
     if (g_previewTexture)
     {
-        g_oldPreviewTextures.push_back(g_previewTexture);
+        g_delayedResourceDestruction.push_back({ g_previewTexture, g_frameIndex + NUM_FRAMES_IN_FLIGHT });
         g_previewTexture = nullptr;
     }
 
@@ -159,7 +162,7 @@ void ReleasePreviewResources()
     {
         if (g_previewUploadBuffers[i])
         {
-            g_oldPreviewTextures.push_back(g_previewUploadBuffers[i]);
+            g_delayedResourceDestruction.push_back({ g_previewUploadBuffers[i], g_frameIndex + NUM_FRAMES_IN_FLIGHT });
             g_previewUploadBuffers[i] = nullptr;
         }
     }
@@ -262,20 +265,16 @@ void OnDocumentChange()
     // We keep a separate render document because the validation and fixup modifies the document data
     g_renderDocument = g_rootDocument;
 
-    // TODO: have a drop down of render sizes maybe? i dunno
     g_renderDocument.outputSizeX = 640;
     g_renderDocument.outputSizeY = int(float(g_renderDocument.outputSizeX) * float(g_rootDocument.outputSizeY) / float(g_rootDocument.outputSizeX));
 
-    g_renderDocumentContext.frameCache.Reset();  // TODO: this might not be needed. different hash? only risk is running out of memory. maybe start to purge it if memory use is too high, can purge the ones that were least recently used or something.
+    g_renderDocumentContext.frameCache.Reset();
     g_renderDocumentThreadContext.threadId = 0;
     ValidateAndFixupDocument(g_renderDocument);
-    // TODO: what if ValidateAndFixupDocument returns false?
-    // TODO: it can't load the blue noise dither texture. need config to say where the root directory is (../ here!)
 }
 
 void LoadConfig()
 {
-    // TODO: report if this fails?
     ReadFromJSONFile(g_rootDocument.config, "internal/config.json");
 }
 
@@ -293,6 +292,25 @@ void NewDocument()
     g_rootDocument.config.versionMinor = c_configVersionMinor;
 
     LoadConfig();
+}
+
+void OnNewFrame()
+{
+    // handle delayed destruction. delete anything that is old enough not to be referenced by any in flight command lists
+    g_delayedResourceDestruction.erase(
+        std::remove_if(g_delayedResourceDestruction.begin(),
+            g_delayedResourceDestruction.end(),
+            [](DelayedResourceDestruction& d)
+            {
+                if (d.frameIndex <= g_frameIndex)
+                    return false;
+
+                d.resource->Release();
+                return true;
+            }
+        ),
+        g_delayedResourceDestruction.end()
+    );
 }
 
 // Main code
@@ -398,8 +416,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        static int frameIndex = 0;
-        frameIndex = (frameIndex + 1) % NUM_FRAMES_IN_FLIGHT;
+        g_frameIndex = (g_frameIndex + 1) % NUM_FRAMES_IN_FLIGHT;
+        OnNewFrame();
 
         // Save hotkey
         if (!g_rootDocumentFileName.empty() && g_ctrl_s && g_rootDocumentDirty)
@@ -636,7 +654,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 // Copy textures from CPU to upload buffer
                 {
                     void* mapped = NULL;
-                    HRESULT hr = g_previewUploadBuffers[frameIndex]->Map(0, nullptr, &mapped);
+                    HRESULT hr = g_previewUploadBuffers[g_frameIndex % NUM_FRAMES_IN_FLIGHT]->Map(0, nullptr, &mapped);
                     IM_ASSERT(SUCCEEDED(hr));
 
                     UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
@@ -648,7 +666,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                         memcpy(dest, src, g_renderDocument.renderSizeX * 4);
                     }
 
-                    g_previewUploadBuffers[frameIndex]->Unmap(0, nullptr);
+                    g_previewUploadBuffers[g_frameIndex % NUM_FRAMES_IN_FLIGHT]->Unmap(0, nullptr);
                 }
 
                 // transition preview texture from shader resource to copy dest
@@ -669,7 +687,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                     UINT uploadPitch = (g_previewWidth * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
 
                     D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
-                    srcLocation.pResource = g_previewUploadBuffers[frameIndex];
+                    srcLocation.pResource = g_previewUploadBuffers[g_frameIndex % NUM_FRAMES_IN_FLIGHT];
                     srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
                     srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
                     srcLocation.PlacedFootprint.Footprint.Width = g_previewWidth;
@@ -725,10 +743,9 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    // TODO: clean this up
-    for (ID3D12Resource* res : g_oldPreviewTextures)
-        res->Release();
-    g_oldPreviewTextures.clear();
+    for (DelayedResourceDestruction& destruction : g_delayedResourceDestruction)
+        destruction.resource->Release();
+    g_delayedResourceDestruction.clear();
 
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
@@ -1029,6 +1046,8 @@ TODO:
 * need to be able to export the video (probably use animatron command line)
 * for certain edits (or all?), have a timeout before you apply them.  Like when changing resolution.
 * make the edit boxes take up the full width of the column. no reason to waste space
+* have a 'realtime' checkbox next to the play button to make it advance frames based on time, instead of just incrementing.
+* have a rewind button next to the play/stop button. can we use icons? does imgui have em?
 
 ! retest command line animatron
 */
