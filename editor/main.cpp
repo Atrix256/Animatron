@@ -365,6 +365,12 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
 
+    // Custom styling
+    {
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.IndentSpacing = 10.0f;
+    }
+
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX12_Init(g_pd3dDevice, NUM_FRAMES_IN_FLIGHT,
@@ -1032,21 +1038,19 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /*
 TODO:
-* make the entity list use regular indent, but make regular indent smaller so property panel gets that benefit too.
 * put preview image in it's own sub window with it's own horizontal and vertical scroll bars
-* should launch latex and ffmpeg not with cmd but with something else.
-* scrub bar on bottom w/ preview window showing currently rendered frame
+* should launch latex and ffmpeg not with cmd but with something else. no system pls.
 * add & delete entity buttons.
 * could make a file name type, where you click it to choose a file.
 * also a color picker, and make point3d be a single line to edit!
-* more hotkeys like for opening file and saving as?
+* more hotkeys like for opening file and saving as work.
 * need to be able to edit keyframes
-* need to be able to "press play" and see the video play
 * need to be able to export the video (probably use animatron command line)
-* for certain edits (or all?), have a timeout before you apply them.  Like when changing resolution.
+* for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
 * make the edit boxes take up the full width of the column. no reason to waste space
 * have a 'realtime' checkbox next to the play button to make it advance frames based on time, instead of just incrementing.
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
+* show current time in minutes/seconds and total time.
 
 ! retest command line animatron
 */
