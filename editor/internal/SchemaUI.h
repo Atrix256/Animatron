@@ -117,7 +117,6 @@
                 if(value._index == typeInfo[i]._index) \
                     selectedIndex = i; \
             } \
-            ImGui::PushID("_type"); \
             if (ImGui::BeginCombo("Object Type", selectedIndex < sizeof(typeInfo) / sizeof(typeInfo[0]) ? typeInfo[selectedIndex].name.c_str() : "", 0)) \
             { \
                 for (int n = 0; n < sizeof(typeInfo) / sizeof(typeInfo[0]); ++n) \
@@ -133,8 +132,7 @@
                         ImGui::SetItemDefaultFocus(); \
                 } \
                 ImGui::EndCombo(); \
-            } \
-            ImGui::PopID();
+            }
 
 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
             if (value._index == ThisType::c_index_##_NAME) \
@@ -270,7 +268,3 @@ bool ShowUI(std::string& value, const char* label)
     }
     return ret;
 }
-
-// TODO: if labels work, don't need to push as many ids
-// TODO: structs probably want to be tree nodes instead of just indenting?
-// TODO: arrays don't need to show their name for each label. tree node and pass empty string for label?
