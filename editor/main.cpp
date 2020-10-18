@@ -172,7 +172,6 @@ void ReleasePreviewResources()
 
 void UpdatePreviewResources()
 {
-    // TODO: we should probably render to a smaller window with same aspect ratio. Whatever the actual size of the preview is.
     int desiredWidth = g_renderDocument.outputSizeX;
     int desiredHeight = g_renderDocument.outputSizeY;
 

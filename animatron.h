@@ -1,7 +1,5 @@
 #pragma once
 
-// TODO: do these headers all need to be here, or can they be internal? or elsewhere? maybe some belong in main (like json?)
-
 #include "schemas/types.h"
 #include "schemas/json.h"
 #include "schemas/lerp.h"
