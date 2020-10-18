@@ -140,6 +140,7 @@ ID3D12Resource* g_previewTexture = nullptr;
 ID3D12Resource* g_previewUploadBuffers[NUM_FRAMES_IN_FLIGHT] = { nullptr };
 D3D12_CPU_DESCRIPTOR_HANDLE  g_previewCpuDescHandle = {};
 D3D12_GPU_DESCRIPTOR_HANDLE  g_previewGpuDescHandle = {};
+int g_previewFrameIndex = 0;
 
 // TODO: need to release these as we can (like put a frame # in here and release em when that frame # is hit again)
 // TODO: possibly rename since it also contains upload buffers!
@@ -542,6 +543,10 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                 ImGui::NextColumn();
 
+                // frame scrubber
+                g_previewFrameIndex = Clamp(g_previewFrameIndex, 0, TotalFrameCount(g_rootDocument) - 1);
+                ImGui::SliderInt("Frame", &g_previewFrameIndex, 0, TotalFrameCount(g_rootDocument) - 1);
+
                 if (g_previewGpuDescHandle.ptr)
                 {
                     ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
@@ -585,12 +590,11 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
             // render the current frame
             size_t frameHash = 0;
             {
-                int renderFrameIndex = 0;
                 int recycledFrameIndex = -1;
-                RenderFrame(g_renderDocument, renderFrameIndex, g_renderDocumentThreadContext, g_renderDocumentContext, recycledFrameIndex, frameHash);
+                RenderFrame(g_renderDocument, g_previewFrameIndex, g_renderDocumentThreadContext, g_renderDocumentContext, recycledFrameIndex, frameHash);
 
                 if (recycledFrameIndex == -1)
-                    g_renderDocumentContext.frameCache.SetFrame(frameHash, renderFrameIndex, g_renderDocumentThreadContext.pixelsU8);
+                    g_renderDocumentContext.frameCache.SetFrame(frameHash, g_previewFrameIndex, g_renderDocumentThreadContext.pixelsU8);
             }
 
             // If the preview hash is different than this frame's hash we need to upload it to the GPU and copy it into the preview texture

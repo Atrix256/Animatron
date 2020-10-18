@@ -94,3 +94,8 @@ struct Context
 bool ValidateAndFixupDocument(Data::Document& document);
 
 bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& threadContext, Context& context, int& recycledFrameIndex, size_t& frameHash);
+
+inline int TotalFrameCount(const Data::Document& document)
+{
+    return int(document.duration * float(document.FPS));
+}

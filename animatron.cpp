@@ -230,6 +230,8 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
 
     // Get the key frame interpolated state of each entity first, so that they can look at eachother (like 3d objects looking at their camera)
     frameHash = 0;
+    Hash(frameHash, document.renderSizeX);
+    Hash(frameHash, document.renderSizeY);
     std::unordered_map<std::string, Data::Entity> entityMap;
     {
         for (const Data::RuntimeEntityTimeline* timeline_ : document.runtimeEntityTimelines)

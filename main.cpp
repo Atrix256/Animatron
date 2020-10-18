@@ -118,7 +118,7 @@ int main(int argc, char** argv)
     }
 
     // report what we are doing
-    int framesTotal = int(document.duration * float(document.FPS));
+    int framesTotal = TotalFrameCount(document);
     printf("Animatron v%i.%i\n", c_programVersionMajor, c_programVersionMinor);
     printf("Rendering with %i threads...\n", omp_get_max_threads());
     printf("  srcFile: %s\n", srcFile);
