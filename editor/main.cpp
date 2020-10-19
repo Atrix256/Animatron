@@ -590,6 +590,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                     {
                         ImGui::BeginChild("entity", ImVec2(0, 0), true);
 
+                        ImGui::PushItemWidth(-150);
+
                         if (selected-1 < g_rootDocument.entities.size())
                         {
                             bool changed = ShowUI(g_rootDocument.entities[selected-1], "");
@@ -617,6 +619,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                                 }
                             }
                         }
+
+                        ImGui::PopItemWidth();
 
                         ImGui::EndChild();
                     }
@@ -1098,7 +1102,6 @@ TODO:
 * need to be able to edit keyframes
 * need to be able to render the video (probably use animatron command line)
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
-* make the edit boxes take up the full width of the column. no reason to waste space
 * have a 'realtime' checkbox next to the play button to make it advance frames based on time, instead of just incrementing.
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
 * show current time in minutes/seconds and total time.
