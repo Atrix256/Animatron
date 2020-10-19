@@ -40,12 +40,12 @@
                 "B": 0.0,
                 "A": 1
               },
-              "blendControlPoints": [
-                0,
-                0,
-                0,
-                1
-              ]
+              "blendControlPoints": {
+                "A": 0,
+                "B": 0,
+                "C": 0,
+                "D": 1
+              }
             }
           ]
         }
@@ -397,7 +397,12 @@
     {
       "entityId": "NodeBoxTrash",
       "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-75, \"Y\":-40}}"
     },
     {
@@ -407,7 +412,12 @@
     {
       "entityId": "NodeBoxWatermelon",
       "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-50, \"Y\":-40}}"
     },
     {
@@ -417,7 +427,12 @@
     {
       "entityId": "NodeBoxRake",
       "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-25, \"Y\":-40}}"
     },
     {
@@ -427,7 +442,12 @@
     {
       "entityId": "NodeBoxWashClothes",
       "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":0, \"Y\":-40}}"
     },
     {
@@ -437,7 +457,12 @@
     {
       "entityId": "NodeBoxFoldLaundry",
       "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":25, \"Y\":-40}}"
     },
     {
@@ -447,7 +472,12 @@
     {
       "entityId": "NodeBoxDishes",
       "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":50, \"Y\":-40}}"
     },
     {
@@ -457,7 +487,12 @@
     {
       "entityId": "NodeBoxRelax",
       "time": 1.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":75, \"Y\":-40}}"
     },
 
@@ -470,7 +505,12 @@
     {
       "entityId": "NodeBoxWatermelon",
       "time": 6.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-20,\"Y\":20}}"
     },
     {
@@ -480,7 +520,12 @@
     {
       "entityId": "NodeBoxRake",
       "time": 7.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-20,\"Y\":0}}"
     },
     {
@@ -490,7 +535,12 @@
     {
       "entityId": "NodeBoxTrash",
       "time": 8.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":17.5,\"Y\":10}}"
     },
 
@@ -503,7 +553,12 @@
     {
       "entityId": "NodeBoxDishes",
       "time": 12.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-57.5, \"Y\":20}}"
     },
 
@@ -516,7 +571,12 @@
     {
       "entityId": "NodeBoxWashClothes",
       "time": 17.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-20, \"Y\":-20}}"
     },
 
@@ -527,7 +587,12 @@
     {
       "entityId": "NodeBoxFoldLaundry",
       "time": 19.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":17.5, \"Y\":-20}}"
     },
 
@@ -540,7 +605,12 @@
     {
       "entityId": "NodeBoxRelax",
       "time": 26.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":55, \"Y\":-5}}"
     }
   ]

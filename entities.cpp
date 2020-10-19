@@ -547,10 +547,10 @@ bool EntityLinearGradient_Action::DoAction(
 
                 float percent = (value - linearGradient.points[index - 1].value) / (linearGradient.points[index].value - linearGradient.points[index - 1].value);
 
-                float CP0 = linearGradient.points[index].blendControlPoints[0];
-                float CP1 = linearGradient.points[index].blendControlPoints[1];
-                float CP2 = linearGradient.points[index].blendControlPoints[2];
-                float CP3 = linearGradient.points[index].blendControlPoints[3];
+                float CP0 = linearGradient.points[index].blendControlPoints.A;
+                float CP1 = linearGradient.points[index].blendControlPoints.B;
+                float CP2 = linearGradient.points[index].blendControlPoints.C;
+                float CP3 = linearGradient.points[index].blendControlPoints.D;
 
                 float t = CubicBezierInterpolation(CP0, CP1, CP2, CP3, percent);
 

@@ -255,10 +255,10 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
                     float t = frameTime - timeline.keyFrames[cursorIndex].time;
                     t /= (timeline.keyFrames[cursorIndex + 1].time - timeline.keyFrames[cursorIndex].time);
 
-                    float CPA = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
-                    float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
-                    float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[2];
-                    float CPD = timeline.keyFrames[cursorIndex + 1].blendControlPoints[3];
+                    float CPA = timeline.keyFrames[cursorIndex + 1].blendControlPoints.A;
+                    float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints.B;
+                    float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints.C;
+                    float CPD = timeline.keyFrames[cursorIndex + 1].blendControlPoints.D;
 
                     blendPercent = Clamp(CubicBezierInterpolation(CPA, CPB, CPC, CPD, t), 0.0f, 1.0f);
                 }

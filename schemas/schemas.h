@@ -43,10 +43,17 @@ STRUCT_BEGIN(Data, Point4D, "A 4d Point")
     STRUCT_FIELD(float, W, 0.0f, "W")
 STRUCT_END()
 
+STRUCT_BEGIN(Data, CubicBezierControlPoints1D, "")
+    STRUCT_FIELD(float, A, 0.0f / 3.0f, "A")
+    STRUCT_FIELD(float, B, 1.0f / 3.0f, "B")
+    STRUCT_FIELD(float, C, 2.0f / 3.0f, "C")
+    STRUCT_FIELD(float, D, 3.0f / 3.0f, "D")
+STRUCT_END()
+
 STRUCT_BEGIN(Data, GradientPoint, "A color gradient point")
     STRUCT_FIELD(float, value, 0.0f, "The gradient scalar value")
     STRUCT_FIELD(Color, color, Data::Color(), "The color at this value")
-    STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, { 0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f }, "Cubic Bezier control points for blending from the previous value")
+    STRUCT_FIELD(CubicBezierControlPoints1D, blendControlPoints, Data::CubicBezierControlPoints1D(), "Cubic Bezier control points for blending from the previous value")
 STRUCT_END()
 
 STRUCT_BEGIN(Data, Matrix2x2, "A 2x2 matrix")
@@ -210,14 +217,14 @@ STRUCT_BEGIN(Data, KeyFrame, "A KeyFrame")
     STRUCT_FIELD(std::string, entityId, "", "The ID of the entity affected")
     STRUCT_FIELD(float, time, 0.0f, "The time in seconds the event occurs")
     STRUCT_FIELD(std::string, newValue, "{}", "JSON describing the value of the entity at this point in time")
-    STRUCT_STATIC_ARRAY(float, blendControlPoints, 4, {0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f}, "Cubic Bezier control points for blending from the previous value")
+    STRUCT_FIELD(CubicBezierControlPoints1D, blendControlPoints, Data::CubicBezierControlPoints1D(), "Cubic Bezier control points for blending from the previous value")
 STRUCT_END()
 
 // ----------------------------- Runtime Types -----------------------------
 
 STRUCT_BEGIN(Data, RuntimeEntityTimelineKeyframe, "")
     STRUCT_FIELD_NO_SERIALIZE(float, time, 0.0f, "")
-    STRUCT_FIELD_NO_SERIALIZE(std::array<float COMMA 4>, blendControlPoints, std::array<float COMMA 4>{ 0.0f COMMA 1.0f / 3.0f COMMA 2.0f / 3.0f COMMA 1.0f }, "")
+    STRUCT_FIELD_NO_SERIALIZE(CubicBezierControlPoints1D, blendControlPoints, Data::CubicBezierControlPoints1D(), "Cubic Bezier control points for blending from the previous value")
     STRUCT_FIELD_NO_SERIALIZE(Data::Entity, entity, Data::Entity(), "")
 STRUCT_END()
 

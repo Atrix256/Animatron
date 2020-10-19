@@ -1103,7 +1103,6 @@ TODO:
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
 * show current time in minutes/seconds and total time.
 
-* could make blend points be shown as a curve with a custom plot. Or, do it along w/ the edit values.
 * tooltips! use the description to make tooltips for each field!
 
 * make entity references be a special type that has a drop down to choose from when editing?

@@ -294,3 +294,16 @@ bool ShowUI(Data::Point4D& value, const char* label)
 {
     return ImGui::InputFloat4(label, &value.X);
 }
+
+bool ShowUI(Data::CubicBezierControlPoints1D& value, const char* label)
+{
+    auto func = [](void* context, int i) -> float
+    {
+        Data::CubicBezierControlPoints1D& value = *(Data::CubicBezierControlPoints1D*)context;
+
+        return CubicBezierInterpolation(value.A, value.B, value.C, value.D, float(i) / 100.0f);
+    };
+
+    ImGui::PlotLines("Lines", func, (void*)&value, 100, 0, NULL, 0.0f, 1.0f, ImVec2(0, 80));
+    return ImGui::InputFloat4(label, &value.A);
+}
