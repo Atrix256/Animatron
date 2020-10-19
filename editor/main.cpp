@@ -94,6 +94,16 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 HWND g_hwnd;
 
+bool HasEntity(const RootDocumentType& rootDocument, const char* entityId)
+{
+    for (const auto& entity : rootDocument.entities)
+    {
+        if (entity.id == entityId)
+            return true;
+    }
+    return false;
+}
+
 void UpdateWindowTitle()
 {
     char buffer[1024];
@@ -528,6 +538,44 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                         }
 
                         ImGui::Unindent();
+
+                        if (ImGui::Button("Add"))
+                        {
+                            char entityId[256];
+                            int index = 0;
+                            do
+                            {
+                                sprintf_s(entityId, "Entity %i", index);
+                                index++;
+                            } while (HasEntity(g_rootDocument, entityId));
+
+                            g_rootDocument.entities.resize(g_rootDocument.entities.size() + 1);
+                            g_rootDocument.entities.rbegin()->id = entityId;
+
+                            OnDocumentChange();
+                            if (!g_rootDocumentDirty)
+                            {
+                                g_rootDocumentDirty = true;
+                                UpdateWindowTitle();
+                            }
+                        }
+
+                        ImGui::SameLine();
+
+                        if (ImGui::Button("Delete"))
+                        {
+                            if (selected > 0 && selected - 1 < g_rootDocument.entities.size())
+                            {
+                                g_rootDocument.entities.erase(g_rootDocument.entities.begin() + selected - 1);
+
+                                OnDocumentChange();
+                                if (!g_rootDocumentDirty)
+                                {
+                                    g_rootDocumentDirty = true;
+                                    UpdateWindowTitle();
+                                }
+                            }
+                        }
 
                         ImGui::EndChild();
                     }
@@ -1040,7 +1088,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 TODO:
 * put preview image in it's own sub window with it's own horizontal and vertical scroll bars
 * should launch latex and ffmpeg not with cmd but with something else. no system pls.
-* add & delete entity buttons.
 * could make a file name type, where you click it to choose a file.
 * also a color picker, and make point3d be a single line to edit!
 * more hotkeys like for opening file and saving as work.

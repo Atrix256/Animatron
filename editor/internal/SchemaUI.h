@@ -7,7 +7,8 @@
 // Enums 
 
 #define ENUM_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
-	bool ShowUI(_NAMESPACE::_NAME& value, const char* label) \
+    template <typename T = void> \
+	bool ShowUI(_NAMESPACE::_NAME& value, const char* label, T* dummy = nullptr) \
 	{ \
         typedef _NAMESPACE::_NAME ThisType; \
         int v = (int)value; \
@@ -26,7 +27,8 @@
 // Structs
 
 #define STRUCT_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
-	bool ShowUI(_NAMESPACE::_NAME& value, const char* label) \
+    template <typename T = void> \
+	bool ShowUI(_NAMESPACE::_NAME& value, const char* label, T* dummy = nullptr) \
 	{ \
         using namespace _NAMESPACE; \
         bool ret = false; \
@@ -35,7 +37,8 @@
             ImGui::PushID(#_NAME);
 
 #define STRUCT_INHERIT_BEGIN(_NAMESPACE, _NAME, _BASE, _DESCRIPTION) \
-	bool ShowUI(_NAMESPACE::_NAME& value, const char* label) \
+    template <typename T = void> \
+	bool ShowUI(_NAMESPACE::_NAME& value, const char* label, T* dummy = nullptr) \
 	{ \
         using namespace _NAMESPACE; \
         bool ret = false; \
@@ -89,13 +92,13 @@
                     ret |= ShowUI(value._NAME[index], ""); \
                     ImGui::PopID(); \
                 } \
-                if (label[0] != 0) \
-                    ImGui::TreePop(); \
+                ImGui::TreePop(); \
             }
 
 #define STRUCT_END() \
             ImGui::PopID(); \
-            ImGui::TreePop(); \
+            if (label[0] != 0) \
+                ImGui::TreePop(); \
         } \
         return ret; \
 	}
@@ -103,7 +106,8 @@
 // Variants
 
 #define VARIANT_BEGIN(_NAMESPACE, _NAME, _DESCRIPTION) \
-	bool ShowUI(_NAMESPACE::_NAME& value, const char* label) \
+    template <typename T = void> \
+	bool ShowUI(_NAMESPACE::_NAME& value, const char* label, T* dummy = nullptr) \
 	{ \
         bool ret = false; \
         if (ImGui::TreeNode(label)) \
@@ -268,3 +272,7 @@ bool ShowUI(std::string& value, const char* label)
     }
     return ret;
 }
+
+// Custom UI types
+
+// TODO: custom UI types here. make a regular old ShowUI function and it ought to select it since the other is templated

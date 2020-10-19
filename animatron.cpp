@@ -114,7 +114,7 @@ bool ValidateAndFixupDocument(Data::Document& document)
                 default:
                 {
                     printf("unhandled entity type in variant\n");
-                    return false;
+                    break;
                 }
             }
             if (error)
@@ -129,7 +129,7 @@ bool ValidateAndFixupDocument(Data::Document& document)
     if (!CAS::Get().Init())
     {
         printf("Could not init CAS\n");
-        return 1;
+        return false;
     }
 
     // make a timeline for each entity by just starting with the entity definition
@@ -157,8 +157,7 @@ bool ValidateAndFixupDocument(Data::Document& document)
         if (it == document.runtimeEntityTimelinesMap.end())
         {
             printf("Could not find entity %s for keyframe!\n", keyFrame.entityId.c_str());
-            system("pause");
-            return 1;
+            continue;
         }
 
         // ignore events outside the lifetime of the entity
@@ -187,14 +186,13 @@ bool ValidateAndFixupDocument(Data::Document& document)
                 default:
                 {
                     printf("unhandled entity type in variant\n");
-                    return 1;
+                    return false;
                 }
             }
             if (error)
             {
                 printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
-                system("pause");
-                return 1;
+                return false;
             }
         }
         it->second.keyFrames.push_back(newKeyFrame);
@@ -292,7 +290,7 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
                 default:
                 {
                     printf("unhandled entity type in variant\n");
-                    return false;
+                    break;
                 }
             }
             if (error)
@@ -342,7 +340,7 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
             default:
             {
                 printf("unhandled entity type in variant\n");
-                return false;
+                break;
             }
         }
         if (error)
