@@ -275,4 +275,22 @@ bool ShowUI(std::string& value, const char* label)
 
 // Custom UI types
 
-// TODO: custom UI types here. make a regular old ShowUI function and it ought to select it since the other is templated
+bool ShowUI(Data::Color& value, const char* label)
+{
+    return ImGui::ColorEdit4(label, &value.R, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_AlphaPreview);
+}
+
+bool ShowUI(Data::Point2D& value, const char* label)
+{
+    return ImGui::InputFloat2(label, &value.X);
+}
+
+bool ShowUI(Data::Point3D& value, const char* label)
+{
+    return ImGui::InputFloat3(label, &value.X);
+}
+
+bool ShowUI(Data::Point4D& value, const char* label)
+{
+    return ImGui::InputFloat4(label, &value.X);
+}

@@ -55,6 +55,8 @@ RootDocumentType g_renderDocument;
 Context g_renderDocumentContext;
 ThreadContext g_renderDocumentThreadContext;
 
+bool g_showImGUIDemo = false;
+
 bool g_ctrl_s = false;
 
 struct FrameContext
@@ -443,6 +445,9 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
             UpdateWindowTitle();
         }
 
+        if (g_showImGUIDemo)
+            ImGui::ShowDemoWindow();
+
         // Our editor UI
         {
             // take up the whole screen
@@ -450,8 +455,6 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
             ImGui::SetNextWindowSize(ImVec2{ float(g_width), float(g_height) });
             
             ImGui::Begin("df_serialize editor", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-
-            //ImGui::ShowDemoWindow();
 
             // Menu
             if (ImGui::BeginMenuBar())
@@ -510,6 +513,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                             }
                         }
                     }
+                    if (ImGui::MenuItem("Show IMGUI Demo Window", ""))
+                        g_showImGUIDemo = !g_showImGUIDemo;
                     if (ImGui::MenuItem("Exit","Alt+f4") && ConfirmLoseChanges()) { ::PostQuitMessage(0); }
                     ImGui::EndMenu();
                 }
@@ -1089,15 +1094,19 @@ TODO:
 * put preview image in it's own sub window with it's own horizontal and vertical scroll bars
 * should launch latex and ffmpeg not with cmd but with something else. no system pls.
 * could make a file name type, where you click it to choose a file.
-* also a color picker, and make point3d be a single line to edit!
 * more hotkeys like for opening file and saving as work.
 * need to be able to edit keyframes
-* need to be able to export the video (probably use animatron command line)
+* need to be able to render the video (probably use animatron command line)
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
 * make the edit boxes take up the full width of the column. no reason to waste space
 * have a 'realtime' checkbox next to the play button to make it advance frames based on time, instead of just incrementing.
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
 * show current time in minutes/seconds and total time.
+
+* could make blend points be shown as a curve with a custom plot. Or, do it along w/ the edit values.
+* tooltips! use the description to make tooltips for each field!
+
+* make entity references be a special type that has a drop down to choose from when editing?
 
 ! retest command line animatron
 */
