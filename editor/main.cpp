@@ -9,6 +9,7 @@
 #include <dxgi1_4.h>
 #include <tchar.h>
 #include "nfd.h"
+#include <chrono>
 
 // --------------------------- DF_SERIALIZE expansion ---------------------------
 
@@ -144,6 +145,10 @@ bool Load(const char* load)
 
     return true;
 }
+
+bool g_previewRealTime = true;
+std::chrono::high_resolution_clock::time_point g_previewRealTimeStart;
+int g_previewRealTimeStartFrameOffset = 0;
 
 int g_previewWidth = -1;
 int g_previewHeight = -1;
@@ -490,7 +495,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                         }
                     }
 
-                    if (!g_rootDocumentFileName.empty() && ImGui::MenuItem("Save", "Ctrl+S") && g_rootDocumentDirty)
+                    if (ImGui::MenuItem("Save", "Ctrl+S", false, !g_rootDocumentFileName.empty() && g_rootDocumentDirty))
                     {
                         if (!WriteToJSONFile(g_rootDocument, g_rootDocumentFileName.c_str()))
                             MessageBoxA(nullptr, "Could not save JSON file", "Error", MB_OK);
@@ -633,7 +638,15 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                     int totalFrames = TotalFrameCount(g_rootDocument);
                     if (g_playMode)
                     {
-                        g_previewFrameIndex++;
+                        if (g_previewRealTime)
+                        {
+                            std::chrono::duration<float> seconds = (std::chrono::high_resolution_clock::now() - g_previewRealTimeStart);
+                            g_previewFrameIndex = g_previewRealTimeStartFrameOffset + int(seconds.count() * float(g_rootDocument.FPS));
+                        }
+                        else
+                        {
+                            g_previewFrameIndex++;
+                        }
                         if (g_previewFrameIndex >= totalFrames)
                             g_playMode = false;
                     }
@@ -646,16 +659,51 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                     ImGui::PushID("Frame");
 
-                    ImGui::SliderInt("", &g_previewFrameIndex, 0, totalFrames - 1);
+                    if (ImGui::SliderInt("", &g_previewFrameIndex, 0, totalFrames - 1))
+                    {
+                        g_previewRealTimeStartFrameOffset = g_previewFrameIndex;
+                        g_previewRealTimeStart = std::chrono::high_resolution_clock::now();
+                    }
 
                     ImGui::PopID();
+
+                    int min, sec, tmin, tsec;
+                    FrameIndexToMinutesSeconds(g_rootDocument, g_previewFrameIndex, min, sec);
+                    FrameIndexToMinutesSeconds(g_rootDocument, totalFrames - 1, tmin, tsec);
+                    ImGui::Text("%02d:%02d / %02d:%02d", min, sec, tmin, tsec);
 
                     ImGui::SameLine();
 
                     if (!g_playMode && ImGui::Button("Play"))
+                    {
+                        g_previewRealTimeStartFrameOffset = g_previewFrameIndex;
+                        g_previewRealTimeStart = std::chrono::high_resolution_clock::now();
                         g_playMode = true;
+                    }
                     else if (g_playMode && ImGui::Button("Stop"))
+                    {
                         g_playMode = false;
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button("Rewind"))
+                    {
+                        g_previewFrameIndex = 0;
+                        g_previewRealTimeStartFrameOffset = 0;
+                        g_previewRealTimeStart = std::chrono::high_resolution_clock::now();
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Checkbox("Realtime", &g_previewRealTime))
+                    {
+                        if (g_previewRealTime && g_playMode)
+                        {
+                            g_previewRealTimeStartFrameOffset = g_previewFrameIndex;
+                            g_previewRealTimeStart = std::chrono::high_resolution_clock::now();
+                        }
+                    }
                 }
 
                 if (g_previewGpuDescHandle.ptr)
@@ -1094,21 +1142,19 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 /*
+IMPORTANT TODO:
+* need to be able to edit keyframes
+* need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
+* for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
+
+
 TODO:
+* have a rewind button next to the play/stop button. can we use icons? does imgui have em?
 * put preview image in it's own sub window with it's own horizontal and vertical scroll bars
 * should launch latex and ffmpeg not with cmd but with something else. no system pls.
 * could make a file name type, where you click it to choose a file.
 * more hotkeys like for opening file and saving as work.
-* need to be able to edit keyframes
-* need to be able to render the video (probably use animatron command line)
-* for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
-* have a 'realtime' checkbox next to the play button to make it advance frames based on time, instead of just incrementing.
-* have a rewind button next to the play/stop button. can we use icons? does imgui have em?
-* show current time in minutes/seconds and total time.
-
 * tooltips! use the description to make tooltips for each field!
-
 * make entity references be a special type that has a drop down to choose from when editing?
 
-! retest command line animatron
 */

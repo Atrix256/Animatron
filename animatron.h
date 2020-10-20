@@ -97,3 +97,11 @@ inline int TotalFrameCount(const Data::Document& document)
 {
     return int(document.duration * float(document.FPS));
 }
+
+inline void FrameIndexToMinutesSeconds(const Data::Document& document, int frameIndex, int& minutes, int& seconds)
+{
+    float s = float(frameIndex) / float(document.FPS);
+
+    minutes = int(s / 60.0f);
+    seconds = int(fmodf(s, 60.0f));
+}
