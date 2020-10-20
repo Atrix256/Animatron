@@ -75,6 +75,7 @@ Context g_renderDocumentContext;
 ThreadContext g_renderDocumentThreadContext;
 
 bool g_showImGUIDemo = false;
+bool g_vsync = true; // turn this off for faster rendering in preview window
 
 bool g_ctrl_s = false;
 
@@ -583,9 +584,22 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                             }
                         }
                     }
-                    if (ImGui::MenuItem("Show IMGUI Demo Window", ""))
-                        g_showImGUIDemo = !g_showImGUIDemo;
                     if (ImGui::MenuItem("Exit","Alt+f4") && ConfirmLoseChanges()) { ::PostQuitMessage(0); }
+
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Render"))
+                {
+                    if (ImGui::MenuItem("Render Video", "Ctrl+R", false, false))
+                    {
+                        // TODO: render the video!
+                    }
+
+                    if (ImGui::MenuItem("VSync", "", g_vsync))
+                        g_vsync = !g_vsync;
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Show IMGUI Demo Window", "", g_showImGUIDemo))
+                        g_showImGUIDemo = !g_showImGUIDemo;
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
@@ -910,8 +924,10 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
         g_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&g_pd3dCommandList);
 
-        g_pSwapChain->Present(1, 0); // Present with vsync
-        //g_pSwapChain->Present(0, 0); // Present without vsync
+        if(g_vsync)
+            g_pSwapChain->Present(1, 0); // Present with vsync
+        else
+            g_pSwapChain->Present(0, 0); // Present without vsync
 
         UINT64 fenceValue = g_fenceLastSignaledValue + 1;
         g_pd3dCommandQueue->Signal(g_fence, fenceValue);
@@ -1217,7 +1233,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 /*
 IMPORTANT TODO:
 * need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
-* for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
+* for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution, or a latex string. so that it doesn't fire up latex etc right away while you are typing.
 ! merge to master after this list is done
 
 TODO:
