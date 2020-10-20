@@ -99,7 +99,6 @@ int main(int argc, char** argv)
     Data::Document document;
     if (!ReadFromJSONFile(document, srcFile))
     {
-        system("pause");
         return 1;
     }
 
@@ -245,7 +244,6 @@ int main(int argc, char** argv)
 
     if (wasError)
     {
-        system("pause");
         return 1;
     }
 

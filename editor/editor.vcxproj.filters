@@ -20,8 +20,12 @@
     <ClCompile Include="..\df_serialize\imgui\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\df_serialize\editor\nfd\nfd_common.c" />
-    <ClCompile Include="..\df_serialize\editor\nfd\nfd_win.cpp" />
+    <ClCompile Include="..\df_serialize\editor\nfd\nfd_common.c">
+      <Filter>nfd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\df_serialize\editor\nfd\nfd_win.cpp">
+      <Filter>nfd</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">

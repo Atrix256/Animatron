@@ -1255,7 +1255,6 @@ IMPORTANT TODO:
 * need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution, or a latex string. so that it doesn't fire up latex etc right away while you are typing.
 ! merge to master after this list is done
-* yes, probably get rid of system() stuff
 
 TODO:
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
