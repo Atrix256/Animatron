@@ -329,6 +329,53 @@ void OnNewFrame()
     );
 }
 
+bool ShowKeyframes(size_t entityIndex)
+{
+    std::string& entityId = g_rootDocument.entities[entityIndex].id;
+    bool ret = false;
+
+    ImGui::Separator();
+    if (ImGui::TreeNode("Key Frames"))
+    {
+        int deleteIndex = -1;
+        int keyFrameIndex = -1;
+        for (Data::KeyFrame& keyFrame : g_rootDocument.keyFrames)
+        {
+            keyFrameIndex++;
+            if (keyFrame.entityId != entityId)
+                continue;
+
+            ImGui::Separator();
+
+            ret |= ShowUI(keyFrame.time, "time");
+            ret |= ShowUI(keyFrame.newValue, "newValue");
+            ret |= ShowUI(keyFrame.blendControlPoints, "blendControlPoints");
+
+            if (ImGui::Button("Delete"))
+                deleteIndex = keyFrameIndex;
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::Button("Add"))
+        {
+            g_rootDocument.keyFrames.push_back(Data::KeyFrame());
+            Data::KeyFrame& keyFrame = *g_rootDocument.keyFrames.rbegin();
+            keyFrame.entityId = entityId;
+            ret = true;
+        }
+
+        if (deleteIndex >= 0)
+        {
+            g_rootDocument.keyFrames.erase(g_rootDocument.keyFrames.begin() + deleteIndex);
+            ret = true;
+        }
+
+        ImGui::TreePop();
+    }
+    return ret;
+}
+
 // Main code
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
@@ -600,6 +647,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                         if (selected-1 < g_rootDocument.entities.size())
                         {
                             bool changed = ShowUI(g_rootDocument.entities[selected-1], "");
+                            changed |= ShowKeyframes(selected-1);
+
                             if (changed)
                             {
                                 OnDocumentChange();
@@ -1143,10 +1192,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /*
 IMPORTANT TODO:
-* need to be able to edit keyframes
 * need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
-
+* document edit shows a lot of stuff i'd rather people not edit. probably should make a custom edit function for the document and hide that away
 
 TODO:
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
@@ -1156,5 +1204,6 @@ TODO:
 * more hotkeys like for opening file and saving as work.
 * tooltips! use the description to make tooltips for each field!
 * make entity references be a special type that has a drop down to choose from when editing?
+
 
 */
