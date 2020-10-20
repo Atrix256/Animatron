@@ -608,7 +608,13 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                         for (size_t index = 0; index < g_rootDocument.entities.size(); ++index)
                         {
-                            if (ImGui::Selectable(g_rootDocument.entities[index].id.c_str(), selected == index + 1))
+                            char entityName[256];
+                            if (g_rootDocument.entities[index].id.empty())
+                                sprintf_s(entityName, "<Entity %i>", (int)index);
+                            else
+                                strcpy_s(entityName, g_rootDocument.entities[index].id.c_str());
+
+                            if (ImGui::Selectable(entityName, selected == index + 1))
                                 selected = index + 1;
                         }
 
@@ -1212,7 +1218,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 IMPORTANT TODO:
 * need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
-* bug: loading 3 then 7, there were a bunch of ghost entities in the list
 ! merge to master after this list is done
 
 TODO:
