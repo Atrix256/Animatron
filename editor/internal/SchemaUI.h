@@ -12,7 +12,7 @@
 	{ \
         typedef _NAMESPACE::_NAME ThisType; \
         int v = (int)value; \
-        bool ret = ImGui::Combo("", &v,
+        bool ret = ImGui::Combo(label, &v,
 
 #define ENUM_ITEM(_NAME, _DESCRIPTION) \
         #_NAME "\0"

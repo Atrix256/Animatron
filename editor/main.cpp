@@ -34,6 +34,24 @@
 #include "internal/SchemaUI.h"
 #include "editor_config.h"
 
+bool ShowUI(Data::Document& value, const char* label)
+{
+    bool ret = false;
+    ret |= ShowUI(value.outputSizeX, "outputSizeX");
+    ret |= ShowUI(value.outputSizeY, "outputSizeY");
+    ret |= ShowUI(value.renderSizeX, "renderSizeX");
+    ret |= ShowUI(value.renderSizeY, "renderSizeY");
+    ret |= ShowUI(value.duration, "duration");
+    ret |= ShowUI(value.startTime, "startTime");
+    ret |= ShowUI(value.FPS, "FPS");
+    ret |= ShowUI(value.audioFile, "audioFile");
+    ret |= ShowUI(value.blueNoiseDither, "blueNoiseDither");
+    ret |= ShowUI(value.forceOpaqueOutput, "forceOpaqueOutput");
+    ret |= ShowUI(value.samplesPerPixel, "samplesPerPixel");
+    ret |= ShowUI(value.jitterSequenceType, "jitterSequenceType");
+    return ret;
+}
+
 // --------------------------- DF_SERIALIZE expansion ---------------------------
 
 #ifdef _DEBUG
@@ -1194,7 +1212,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 IMPORTANT TODO:
 * need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution. so that it doesn't fire up latex etc right away while you are typing.
-* document edit shows a lot of stuff i'd rather people not edit. probably should make a custom edit function for the document and hide that away
+* bug: loading 3 then 7, there were a bunch of ghost entities in the list
+! merge to master after this list is done
 
 TODO:
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
@@ -1204,6 +1223,6 @@ TODO:
 * more hotkeys like for opening file and saving as work.
 * tooltips! use the description to make tooltips for each field!
 * make entity references be a special type that has a drop down to choose from when editing?
-
+* keyframe editing needs better editing. like a normal ui with a checkbox next to each field to say you want to edit that field in the keyframe? or maybe the checkbox is implicit based on if it changed from last keyframe or not
 
 */
