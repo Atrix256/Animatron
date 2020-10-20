@@ -684,7 +684,27 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                         if (selected-1 < g_rootDocument.entities.size())
                         {
+                            std::string oldId = g_rootDocument.entities[selected - 1].id;
+
                             bool changed = ShowUI(g_rootDocument.entities[selected-1], "");
+
+                            // If the Id changed, we need to update the key frames to use the new id!
+                            // We also need to update the parents
+                            if (g_rootDocument.entities[selected - 1].id != oldId)
+                            {
+                                for (Data::KeyFrame& keyFrame : g_rootDocument.keyFrames)
+                                {
+                                    if (keyFrame.entityId == oldId)
+                                        keyFrame.entityId = g_rootDocument.entities[selected - 1].id;
+                                }
+
+                                for (Data::Entity& entity : g_rootDocument.entities)
+                                {
+                                    if (entity.parent == oldId)
+                                        entity.parent = g_rootDocument.entities[selected - 1].id;
+                                }
+                            }
+
                             changed |= ShowKeyframes(selected-1);
 
                             if (changed)
@@ -1235,6 +1255,7 @@ IMPORTANT TODO:
 * need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution, or a latex string. so that it doesn't fire up latex etc right away while you are typing.
 ! merge to master after this list is done
+* yes, probably get rid of system() stuff
 
 TODO:
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
