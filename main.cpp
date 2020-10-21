@@ -19,7 +19,7 @@
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 
-// TODO: fixup the headers above
+// TODO: fixup the headers above. don't need them all anymore
 
 void CopyFile(const char* src, const char* dest)
 {
@@ -171,9 +171,6 @@ int main(int argc, char** argv)
             wasError = true;
             break;
         }
-
-        // TODO: it's weird that the caller has to set the frame cache, but it must happen after the file is written so... i dunno. maybe we can't do file copy?
-        // TODO: maybe it does it internally and we still do stbi_write_png and do encoding? kinda sucks...
 
         // write it out
         if (recycledFrameIndex == -1)

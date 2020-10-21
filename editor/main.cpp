@@ -3,6 +3,7 @@
 // FIXME: 64-bit only for now! (Because sizeof(ImTextureId) == sizeof(void*))
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx12.h"
 #include <d3d12.h>
@@ -10,6 +11,11 @@
 #include <tchar.h>
 #include "nfd.h"
 #include <chrono>
+#include <thread>
+#include <atomic>
+
+#include "../stb/stb_image.h"
+#include "../stb/stb_image_write.h"
 
 // --------------------------- DF_SERIALIZE expansion ---------------------------
 
@@ -79,6 +85,8 @@ bool g_vsync = true; // turn this off for faster rendering in preview window
 
 bool g_ctrl_s = false;
 
+bool g_wantsRender = false;
+
 struct FrameContext
 {
     ID3D12CommandAllocator* CommandAllocator;
@@ -115,6 +123,44 @@ void ResizeSwapChain(HWND hWnd, int width, int height);
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 HWND g_hwnd;
+
+// TODO: animatron CLI uses this too, centralize it?
+void CopyFile(const char* src, const char* dest)
+{
+    std::vector<unsigned char> data;
+
+    // read the data into memory
+    {
+        FILE* file = nullptr;
+        fopen_s(&file, src, "rb");
+        if (!file)
+        {
+            printf("Failed to copy file!! Could not open %s for read.\n", src);
+            return;
+        }
+
+        fseek(file, 0, SEEK_END);
+        data.resize(ftell(file));
+        fseek(file, 0, SEEK_SET);
+
+        fread(data.data(), data.size(), 1, file);
+        fclose(file);
+    }
+
+    // write the new file
+    {
+        FILE* file = nullptr;
+        fopen_s(&file, dest, "wb");
+        if (!file)
+        {
+            printf("Failed to copy file!! Could not open %s for write.\n", dest);
+            return;
+        }
+
+        fwrite(data.data(), data.size(), 1, file);
+        fclose(file);
+    }
+}
 
 bool HasEntity(const RootDocumentType& rootDocument, const char* entityId)
 {
@@ -395,6 +441,144 @@ bool ShowKeyframes(size_t entityIndex)
     return ret;
 }
 
+std::vector<std::thread> g_renderThreads;
+std::atomic<bool> g_renderThreadCancel = false;
+std::atomic<int> g_renderThreadNextThreadId = 0;
+std::atomic<int> g_renderThreadNextFrame = 0;
+std::atomic<int> g_renderThreadRenderedFrames = 0;
+int g_renderThreadFrameTotal = 0;
+std::vector<ThreadContext> g_renderThreadContexts;
+Context g_renderThreadContext;
+RootDocumentType g_renderThreadDocument;
+bool g_renderingInProgress = false;
+
+void RenderThread()
+{
+    int threadId = g_renderThreadNextThreadId++;
+    ThreadContext& threadContext = g_renderThreadContexts[threadId];
+
+    while (1)
+    {
+        if (g_renderThreadCancel)
+            return;
+
+        int frameIndex = g_renderThreadNextFrame++;
+        if (frameIndex >= g_renderThreadFrameTotal)
+            return;
+
+        // render a frame
+        int recycledFrameIndex = -1;
+        size_t frameHash = 0;
+        if (!RenderFrame(g_renderThreadDocument, frameIndex, threadContext, g_renderThreadContext, recycledFrameIndex, frameHash))
+        {
+            // TODO: how to handle errors? should report them to user somehow
+            //wasError = true;
+            break;
+        }
+
+        // write it out
+        if (recycledFrameIndex == -1)
+        {
+            sprintf_s(threadContext.outFileName, "build/%i.%s", frameIndex, (g_renderThreadDocument.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
+            if (g_renderThreadDocument.config.writeFrames == Data::ImageFileType::PNG)
+                stbi_write_png(threadContext.outFileName, g_renderThreadDocument.outputSizeX, g_renderThreadDocument.outputSizeY, 4, threadContext.pixelsU8.data(), g_renderThreadDocument.outputSizeX * 4);
+            else
+                stbi_write_bmp(threadContext.outFileName, g_renderThreadDocument.outputSizeX, g_renderThreadDocument.outputSizeY, 4, threadContext.pixelsU8.data());
+
+            // Set this frame in the frame cache for recycling
+            g_renderThreadContext.frameCache.SetFrame(frameHash, frameIndex, threadContext.pixelsU8);
+        }
+        else
+        {
+            const char* extension = (g_renderThreadDocument.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp";
+            char fileName1[256];
+            sprintf_s(fileName1, "build/%i.%s", recycledFrameIndex, extension);
+            char fileName2[256];
+            sprintf_s(fileName2, "build/%i.%s", frameIndex, extension);
+            CopyFile(fileName1, fileName2);
+        }
+
+        g_renderThreadRenderedFrames++;
+    }
+}
+
+void StartRenderThreads()
+{
+    // We keep a separate render document because the validation and fixup modifies the document data
+    g_renderThreadDocument = g_rootDocument;
+    g_renderThreadContext.frameCache.Reset();
+    ValidateAndFixupDocument(g_renderThreadDocument);
+
+    g_renderThreadNextThreadId = 0;
+    g_renderThreadNextFrame = 0;
+    g_renderThreadRenderedFrames = 0;
+    g_renderThreadFrameTotal = TotalFrameCount(g_rootDocument);
+    g_renderThreadCancel = false;
+    g_renderingInProgress = true;
+
+    unsigned int numThreads = std::thread::hardware_concurrency();
+
+    g_renderThreads.resize(numThreads);
+    g_renderThreadContexts.resize(numThreads);
+    for (unsigned int i = 0; i < numThreads; ++i)
+        g_renderThreadContexts[i].threadId = i;
+
+    for (std::thread& t : g_renderThreads)
+        t = std::thread(RenderThread);
+}
+
+void EndRenderThreads()
+{
+    for (std::thread& t : g_renderThreads)
+        t.join();
+    g_renderThreads.clear();
+    g_renderThreadContext.frameCache.Reset();
+
+    if (g_renderThreadCancel)
+        return;
+
+    // make output file name
+    char destFileBuffer[1024];
+    strcpy_s(destFileBuffer, g_rootDocumentFileName.c_str());
+    int len = (int)strlen(destFileBuffer);
+    while (len > 0 && destFileBuffer[len] != '.')
+        len--;
+    if (len == 0)
+    {
+        strcpy_s(destFileBuffer, "out.mp4");
+    }
+    else
+    {
+        destFileBuffer[len] = 0;
+        strcat_s(destFileBuffer, ".mp4");
+    }
+
+    // have ffmpeg assemble it!
+    bool hasAudio = !g_renderThreadDocument.audioFile.empty();
+
+    char inputs[1024];
+    if (!hasAudio)
+        sprintf_s(inputs, "-i build/%%d.%s", (g_renderThreadDocument.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
+    else
+        sprintf_s(inputs, "-i build/%%d.%s -i %s", (g_renderThreadDocument.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp", g_renderThreadDocument.audioFile.c_str());
+
+    char audioOptions[1024];
+    if (hasAudio)
+        sprintf_s(audioOptions, " -c:a aac -b:a 384k ");
+    else
+        sprintf_s(audioOptions, " ");
+
+    int framesTotal = TotalFrameCount(g_renderThreadDocument);
+
+    char containerOptions[1024];
+    sprintf_s(containerOptions, "-frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p %s", framesTotal, hasAudio ? "-filter_complex \"[1:0] apad \" -shortest" : "");
+
+    char buffer[1024];
+    sprintf_s(buffer, "%s -y -framerate %i %s%s%s %s", g_renderThreadDocument.config.ffmpeg.c_str(), g_renderThreadDocument.FPS, inputs, audioOptions, containerOptions, destFileBuffer);
+
+    system(buffer);
+}
+
 // Main code
 INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
@@ -590,10 +774,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 }
                 if (ImGui::BeginMenu("Render"))
                 {
-                    if (ImGui::MenuItem("Render Video", "Ctrl+R", false, false))
-                    {
-                        // TODO: render the video!
-                    }
+                    if (ImGui::MenuItem("Render Video", "Ctrl+R"))
+                        g_wantsRender = true;
 
                     if (ImGui::MenuItem("VSync", "", g_vsync))
                         g_vsync = !g_vsync;
@@ -828,6 +1010,53 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
             ImGui::End();
 
             g_ctrl_s = false;
+        }
+
+        // Render progress dialog
+        {
+            // g_wantsRender is because i couldn't open the popup in the menu directly for some reason
+            if (g_wantsRender)
+            {
+                g_wantsRender = false;
+                ImGui::OpenPopup("Rendering Video");
+                StartRenderThreads();
+            }
+            {
+                // Always center this window when appearing
+                ImVec2 center(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f);
+                ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+                if (ImGui::BeginPopupModal("Rendering Video", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    int framesRendered = g_renderThreadRenderedFrames.load();
+                    int framesTotal = g_renderThreadFrameTotal;
+
+                    ImGui::Text("Rendering Frame %i / %i", framesRendered, framesTotal);
+                    ImGui::ProgressBar(float(framesRendered) / float(framesTotal));
+
+                    // run ffmpeg when done
+                    if (g_renderingInProgress && framesRendered >= framesTotal)
+                    {
+                        g_renderingInProgress = false;
+                        EndRenderThreads();
+                    }
+
+                    // Cancel button while rendering, ok button when finished
+                    if (g_renderingInProgress && ImGui::Button("Cancel", ImVec2(120, 0)))
+                    {
+                        g_renderingInProgress = false;
+                        g_renderThreadCancel = true;
+                        EndRenderThreads();
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else if (!g_renderingInProgress && ImGui::Button("OK", ImVec2(120, 0)))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::EndPopup();
+                }
+            }
         }
 
         UpdatePreviewResources();
@@ -1252,11 +1481,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /*
 IMPORTANT TODO:
-* need to be able to render the video - make animatron exe main() be a function call into animatron.cpp so we can use it here too, or use animatron command line.
 * for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution, or a latex string. so that it doesn't fire up latex etc right away while you are typing.
 ! merge to master after this list is done
 
 TODO:
+* handle the crash when closing while rendering
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
 * put preview image in it's own sub window with it's own horizontal and vertical scroll bars
 * should launch latex and ffmpeg not with cmd but with something else. no system pls.
