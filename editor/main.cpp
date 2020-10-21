@@ -363,10 +363,14 @@ bool ShouldDelayUpdate(const RootDocumentType& A, const RootDocumentType& B)
     // This returns true for things that are annoying to update each time you make an edit.
     // For instance, a latex string, so that it doesn't update (and freeze) each time you press a key.
 
+    // delay preview resolution updates
+    int desiredOutputSizeX = 640;
+    int desiredOutputSizeY = int(float(desiredOutputSizeX) * float(A.outputSizeY) / float(A.outputSizeX));
+    if (B.outputSizeX != desiredOutputSizeX || B.outputSizeY != desiredOutputSizeY)
+        return true;
+
     bool ret = false;
-
     size_t entityCount = Min(A.entities.size(), B.entities.size());
-
     for (size_t entityIndex = 0; entityIndex < entityCount; ++entityIndex)
     {
         if (ret)
@@ -397,22 +401,33 @@ bool ShouldDelayUpdate(const RootDocumentType& A, const RootDocumentType& B)
     return ret;
 }
 
-void UpdateRenderDocument()
+bool UpdateRenderDocument()
 {
+    if (g_rootDocument.outputSizeX < 4 || g_rootDocument.outputSizeY < 4)
+        return false;
+
+    int desiredOutputSizeX = 640;
+    int desiredOutputSizeY = int(float(desiredOutputSizeX) * float(g_rootDocument.outputSizeY) / float(g_rootDocument.outputSizeX));
+
+    if (desiredOutputSizeY > 4096)
+        return false;
+
     // We keep a separate render document because the validation and fixup modifies the document data
     g_renderDocument = g_rootDocument;
 
-    g_renderDocument.outputSizeX = 640;
-    g_renderDocument.outputSizeY = int(float(g_renderDocument.outputSizeX) * float(g_rootDocument.outputSizeY) / float(g_rootDocument.outputSizeX));
+    g_renderDocument.outputSizeX = desiredOutputSizeX;
+    g_renderDocument.outputSizeY = desiredOutputSizeY;
 
     g_renderDocumentContext.frameCache.Reset();
     g_renderDocumentThreadContext.threadId = 0;
     ValidateAndFixupDocument(g_renderDocument);
+
+    return true;
 }
 
 void OnDocumentChange(bool forceImmediateRenderDocumentUpdate)
 {
-    if (!forceImmediateRenderDocumentUpdate && ShouldDelayUpdate(g_renderDocument, g_rootDocument))
+    if (!forceImmediateRenderDocumentUpdate && ShouldDelayUpdate(g_rootDocument, g_renderDocument))
     {
         g_editCommitTime = std::chrono::high_resolution_clock::now() + std::chrono::seconds(1);
         g_editCommitDelayed = true;
@@ -1257,8 +1272,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
         if (g_editCommitDelayed && std::chrono::high_resolution_clock::now() > g_editCommitTime)
         {
-            g_editCommitDelayed = false;
-            UpdateRenderDocument();
+            if(UpdateRenderDocument())
+                g_editCommitDelayed = false;
         }
     }
 
@@ -1558,6 +1573,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 /*
+
+TODO: x^2 latex crashed??!
 
 TODO:
 * handle the crash when closing while rendering
