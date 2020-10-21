@@ -125,6 +125,17 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 HWND g_hwnd;
 
 // TODO: animatron CLI uses this too, centralize it?
+bool FileExists(const char* fileName)
+{
+    FILE* file = nullptr;
+    fopen_s(&file, fileName, "rb");
+    if (file)
+    {
+        fclose(file);
+        return true;
+    }
+    return false;
+}
 void CopyFile(const char* src, const char* dest)
 {
     std::vector<unsigned char> data;
@@ -554,7 +565,7 @@ void EndRenderThreads()
     }
 
     // have ffmpeg assemble it!
-    bool hasAudio = !g_renderThreadDocument.audioFile.empty();
+    bool hasAudio = FileExists(g_renderThreadDocument.audioFile.c_str());
 
     char inputs[1024];
     if (!hasAudio)

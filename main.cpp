@@ -20,7 +20,17 @@
 #include "stb/stb_image_write.h"
 
 // TODO: fixup the headers above. don't need them all anymore
-
+bool FileExists(const char* fileName)
+{
+    FILE* file = nullptr;
+    fopen_s(&file, fileName, "rb");
+    if (file)
+    {
+        fclose(file);
+        return true;
+    }
+    return false;
+}
 void CopyFile(const char* src, const char* dest)
 {
     std::vector<unsigned char> data;
@@ -208,7 +218,7 @@ int main(int argc, char** argv)
         // Youtube recomended settings (https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
         printf("Assembling frames...\n");
 
-        bool hasAudio = !document.audioFile.empty();
+        bool hasAudio = FileExists(document.audioFile.c_str());
 
         char inputs[1024];
         if (!hasAudio)
