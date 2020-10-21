@@ -26,7 +26,7 @@
 
 #include "../rapidjson/document.h"
 #include "../rapidjson/error/en.h"
-#include "../rapidjson/writer.h"
+#include "../rapidjson/writer.h" 
 #include "../rapidjson/prettywriter.h"
 #include "../rapidjson/stringbuffer.h"
 
@@ -222,6 +222,12 @@ bool Load(const char* load)
     return true;
 }
 
+// Some edits are expensive and annoying to happen immediately - like as you type text into a latex text field.
+// Those edits need to be delayed until the user has stopped making edits for a short period of time.
+// This is the time that those commits should happen.
+std::chrono::high_resolution_clock::time_point g_editCommitTime;
+bool g_editCommitDelayed = false;
+
 bool g_previewRealTime = true;
 std::chrono::high_resolution_clock::time_point g_previewRealTimeStart;
 int g_previewRealTimeStartFrameOffset = 0;
@@ -352,7 +358,46 @@ void UpdatePreviewResources()
     g_previewHeight = desiredHeight;
 }
 
-void OnDocumentChange()
+bool ShouldDelayUpdate(const RootDocumentType& A, const RootDocumentType& B)
+{
+    // This returns true for things that are annoying to update each time you make an edit.
+    // For instance, a latex string, so that it doesn't update (and freeze) each time you press a key.
+
+    bool ret = false;
+
+    size_t entityCount = Min(A.entities.size(), B.entities.size());
+
+    for (size_t entityIndex = 0; entityIndex < entityCount; ++entityIndex)
+    {
+        if (ret)
+            break;
+
+        const Data::Entity& eA = A.entities[entityIndex];
+        const Data::Entity& eB = B.entities[entityIndex];
+
+        if (eA.id != eB.id || eA.data._index != eB.data._index)
+            continue;
+
+        switch (eA.data._index)
+        {
+            case Data::EntityVariant::c_index_latex:
+            {
+                ret |= eA.data.latex.latex != eB.data.latex.latex;
+                ret |= eA.data.latex.scale != eB.data.latex.scale;
+                break;
+            }
+            case Data::EntityVariant::c_index_image:
+            {
+                ret |= eA.data.image.fileName != eB.data.image.fileName;
+                break;
+            }
+        }
+    }
+
+    return ret;
+}
+
+void UpdateRenderDocument()
 {
     // We keep a separate render document because the validation and fixup modifies the document data
     g_renderDocument = g_rootDocument;
@@ -363,6 +408,18 @@ void OnDocumentChange()
     g_renderDocumentContext.frameCache.Reset();
     g_renderDocumentThreadContext.threadId = 0;
     ValidateAndFixupDocument(g_renderDocument);
+}
+
+void OnDocumentChange(bool forceImmediateRenderDocumentUpdate)
+{
+    if (!forceImmediateRenderDocumentUpdate && ShouldDelayUpdate(g_renderDocument, g_rootDocument))
+    {
+        g_editCommitTime = std::chrono::high_resolution_clock::now() + std::chrono::seconds(1);
+        g_editCommitDelayed = true;
+        return;
+    }
+
+    UpdateRenderDocument();
 }
 
 void LoadConfig()
@@ -423,12 +480,16 @@ bool ShowKeyframes(size_t entityIndex)
 
             ImGui::Separator();
 
+            ImGui::PushID(keyFrameIndex);
+
             ret |= ShowUI(keyFrame.time, "time");
             ret |= ShowUI(keyFrame.newValue, "newValue");
             ret |= ShowUI(keyFrame.blendControlPoints, "blendControlPoints");
 
             if (ImGui::Button("Delete"))
                 deleteIndex = keyFrameIndex;
+
+            ImGui::PopID();
         }
 
         ImGui::Separator();
@@ -674,7 +735,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    OnDocumentChange();
+    OnDocumentChange(true);
     UpdateWindowTitle();
 
     // Main loop
@@ -730,7 +791,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                     if (ImGui::MenuItem("New", "Ctrl+N") && ConfirmLoseChanges())
                     {
                         NewDocument();
-                        OnDocumentChange();
+                        OnDocumentChange(true);
                         UpdateWindowTitle();
                     }
 
@@ -752,7 +813,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                                 UpdateWindowTitle();
                             }
                             LoadConfig();
-                            OnDocumentChange();
+                            OnDocumentChange(true);
                         }
                     }
 
@@ -840,7 +901,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                             g_rootDocument.entities.resize(g_rootDocument.entities.size() + 1);
                             g_rootDocument.entities.rbegin()->id = entityId;
 
-                            OnDocumentChange();
+                            OnDocumentChange(false);
                             if (!g_rootDocumentDirty)
                             {
                                 g_rootDocumentDirty = true;
@@ -856,7 +917,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                             {
                                 g_rootDocument.entities.erase(g_rootDocument.entities.begin() + selected - 1);
 
-                                OnDocumentChange();
+                                OnDocumentChange(false);
                                 if (!g_rootDocumentDirty)
                                 {
                                     g_rootDocumentDirty = true;
@@ -902,7 +963,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
 
                             if (changed)
                             {
-                                OnDocumentChange();
+                                OnDocumentChange(false);
                                 if (!g_rootDocumentDirty)
                                 {
                                     g_rootDocumentDirty = true;
@@ -916,7 +977,7 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                             bool changed = ShowUI(g_rootDocument, "");
                             if (changed)
                             {
-                                OnDocumentChange();
+                                OnDocumentChange(false);
                                 if (!g_rootDocumentDirty)
                                 {
                                     g_rootDocumentDirty = true;
@@ -968,8 +1029,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                     ImGui::PopID();
 
                     int min, sec, tmin, tsec;
-                    FrameIndexToMinutesSeconds(g_rootDocument, g_previewFrameIndex, min, sec);
-                    FrameIndexToMinutesSeconds(g_rootDocument, totalFrames - 1, tmin, tsec);
+                    FrameIndexToMinutesSeconds(g_rootDocument, g_previewFrameIndex+1, min, sec);
+                    FrameIndexToMinutesSeconds(g_rootDocument, totalFrames, tmin, tsec);
                     ImGui::Text("%02d:%02d / %02d:%02d", min, sec, tmin, tsec);
 
                     ImGui::SameLine();
@@ -1193,6 +1254,12 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
         g_pd3dCommandQueue->Signal(g_fence, fenceValue);
         g_fenceLastSignaledValue = fenceValue;
         frameCtxt->FenceValue = fenceValue;
+
+        if (g_editCommitDelayed && std::chrono::high_resolution_clock::now() > g_editCommitTime)
+        {
+            g_editCommitDelayed = false;
+            UpdateRenderDocument();
+        }
     }
 
     ReleasePreviewResources();
@@ -1491,9 +1558,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 /*
-IMPORTANT TODO:
-* for certain edits (or all if you have to?), have a timeout before you apply them.  Like when changing resolution, or a latex string. so that it doesn't fire up latex etc right away while you are typing.
-! merge to master after this list is done
 
 TODO:
 * handle the crash when closing while rendering
