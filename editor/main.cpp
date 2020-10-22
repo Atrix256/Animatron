@@ -1574,8 +1574,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /*
 
-TODO: x^2 latex crashed??!
-
 TODO:
 * handle the crash when closing while rendering
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?

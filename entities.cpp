@@ -404,7 +404,7 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
             strcat_s(currentDirectory, "\\build\\");
 
             sprintf_s(buffer, "%slatex.exe", latexBinaries);
-            sprintf_s(buffer2, "-output-directory=./ latex%i.tex", threadId);
+            sprintf_s(buffer2, "-output-directory=./ -interaction=nonstopmode latex%i.tex", threadId);
             Run(buffer, buffer2, currentDirectory);
 
             sprintf_s(buffer, "%sdvipng.exe", latexBinaries);
