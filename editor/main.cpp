@@ -1577,8 +1577,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 Higher priority TODO:
 * get rid of z-order, make it implicit in ordering of entities in list. make them able to move up and down. yes will work with subrenders too!
 * generalized bias and gain for blend curve points. could do a variant. https://arxiv.org/pdf/2010.09714.pdf
-* get tooltips working
-* Maybe use sliders instead of text entry boxes? (You can still manually enter with cntl-left click in imgui)
+* get tooltips working. either a timer, or maybe a ? to hover over?
 * probably should make a tag for this being 0.5, and make a branch for the next version number.
 
 TODO:

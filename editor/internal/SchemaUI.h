@@ -155,7 +155,7 @@ bool ShowUI(uint8_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (uint8_t)v;
         ret = true;
@@ -167,7 +167,7 @@ bool ShowUI(uint16_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (uint16_t)v;
         ret = true;
@@ -179,7 +179,7 @@ bool ShowUI(uint32_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (uint32_t)v;
         ret = true;
@@ -191,7 +191,7 @@ bool ShowUI(uint64_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (uint64_t)v;
         ret = true;
@@ -203,7 +203,7 @@ bool ShowUI(int8_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (int8_t)v;
         ret = true;
@@ -215,7 +215,7 @@ bool ShowUI(int16_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (int16_t)v;
         ret = true;
@@ -227,7 +227,7 @@ bool ShowUI(int32_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (int32_t)v;
         ret = true;
@@ -239,7 +239,7 @@ bool ShowUI(int64_t& value, const char* label)
 {
     bool ret = false;
     int v = (int)value;
-    if (ImGui::InputInt(label, &v))
+    if (ImGui::DragInt(label, &v))
     {
         value = (int64_t)v;
         ret = true;
@@ -249,7 +249,7 @@ bool ShowUI(int64_t& value, const char* label)
 
 bool ShowUI(float& value, const char* label)
 {
-    bool ret = ImGui::InputFloat(label, &value);
+    bool ret = ImGui::DragFloat(label, &value);
     return ret;
 }
 
@@ -282,17 +282,17 @@ bool ShowUI(Data::Color& value, const char* label)
 
 bool ShowUI(Data::Point2D& value, const char* label)
 {
-    return ImGui::InputFloat2(label, &value.X);
+    return ImGui::DragFloat2(label, &value.X);
 }
 
 bool ShowUI(Data::Point3D& value, const char* label)
 {
-    return ImGui::InputFloat3(label, &value.X);
+    return ImGui::DragFloat3(label, &value.X);
 }
 
 bool ShowUI(Data::Point4D& value, const char* label)
 {
-    return ImGui::InputFloat4(label, &value.X);
+    return ImGui::DragFloat4(label, &value.X);
 }
 
 bool ShowUI(Data::CubicBezierControlPoints1D& value, const char* label)
@@ -305,5 +305,5 @@ bool ShowUI(Data::CubicBezierControlPoints1D& value, const char* label)
     };
 
     ImGui::PlotLines("Lines", func, (void*)&value, 100, 0, NULL, 0.0f, 1.0f, ImVec2(0, 80));
-    return ImGui::InputFloat4(label, &value.A);
+    return ImGui::DragFloat4(label, &value.A);
 }
