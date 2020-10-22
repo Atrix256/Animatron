@@ -5,95 +5,32 @@
 #include <string>
 #include <array>
 #include <unordered_map>
-#include <omp.h>
 #include <atomic>
 #include <chrono>
 #include <direct.h>
 
-#include "schemas/types.h"
-#include "schemas/json.h"
-#include "schemas/lerp.h"
-#include "schemas/hash.h"
-#include "config.h"
+#include "animatron.h"
 #include "entities.h"
 #include "cas.h"
 
 #include "utils.h"
+#include "animatron.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-// Many frames are pixel identical. This allows that to be detected and a frame on disk be copied instead of re-rendered
-class FrameCache
+// TODO: fixup the headers above. don't need them all anymore
+bool FileExists(const char* fileName)
 {
-public:
-    FrameCache()
+    FILE* file = nullptr;
+    fopen_s(&file, fileName, "rb");
+    if (file)
     {
-        omp_init_lock(&m_lock);
+        fclose(file);
+        return true;
     }
-
-    ~FrameCache()
-    {
-        omp_destroy_lock(&m_lock);
-    }
-
-    int GetFrame(size_t hash)
-    {
-        int ret = -1;
-
-        omp_set_lock(&m_lock);
-
-        auto it = m_frames.find(hash);
-        if (it != m_frames.end())
-            ret = it->second;
-
-        omp_unset_lock(&m_lock);
-
-        return ret;
-    }
-
-    void SetFrame(size_t hash, int frameNumber)
-    {
-        omp_set_lock(&m_lock);
-
-        m_frames[hash] = frameNumber;
-
-        omp_unset_lock(&m_lock);
-    }
-
-private:
-    omp_lock_t m_lock;
-    std::unordered_map<size_t, int> m_frames;
-};
-
-struct ThreadData
-{
-    int threadId = -1;
-    char outFileName[1024];
-    std::vector<Data::ColorPMA> pixelsPMA;
-    std::vector<Data::Color> pixels;
-    std::vector<Data::ColorU8> pixelsU8;
-};
-
-struct EntityTimelineKeyframe
-{
-    float time = 0.0f;
-    std::array<float,4> blendControlPoints = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-    Data::Entity entity;
-};
-
-struct EntityTimeline
-{
-    std::string id;
-    float zorder = 0.0f;
-    float createTime = 0.0f;
-    float destroyTime = -1.0f;
-    std::vector<EntityTimelineKeyframe> keyFrames;
-};
-
+    return false;
+}
 void CopyFile(const char* src, const char* dest)
 {
     std::vector<unsigned char> data;
@@ -131,191 +68,6 @@ void CopyFile(const char* src, const char* dest)
     }
 }
 
-bool GenerateFrame(const Data::Document& document, const std::vector<const EntityTimeline*>& entityTimelines, bool& frameRecycled, int frameIndex, ThreadData& threadData, FrameCache& frameCache)
-{
-    frameRecycled = false;
-
-    std::vector<Data::ColorPMA>& pixels = threadData.pixelsPMA;
-
-    // setup for the frame
-    float frameTime = (float(frameIndex) / float(document.FPS)) + document.startTime;
-    pixels.resize(document.renderSizeX*document.renderSizeY);
-    std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 0.0f });
-
-    // Get the key frame interpolated state of each entity first, so that they can look at eachother (like 3d objects looking at their camera)
-    size_t frameHash = 0;
-    std::unordered_map<std::string, Data::Entity> entityMap;
-    {
-        for (const EntityTimeline* timeline_ : entityTimelines)
-        {
-            // skip any entity that doesn't currently exist
-            const EntityTimeline& timeline = *timeline_;
-            if (frameTime < timeline.createTime || (timeline.destroyTime >= 0.0f && frameTime > timeline.destroyTime))
-                continue;
-
-            // find where we are in the time line
-            int cursorIndex = 0;
-            while (cursorIndex + 1 < timeline.keyFrames.size() && timeline.keyFrames[cursorIndex + 1].time < frameTime)
-                cursorIndex++;
-
-            // interpolate keyframes if we are between two key frames
-            Data::Entity entity;
-            if (cursorIndex + 1 < timeline.keyFrames.size())
-            {
-                // calculate the blend percentage from the key frame percentage and the control points
-                float blendPercent = 0.0f;
-                if (cursorIndex + 1 < timeline.keyFrames.size())
-                {
-                    float t = frameTime - timeline.keyFrames[cursorIndex].time;
-                    t /= (timeline.keyFrames[cursorIndex + 1].time - timeline.keyFrames[cursorIndex].time);
-
-                    float CPA = timeline.keyFrames[cursorIndex + 1].blendControlPoints[0];
-                    float CPB = timeline.keyFrames[cursorIndex + 1].blendControlPoints[1];
-                    float CPC = timeline.keyFrames[cursorIndex + 1].blendControlPoints[2];
-                    float CPD = timeline.keyFrames[cursorIndex + 1].blendControlPoints[3];
-
-                    blendPercent = Clamp(CubicBezierInterpolation(CPA, CPB, CPC, CPD, t), 0.0f, 1.0f);
-                }
-
-                // Get the entity(ies) involved
-                const Data::Entity& entity1 = timeline.keyFrames[cursorIndex].entity;
-                const Data::Entity& entity2 = timeline.keyFrames[cursorIndex + 1].entity;
-
-                // Do the lerp between keyframe entities
-                // Set entity to entity1 first though to catch anything that isn't serialized (and not lerped)
-                entity = entity1;
-                Lerp(entity1, entity2, entity, blendPercent);
-            }
-            // otherwise we are beyond the last key frame, so just set the value
-            else
-            {
-                entity = timeline.keyFrames[cursorIndex].entity;
-            }
-
-            // do per frame entity initialization
-            bool error = false;
-            switch (entity.data._index)
-            {
-                #include "df_serialize/df_serialize/_common.h"
-                #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::FrameInitialize(document, entity); break;
-                #include "df_serialize/df_serialize/_fillunsetdefines.h"
-                #include "schemas/schemas_entities.h"
-                default:
-                {
-                    printf("unhandled entity type in variant\n");
-                    return false;
-                }
-            }
-            if (error)
-            {
-                printf("entity %s failed to FrameInitialize\n", timeline.id.c_str());
-                return false;
-            }
-
-            Hash(frameHash, entity);
-
-            entityMap[timeline.id] = entity;
-        }
-    }
-
-    // if we have already rendered a frame with this hash, just copy that file
-    {
-        int recycleFrame = frameCache.GetFrame(frameHash);
-        if (recycleFrame >= 0)
-        {
-            frameRecycled = true;
-            const char* extension = (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp";
-            char fileName1[256];
-            sprintf_s(fileName1, "build/%i.%s", recycleFrame, extension);
-            char fileName2[256];
-            sprintf_s(fileName2, "build/%i.%s", frameIndex, extension);
-            CopyFile(fileName1, fileName2);
-            return true;
-        }
-    }
-
-    // otherwise, render it again
-
-    // process the entities in zorder
-    for (const EntityTimeline* timeline_ : entityTimelines)
-    {
-        // skip any entity that doesn't currently exist
-        const EntityTimeline& timeline = *timeline_;
-        auto it = entityMap.find(timeline.id);
-        if (it == entityMap.end())
-            continue;
-
-        // do the entity action
-        bool error = false;
-        const Data::Entity& entity = it->second;
-        switch (entity.data._index)
-        {
-            #include "df_serialize/df_serialize/_common.h"
-            #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity, threadData.threadId); break;
-            #include "df_serialize/df_serialize/_fillunsetdefines.h"
-            #include "schemas/schemas_entities.h"
-            default:
-            {
-                printf("unhandled entity type in variant\n");
-                return false;
-            }
-        }
-        if (error)
-            return false;
-    }
-
-    // convert from PMA to non PMA
-    threadData.pixels.resize(threadData.pixelsPMA.size());
-    for (size_t index = 0; index < threadData.pixelsPMA.size(); ++index)
-        threadData.pixels[index] = FromPremultipliedAlpha(threadData.pixelsPMA[index]);
-
-    // resize from the rendered size to the output size
-    Resize(threadData.pixels, document.renderSizeX, document.renderSizeY, document.outputSizeX, document.outputSizeY);
-
-    // Do blue noise dithering if we should
-    if (document.blueNoiseDither)
-    {
-        for (size_t iy = 0; iy < document.outputSizeY; ++iy)
-        {
-            const Data::ColorU8* blueNoiseRow = &document.blueNoisePixels[(iy % document.blueNoiseHeight) * document.blueNoiseWidth];
-            Data::Color* destPixel = &threadData.pixels[iy * document.outputSizeX];
-
-            for (size_t ix = 0; ix < document.outputSizeX; ++ix)
-            {
-                destPixel->R += (float(blueNoiseRow[ix % document.blueNoiseWidth].R) / 255.0f) / 255.0f;
-                destPixel->G += (float(blueNoiseRow[ix % document.blueNoiseWidth].G) / 255.0f) / 255.0f;
-                destPixel->B += (float(blueNoiseRow[ix % document.blueNoiseWidth].B) / 255.0f) / 255.0f;
-                destPixel->A += (float(blueNoiseRow[ix % document.blueNoiseWidth].A) / 255.0f) / 255.0f;
-                destPixel++;
-            }
-        }
-    }
-
-    // Convert it to RGBAU8
-    ColorToColorU8(threadData.pixels, threadData.pixelsU8);
-
-    // force to opaque if we should
-    if (document.forceOpaqueOutput)
-    {
-        for (Data::ColorU8& pixel : threadData.pixelsU8)
-            pixel.A = 255;
-    }
-
-    // write it out
-    sprintf_s(threadData.outFileName, "build/%i.%s", frameIndex, (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
-    if (document.config.writeFrames == Data::ImageFileType::PNG)
-        stbi_write_png(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data(), document.outputSizeX * 4);
-    else
-        stbi_write_bmp(threadData.outFileName, document.outputSizeX, document.outputSizeY, 4, threadData.pixelsU8.data());
-
-    // Set this frame in the frame cache for recycling
-    frameCache.SetFrame(frameHash, frameIndex);
-
-    return true;
-}
-
 int main(int argc, char** argv)
 {
     if (argc < 2)
@@ -323,7 +75,8 @@ int main(int argc, char** argv)
         printf("Usage:\n    animatron <sourcefile> <destfile>\n\n    <sourcefile> is a json file describing the animation.\n    <destfile> is the name and location of the mp4 output file.\n\n");
         return 1;
     }
-    // Read the data in
+
+    // handle command line arguments
     const char* srcFile = argv[1];
     const char* destFile = nullptr;
     char destFileBuffer[1024];
@@ -348,88 +101,33 @@ int main(int argc, char** argv)
     {
         destFile = argv[2];
     }
+
+    // start the timer
+    std::chrono::high_resolution_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
+
+    // load the document
     Data::Document document;
     if (!ReadFromJSONFile(document, srcFile))
     {
-        system("pause");
         return 1;
     }
 
-    // verify
-    if (document.program != "animatron")
-    {
-        printf("Not an animatron file!\n");
-        system("pause");
-        return 1;
-    }
-
-    // version fixup
-    if (document.versionMajor != c_documentVersionMajor || document.versionMinor != c_documentVersionMinor)
-    {
-        printf("Wrong version number: %i.%i, not %i.%i\n", document.versionMajor, document.versionMinor, c_documentVersionMajor, c_documentVersionMinor);
-        system("pause");
-        return 1;
-    }
-
-    // initialize CAS
-    if (!CAS::Get().Init())
-    {
-        printf("Could not init CAS\n");
-        return 1;
-    }
-
-    // read the config if possible
-    if (ReadFromJSONFile(document.config, "internal/config.json"))
-    {
-        // verify
-        if (document.config.program != "animatronconfig")
-        {
-            printf("Not an animatron config file!\n");
-            system("pause");
-            return 1;
-        }
-
-        // version fixup
-        if (document.config.versionMajor != c_configVersionMajor || document.config.versionMinor != c_configVersionMinor)
-        {
-            printf("Wrong config version number: %i.%i, not %i.%i\n", document.config.versionMajor, document.config.versionMinor, c_configVersionMajor, c_configVersionMinor);
-            system("pause");
-            return 1;
-        }
-    }
-    else
+    // load the config
+    if (!ReadFromJSONFile(document.config, "internal/config.json"))
     {
         printf("Could not load internal/config.json!");
         return 1;
     }
 
-    // give names to any entities which don't have names
+    // document validation and fixup
+    if (!ValidateAndFixupDocument(document))
     {
-        for (size_t index = 0; index < document.entities.size(); ++index)
-        {
-            if (document.entities[index].id.empty())
-            {
-                char buffer[256];
-                sprintf_s(buffer, "__ entity %zu", index);
-                document.entities[index].id = buffer;
-            }
-        }
-    }
-    
-    // data interpretation and fixup
-    {
-        if (document.renderSizeX == 0)
-            document.renderSizeX = document.outputSizeX;
-        if (document.renderSizeY == 0)
-            document.renderSizeY = document.outputSizeY;
-        if (document.samplesPerPixel < 1)
-            document.samplesPerPixel = 1;
-
-        MakeJitterSequence(document);
+        printf("Document validation failed\n");
+        return 1;
     }
 
     // report what we are doing
-    int framesTotal = int(document.duration * float(document.FPS));
+    int framesTotal = TotalFrameCount(document);
     printf("Animatron v%i.%i\n", c_programVersionMajor, c_programVersionMinor);
     printf("Rendering with %i threads...\n", omp_get_max_threads());
     printf("  srcFile: %s\n", srcFile);
@@ -438,153 +136,9 @@ int main(int argc, char** argv)
         framesTotal, document.renderSizeX, document.renderSizeY, document.samplesPerPixel,
         document.outputSizeX, document.outputSizeY);
 
-    // start the timer
-    std::chrono::high_resolution_clock::time_point timeStart = std::chrono::high_resolution_clock::now();
-
-    // Do one time initialization of entities
-    {
-        _mkdir("build");
-        int entityIndex = -1;
-        for (Data::Entity& entity : document.entities)
-        {
-            bool error = false;
-            entityIndex++;
-            // do per frame entity initialization
-            switch (entity.data._index)
-            {
-                #include "df_serialize/df_serialize/_common.h"
-                #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::Initialize(document, entity, entityIndex); break;
-                #include "df_serialize/df_serialize/_fillunsetdefines.h"
-                #include "schemas/schemas_entities.h"
-                default:
-                {
-                    printf("unhandled entity type in variant\n");
-                    return 1;
-                }
-            }
-            if (error)
-            {
-                printf("entity %s failed to initialize.\n", entity.id.c_str());
-                return 1;
-            }
-        }
-    }
-
-    // Load blue noise texture for dithering
-    if (document.blueNoiseDither)
-    {
-        int blueNoiseComponents = 0;
-        stbi_uc* pixels = stbi_load("internal/BlueNoiseRGBA.png", &document.blueNoiseWidth, &document.blueNoiseHeight, &blueNoiseComponents, 4);
-        if (pixels == nullptr || document.blueNoiseWidth == 0 || document.blueNoiseHeight == 0)
-        {
-            printf("Could not load internal/BlueNoiseRGBA.png");
-            return 1;
-        }
-
-        document.blueNoisePixels.resize(document.blueNoiseWidth * document.blueNoiseHeight);
-        memcpy((unsigned char*)&document.blueNoisePixels[0], pixels, document.blueNoiseWidth * document.blueNoiseHeight * 4);
-
-        stbi_image_free(pixels);
-    }
-
-    // make a timeline for each entity by just starting with the entity definition
-    std::unordered_map<std::string, EntityTimeline> entityTimelinesMap;
-    for (const Data::Entity& entity : document.entities)
-    {
-        EntityTimeline newTimeline;
-        newTimeline.id = entity.id;
-        newTimeline.zorder = entity.zorder;
-        newTimeline.createTime = entity.createTime;
-        newTimeline.destroyTime = entity.destroyTime;
-
-        EntityTimelineKeyframe newKeyFrame;
-        newKeyFrame.time = entity.createTime;
-        newKeyFrame.entity = entity;
-        newTimeline.keyFrames.push_back(newKeyFrame);
-
-        entityTimelinesMap[entity.id] = newTimeline;
-    }
-
-    // sort the keyframes by time ascending to put them in order
-    std::sort(
-        document.keyFrames.begin(),
-        document.keyFrames.end(),
-        [](const Data::KeyFrame& a, const Data::KeyFrame& b)
-        {
-            return a.time < b.time;
-        }
-    );
-
-    // process each key frame
-    for (const Data::KeyFrame& keyFrame : document.keyFrames)
-    {
-        auto it = entityTimelinesMap.find(keyFrame.entityId);
-        if (it == entityTimelinesMap.end())
-        {
-            printf("Could not find entity %s for keyframe!\n", keyFrame.entityId.c_str());
-            system("pause");
-            return 1;
-        }
-
-        // ignore events outside the lifetime of the entity
-        if ((keyFrame.time < it->second.createTime) || (it->second.destroyTime >= 0.0f && keyFrame.time > it->second.destroyTime))
-            continue;
-
-        // make a new key frame entry
-        EntityTimelineKeyframe newKeyFrame;
-        newKeyFrame.time = keyFrame.time;
-        newKeyFrame.blendControlPoints = keyFrame.blendControlPoints;
-
-        // start the keyframe entity values at the last keyframe value, so people only make keyframes for the things they want to change
-        newKeyFrame.entity = it->second.keyFrames.rbegin()->entity;
-
-        // load the sparse json data over the keyframe data
-        if (!keyFrame.newValue.empty())
-        {
-            bool error = false;
-            switch (newKeyFrame.entity.data._index)
-            {
-                #include "df_serialize/df_serialize/_common.h"
-                #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                            case Data::EntityVariant::c_index_##_NAME: error = !ReadFromJSONBuffer(newKeyFrame.entity.data.##_NAME, keyFrame.newValue); break;
-                #include "df_serialize/df_serialize/_fillunsetdefines.h"
-                #include "schemas/schemas_entities.h"
-                default:
-                {
-                    printf("unhandled entity type in variant\n");
-                    return 1;
-                }
-            }
-            if (error)
-            {
-                printf("Could not read json data for keyframe! entity %s, time %f.\n", keyFrame.entityId.c_str(), keyFrame.time);
-                system("pause");
-                return 1;
-            }
-        }
-        it->second.keyFrames.push_back(newKeyFrame);
-    }
-
-    // put the entities into a list sorted by z order ascending
-    // stable sort to keep a deterministic ordering of elements for ties
-    std::vector<const EntityTimeline*> entityTimelines;
-    {
-        for (auto& pair : entityTimelinesMap)
-            entityTimelines.push_back(&pair.second);
-
-        std::stable_sort(
-            entityTimelines.begin(),
-            entityTimelines.end(),
-            [](const EntityTimeline* a, const EntityTimeline* b)
-            {
-                return a->zorder < b->zorder;
-            }
-        );
-    }
-
     // Render and write out each frame multithreadedly
-    std::vector<ThreadData> threadsData(omp_get_max_threads());
+    std::vector<ThreadContext> threadContexts(omp_get_max_threads());
+    Context context;
 
     bool wasError = false;
     std::atomic<int> framesDone(0);
@@ -596,9 +150,7 @@ int main(int argc, char** argv)
         omp_set_num_threads(1);
     #endif
 
-    std::atomic<int> nextFrameIndex;
-    FrameCache frameCache;
-
+    std::atomic<int> nextFrameIndex(0);
     #pragma omp parallel
     while(1)
     {
@@ -606,8 +158,8 @@ int main(int argc, char** argv)
         if (frameIndex >= framesTotal)
             break;
 
-        ThreadData& threadData = threadsData[omp_get_thread_num()];
-        threadData.threadId = omp_get_thread_num();
+        ThreadContext& threadContext = threadContexts[omp_get_thread_num()];
+        threadContext.threadId = omp_get_thread_num();
 
         // report progress
         //if (omp_get_thread_num() == 0)
@@ -622,17 +174,39 @@ int main(int argc, char** argv)
         }
 
         // render a frame
-        bool frameRecycled = false;
-        if (!GenerateFrame(document, entityTimelines, frameRecycled, frameIndex, threadData, frameCache))
+        int recycledFrameIndex = -1;
+        size_t frameHash = 0;
+        if (!RenderFrame(document, frameIndex, threadContext, context, recycledFrameIndex, frameHash))
         {
             wasError = true;
             break;
         }
 
-        if (frameRecycled)
-            framesRecycled++;
-        else
+        // write it out
+        if (recycledFrameIndex == -1)
+        {
             framesRendered++;
+
+            sprintf_s(threadContext.outFileName, "build/%i.%s", frameIndex, (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp");
+            if (document.config.writeFrames == Data::ImageFileType::PNG)
+                stbi_write_png(threadContext.outFileName, document.outputSizeX, document.outputSizeY, 4, threadContext.pixelsU8.data(), document.outputSizeX * 4);
+            else
+                stbi_write_bmp(threadContext.outFileName, document.outputSizeX, document.outputSizeY, 4, threadContext.pixelsU8.data());
+
+            // Set this frame in the frame cache for recycling
+            context.frameCache.SetFrame(frameHash, frameIndex, threadContext.pixelsU8);
+        }
+        else
+        {
+            framesRecycled++;
+
+            const char* extension = (document.config.writeFrames == Data::ImageFileType::PNG) ? "png" : "bmp";
+            char fileName1[256];
+            sprintf_s(fileName1, "build/%i.%s", recycledFrameIndex, extension);
+            char fileName2[256];
+            sprintf_s(fileName2, "build/%i.%s", frameIndex, extension);
+            CopyFile(fileName1, fileName2);
+        }
 
         framesDone++;
     }
@@ -644,7 +218,7 @@ int main(int argc, char** argv)
         // Youtube recomended settings (https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
         printf("Assembling frames...\n");
 
-        bool hasAudio = !document.audioFile.empty();
+        bool hasAudio = FileExists(document.audioFile.c_str());
 
         char inputs[1024];
         if (!hasAudio)
@@ -671,13 +245,12 @@ int main(int argc, char** argv)
     {
         std::chrono::duration<float> seconds = (std::chrono::high_resolution_clock::now() - timeStart);
         float secondsPerFrame = seconds.count() / float(framesTotal);
-        printf("Render Time: %0.3f seconds.\n  %0.3f seconds per frame average wall time (more threads make this lower)\n  %0.3f seconds per frame average actual computation time\n", seconds.count(), secondsPerFrame, secondsPerFrame * float(threadsData.size()));
+        printf("Render Time: %0.3f seconds.\n  %0.3f seconds per frame average wall time (more threads make this lower)\n  %0.3f seconds per frame average actual computation time\n", seconds.count(), secondsPerFrame, secondsPerFrame * float(threadContexts.size()));
         printf("frames rendered: %i\nframes recycled: %i\n", framesRendered.load(), framesRecycled.load());
     }
 
     if (wasError)
     {
-        system("pause");
         return 1;
     }
 
@@ -690,6 +263,10 @@ Animatron Editor
 * scrub bar and preview window.
 * unsure how to show keyframes. could be tree view for now probably.
 
+TODO:
+* should animatron lib files go into the animatronlib folder? i think so!
+* maybe we need a folder for files for animatron the executable as well.
+
 */
 
 // TODO: put resized image into CAS
@@ -699,7 +276,6 @@ Animatron Editor
 
 // TODO: after video is out, write (or generate!) some documentation and a short tutorial on how to use it. also write up the blog post about how it works
 // TODO: after this video is out, maybe make a df_serialize editor in C#? then make a video editor, where it uses this (as a DLL?) to render the frame the scrubber wants to see.
-
 
 // TODO: maybe try a windows API to copy the file instead of what you are doing? CopyFileExA or CopyFileExW
 

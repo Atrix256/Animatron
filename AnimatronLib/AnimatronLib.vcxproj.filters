@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\vectormath.h" />
+    <ClInclude Include="..\utils.h" />
+    <ClInclude Include="..\reflectedvectormath.h" />
+    <ClInclude Include="..\math.h" />
+    <ClInclude Include="..\entities.h" />
+    <ClInclude Include="..\config.h" />
+    <ClInclude Include="..\cas.h" />
+    <ClInclude Include="..\schemas\fnv1a.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\schemas\hash.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\schemas\json.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\schemas\lerp.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\schemas\schemas.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\schemas\schemas_entities.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\schemas\types.h">
+      <Filter>schemas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\animatron.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\utils.cpp" />
+    <ClCompile Include="..\entities.cpp" />
+    <ClCompile Include="..\cas.cpp" />
+    <ClCompile Include="..\animatron.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="schemas">
+      <UniqueIdentifier>{004fbcae-b8c9-4043-a684-df7db83293ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal">
+      <UniqueIdentifier>{b451c49d-15f6-42cd-bec7-4bd2ec394867}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{8063e611-f3ce-4bc7-bc18-d106bc2413f5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\internal\BlueNoiseRGBA.png">
+      <Filter>internal</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\internal\config.json">
+      <Filter>internal</Filter>
+    </None>
+    <None Include="..\assets\clip.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\clip2.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\se2_1.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\se2_2.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\se2_3.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\se2_4.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\se2_5.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\se2_6.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\se2_7.json">
+      <Filter>assets</Filter>
+    </None>
+  </ItemGroup>
+</Project>

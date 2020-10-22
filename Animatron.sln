@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Animatron", "Animatron.vcxproj", "{2B86E8D3-43C3-4215-A20F-694208CDF7FF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor", "df_serialize\editor\editor.vcxproj", "{8CFE5463-E376-4C1F-B79D-9B536631FE67}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnimatronLib", "AnimatronLib\AnimatronLib.vcxproj", "{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor", "editor\editor.vcxproj", "{8CFE5463-E376-4C1F-B79D-9B536631FE67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +25,14 @@ Global
 		{2B86E8D3-43C3-4215-A20F-694208CDF7FF}.Release|x64.Build.0 = Release|x64
 		{2B86E8D3-43C3-4215-A20F-694208CDF7FF}.Release|x86.ActiveCfg = Release|Win32
 		{2B86E8D3-43C3-4215-A20F-694208CDF7FF}.Release|x86.Build.0 = Release|Win32
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Debug|x64.ActiveCfg = Debug|x64
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Debug|x64.Build.0 = Debug|x64
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Debug|x86.ActiveCfg = Debug|Win32
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Debug|x86.Build.0 = Debug|Win32
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Release|x64.ActiveCfg = Release|x64
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Release|x64.Build.0 = Release|x64
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Release|x86.ActiveCfg = Release|Win32
+		{02A3EED7-8780-44B3-A5C0-3BCE4DCC5FEA}.Release|x86.Build.0 = Release|Win32
 		{8CFE5463-E376-4C1F-B79D-9B536631FE67}.Debug|x64.ActiveCfg = Debug|x64
 		{8CFE5463-E376-4C1F-B79D-9B536631FE67}.Debug|x64.Build.0 = Debug|x64
 		{8CFE5463-E376-4C1F-B79D-9B536631FE67}.Debug|x86.ActiveCfg = Debug|Win32

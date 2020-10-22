@@ -2,3 +2,4 @@
 x64/
 build/
 *.mp4
+imgui.ini

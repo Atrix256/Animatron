@@ -410,7 +410,12 @@
     {
       "entityId": "NodeBoxDishes",
       "time": 8.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-75, \"Y\":40}}"
     },
     // Select the dishes node
@@ -431,7 +436,12 @@
     {
       "entityId": "NodeBoxWashClothes",
       "time": 16.5,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-50, \"Y\":40}}"
     },
     // select and move the rake node
@@ -442,13 +452,23 @@
     {
       "entityId": "NodeBoxRake",
       "time": 20.25,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"color\": {\"R\": 0,\"G\": 1,\"B\": 0,\"A\": 1}}"
     },
     {
       "entityId": "NodeBoxRake",
       "time": 20.75,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":-25, \"Y\":40}}"
     },
     // select and move the watermelon node
@@ -459,13 +479,23 @@
     {
       "entityId": "NodeBoxWatermelon",
       "time": 22.25,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"color\": {\"R\": 0,\"G\": 1,\"B\": 0,\"A\": 1}}"
     },
     {
       "entityId": "NodeBoxWatermelon",
       "time": 22.75,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":0, \"Y\":40}}"
     },
     // select and move the trash node
@@ -476,13 +506,23 @@
     {
       "entityId": "NodeBoxTrash",
       "time": 24.25,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"color\": {\"R\": 0,\"G\": 1,\"B\": 0,\"A\": 1}}"
     },
     {
       "entityId": "NodeBoxTrash",
       "time": 24.75,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":25, \"Y\":40}}"
     },
     // select and move the fold laundry node
@@ -493,13 +533,23 @@
     {
       "entityId": "NodeBoxFoldLaundry",
       "time": 26.25,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"color\": {\"R\": 0,\"G\": 1,\"B\": 0,\"A\": 1}}"
     },
     {
       "entityId": "NodeBoxFoldLaundry",
       "time": 26.75,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":50, \"Y\":40}}"
     },
     // select and move the fold laundry node
@@ -510,13 +560,23 @@
     {
       "entityId": "NodeBoxRelax",
       "time": 28.25,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"color\": {\"R\": 0,\"G\": 1,\"B\": 0,\"A\": 1}}"
     },
     {
       "entityId": "NodeBoxRelax",
       "time": 28.75,
-      "blendControlPoints": [ 0, 0, 1, 1 ],
+      "blendControlPoints": {
+        "A": 0,
+        "B": 0,
+        "C": 1,
+        "D": 1
+      },
       "newValue": "{\"center\":{\"X\":75, \"Y\":40}}"
     }
   ]

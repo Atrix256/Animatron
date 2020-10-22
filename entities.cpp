@@ -9,6 +9,41 @@
 #include "schemas/hash.h"
 #include "cas.h"
 
+#include <Windows.h>
+
+void Run(const char* program, char* commandLine, const char* currentDirectory, bool waitForFinish = true)
+{
+    // additional information
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+
+    // set the size of the structures
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    // start the program up
+    bool ret = CreateProcessA(program,   // the path
+        commandLine,        // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        CREATE_NO_WINDOW,
+        NULL,           // Use parent's environment block
+        currentDirectory,
+        &si,            // Pointer to STARTUPINFO structure
+        &pi             // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
+    );
+
+    // wait for it if we should
+    if (ret && waitForFinish)
+        WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Close process and thread handles. 
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+}
+
 bool EntityCircle_Action::DoAction(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
@@ -338,6 +373,7 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
     if (!data)
     {
         char buffer[4096];
+        char buffer2[4096];
 
         // make the latex file
         {
@@ -363,11 +399,17 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
 
         // make a dvi and then convert it to a png
         {
-            sprintf_s(buffer, "%slatex.exe -output-directory=build/ build/latex%i.tex > NUL", latexBinaries, threadId);
-            system(buffer);
+            char currentDirectory[1024];
+            GetCurrentDirectoryA(1024, currentDirectory);
+            strcat_s(currentDirectory, "\\build\\");
 
-            sprintf_s(buffer, "%sdvipng.exe -T tight -D %i -o build/latex%i.png build/latex%i.dvi > NUL", latexBinaries, DPI, threadId, threadId);
-            system(buffer);
+            sprintf_s(buffer, "%slatex.exe", latexBinaries);
+            sprintf_s(buffer2, "-output-directory=./ -interaction=nonstopmode latex%i.tex", threadId);
+            Run(buffer, buffer2, currentDirectory);
+
+            sprintf_s(buffer, "%sdvipng.exe", latexBinaries);
+            sprintf_s(buffer2, "-T tight -D %i -o latex%i.png latex%i.dvi", DPI, threadId, threadId);
+            Run(buffer, buffer2, currentDirectory);
         }
 
         // load the image, store it in the cache and then get it again
@@ -406,11 +448,6 @@ static bool GetOrMakeLatexImage(const char* latexBinaries, const char* latex, in
     height = ((uint32_t*)data)[1];
     pixels = &data[sizeof(uint32_t) * 2];
 
-    return true;
-}
-
-bool EntityLatex_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
-{
     return true;
 }
 
@@ -552,10 +589,10 @@ bool EntityLinearGradient_Action::DoAction(
 
                 float percent = (value - linearGradient.points[index - 1].value) / (linearGradient.points[index].value - linearGradient.points[index - 1].value);
 
-                float CP0 = linearGradient.points[index].blendControlPoints[0];
-                float CP1 = linearGradient.points[index].blendControlPoints[1];
-                float CP2 = linearGradient.points[index].blendControlPoints[2];
-                float CP3 = linearGradient.points[index].blendControlPoints[3];
+                float CP0 = linearGradient.points[index].blendControlPoints.A;
+                float CP1 = linearGradient.points[index].blendControlPoints.B;
+                float CP2 = linearGradient.points[index].blendControlPoints.C;
+                float CP3 = linearGradient.points[index].blendControlPoints.D;
 
                 float t = CubicBezierInterpolation(CP0, CP1, CP2, CP3, percent);
 

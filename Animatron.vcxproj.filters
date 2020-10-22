@@ -2,87 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="entities.cpp" />
-    <ClCompile Include="utils.cpp" />
-    <ClCompile Include="cas.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="schemas">
-      <UniqueIdentifier>{7dcb7012-fea7-4a0a-a777-37b8640527f1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="assets">
-      <UniqueIdentifier>{9c8bc379-3b97-4747-b645-c5fc67bdfa8c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="internal">
-      <UniqueIdentifier>{e53bbbb3-f779-49cb-85e5-3e6c8112ad8a}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="schemas\schemas.h">
-      <Filter>schemas</Filter>
-    </ClInclude>
-    <ClInclude Include="schemas\json.h">
-      <Filter>schemas</Filter>
-    </ClInclude>
-    <ClInclude Include="schemas\types.h">
-      <Filter>schemas</Filter>
-    </ClInclude>
-    <ClInclude Include="math.h" />
-    <ClInclude Include="schemas\lerp.h">
-      <Filter>schemas</Filter>
-    </ClInclude>
-    <ClInclude Include="schemas\schemas_entities.h">
-      <Filter>schemas</Filter>
-    </ClInclude>
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="vectormath.h" />
-    <ClInclude Include="reflectedvectormath.h" />
-    <ClInclude Include="entities.h" />
-    <ClInclude Include="schemas\fnv1a.h">
-      <Filter>schemas</Filter>
-    </ClInclude>
-    <ClInclude Include="schemas\hash.h">
-      <Filter>schemas</Filter>
-    </ClInclude>
-    <ClInclude Include="cas.h" />
     <ClInclude Include="df_serialize_editor_config.h" />
-    <ClInclude Include="config.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="assets\clip.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="internal\config.json">
-      <Filter>internal</Filter>
-    </None>
-    <None Include="assets\se2_1.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\se2_2.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\se2_3.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\clip2.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\se2_4.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\se2_5.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\se2_6.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\se2_7.json">
-      <Filter>assets</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="internal\BlueNoiseRGBA.png">
-      <Filter>internal</Filter>
-    </Image>
   </ItemGroup>
 </Project>

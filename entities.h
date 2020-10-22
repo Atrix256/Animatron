@@ -156,8 +156,6 @@ struct EntityTransform_Action : EntityActionBase
 
 struct EntityLatex_Action : EntityActionBase
 {
-    static bool Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex);
-
     static bool DoAction(
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
