@@ -4,6 +4,7 @@ The software I use to make "simplexplanations" videos.
 After cloning the repo, you must init & update submodules to get df_serialize.
 
 ```git submodule init```
+
 ```git submodule update```
 
 From there you can build and run the code and start making videos.
