@@ -1574,6 +1574,13 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /*
 
+Higher priority TODO:
+* get rid of z-order, make it implicit in ordering of entities in list. make them able to move up and down. yes will work with subrenders too!
+* generalized bias and gain for blend curve points. could do a variant. https://arxiv.org/pdf/2010.09714.pdf
+* get tooltips working
+* Maybe use sliders instead of text entry boxes? (You can still manually enter with cntl-left click in imgui)
+* probably should make a tag for this being 0.5, and make a branch for the next version number.
+
 TODO:
 * handle the crash when closing while rendering
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
@@ -1584,5 +1591,8 @@ TODO:
 * tooltips! use the description to make tooltips for each field!
 * make entity references be a special type that has a drop down to choose from when editing?
 * keyframe editing needs better editing. like a normal ui with a checkbox next to each field to say you want to edit that field in the keyframe? or maybe the checkbox is implicit based on if it changed from last keyframe or not
+* work with ffmpeg library more directly so you can skip png encoding, writing to disk, reading from disk, and png decoding.
+* timeline imgui widget: https://twitter.com/ocornut/status/1319220561822756864?s=03
+* mouse placement / dragging / movement of objects
 
 */
