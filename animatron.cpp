@@ -224,7 +224,7 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
     // setup for the frame
     float frameTime = (float(frameIndex) / float(document.FPS)) + document.startTime;
     pixels.resize(document.renderSizeX * document.renderSizeY);
-    std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 0.0f });
+    std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 1.0f });
 
     // Get the key frame interpolated state of each entity first, so that they can look at eachother (like 3d objects looking at their camera)
     frameHash = 0;
