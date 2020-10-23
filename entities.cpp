@@ -473,8 +473,9 @@ bool EntityLatex_Action::DoAction(
         // Not the most elegant thing, but it makes it resolution independent.
         int DPI = int((float(CanvasSizeInPixels(document)) / 1080.0f) * latex.scale * 300.0f);
 
+        // Note: don't return false on latex errors. We want to just not show text if latex is misconfigured.
         if (!GetOrMakeLatexImage(document.config.latexbinaries.c_str(), latex.latex.c_str(), DPI, imageWidth, imageHeight, imagePixels, threadId))
-            return false;
+            return true;
     }
 
     Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));

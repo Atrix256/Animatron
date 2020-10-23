@@ -1611,7 +1611,6 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 /*
 
 Higher priority TODO:
-* misconfigure latex, and delete the build directory, make sure everything is ok w/ a missing latex.
 * get rid of z-order, make it implicit in ordering of entities in list. make them able to move up and down. yes will work with subrenders too!
 * generalized bias and gain for blend curve points. could do a variant. https://arxiv.org/pdf/2010.09714.pdf
 * get tooltips working
