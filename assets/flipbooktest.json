@@ -1,0 +1,17 @@
+{
+    "versionMajor": 1,
+    "versionMinor": 0,
+    "entities": [
+        {
+            "id": "Entity 0",
+            "data": {
+                "flipbook": {
+                    "fileNames": [
+                        "assets/khan.jpg",
+                        "assets/mpfoot.png"
+                    ]
+                }
+            }
+        }
+    ]
+}

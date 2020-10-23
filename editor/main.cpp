@@ -85,7 +85,15 @@ bool g_vsync = true; // turn this off for faster rendering in preview window
 
 bool g_ctrl_s = false;
 
+enum class RenderType
+{
+    video,
+    gif,
+    None,
+};
+
 bool g_wantsRender = false;
+RenderType g_wantsRenderType = RenderType::None;
 
 struct FrameContext
 {
@@ -632,16 +640,24 @@ void EndRenderThreads()
         len--;
     if (len == 0)
     {
-        strcpy_s(destFileBuffer, "out.mp4");
+        switch (g_wantsRenderType)
+        {
+            case RenderType::video:strcpy_s(destFileBuffer, "out.mp4"); break;
+            case RenderType::gif:strcpy_s(destFileBuffer, "out.gif"); break;
+        }
     }
     else
     {
         destFileBuffer[len] = 0;
-        strcat_s(destFileBuffer, ".mp4");
+        switch (g_wantsRenderType)
+        {
+            case RenderType::video:strcat_s(destFileBuffer, ".mp4"); break;
+            case RenderType::gif:strcat_s(destFileBuffer, ".gif"); break;
+        }
     }
 
     // have ffmpeg assemble it!
-    bool hasAudio = FileExists(g_renderThreadDocument.audioFile.c_str());
+    bool hasAudio = g_wantsRenderType != RenderType::gif && FileExists(g_renderThreadDocument.audioFile.c_str());
 
     char inputs[1024];
     if (!hasAudio)
@@ -658,7 +674,18 @@ void EndRenderThreads()
     int framesTotal = TotalFrameCount(g_renderThreadDocument);
 
     char containerOptions[1024];
-    sprintf_s(containerOptions, "-frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p %s", framesTotal, hasAudio ? "-filter_complex \"[1:0] apad \" -shortest" : "");
+    switch (g_wantsRenderType)
+    {
+        case RenderType::video:
+        {
+            sprintf_s(containerOptions, "-frames:v %i -movflags faststart -c:v libx264 -profile:v high -bf 2 -g 30 -crf 18 -pix_fmt yuv420p %s", framesTotal, hasAudio ? "-filter_complex \"[1:0] apad \" -shortest" : "");
+            break;
+        }
+        case RenderType::gif:
+        {
+            sprintf_s(containerOptions, "-frames:v %i -f gif", framesTotal);
+        }
+    }
 
     char buffer[1024];
     sprintf_s(buffer, "%s -y -framerate %i %s%s%s %s", g_renderThreadDocument.config.ffmpeg.c_str(), g_renderThreadDocument.FPS, inputs, audioOptions, containerOptions, destFileBuffer);
@@ -862,7 +889,16 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                 if (ImGui::BeginMenu("Render"))
                 {
                     if (ImGui::MenuItem("Render Video", "Ctrl+R"))
+                    {
                         g_wantsRender = true;
+                        g_wantsRenderType = RenderType::video;
+                    }
+
+                    if (ImGui::MenuItem("Render Gif", ""))
+                    {
+                        g_wantsRender = true;
+                        g_wantsRenderType = RenderType::gif;
+                    }
 
                     if (ImGui::MenuItem("VSync", "", g_vsync))
                         g_vsync = !g_vsync;
@@ -1582,6 +1618,7 @@ Higher priority TODO:
 * probably should make a tag for this being 0.5, and make a branch for the next version number.
 
 TODO:
+* since the editor can do gif, make the command line able to do gif?
 * handle the crash when closing while rendering
 * have a rewind button next to the play/stop button. can we use icons? does imgui have em?
 * put preview image in it's own sub window with it's own horizontal and vertical scroll bars
