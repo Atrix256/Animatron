@@ -79,8 +79,7 @@ bool ValidateAndFixupDocument(Data::Document& document)
     // Make the sampling jitter sequence for the document
     MakeJitterSequence(document);
 
-    // Load blue noise texture for dithering
-    if (document.blueNoiseDither)
+    // Load blue noise texture for dithering or dissolve etc
     {
         int blueNoiseComponents = 0;
         stbi_uc* pixels = stbi_load("internal/BlueNoiseRGBA.png", &document.blueNoiseWidth, &document.blueNoiseHeight, &blueNoiseComponents, 4);
