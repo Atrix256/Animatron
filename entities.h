@@ -1,11 +1,18 @@
 #pragma once
 
 #include "utils.h"
+#include "animatron.h"
 
 inline Data::Point3D GetParentPosition(
     const Data::Document& document,
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     const Data::Entity& entity);
+
+struct EntityActionFrameContext
+{
+    int frameIndex = 0;
+    float frameTime = 0.0f;
+};
 
 // Default base class functionality
 // Functions which are fully implemented here are optional to be implemented.
@@ -16,16 +23,31 @@ struct EntityActionBase
 
     static bool Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex) { return true; }
 
-    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity) { return true; }
+    static bool FrameInitialize(
+        const Data::Document& document,
+        Data::Entity& entity,
+        const EntityActionFrameContext& context)
+    {
+        return true;
+    }
 
     static bool DoAction(
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId)
+        int threadId,
+        const EntityActionFrameContext& context)
     {
         return true;
+    }
+
+    // If the entity has extra internal state, like how a flipbook uses the time to
+    // know what image to show, you can implement this function to include that info.
+    // Without this, the flipbook would return the same hash for different images shown
+    // and it would only ever show one image.
+    static void ExtraFrameHash(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context, size_t& hash)
+    {
     }
 
 
@@ -46,7 +68,8 @@ struct EntityFill_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId)
+        int threadId,
+        const EntityActionFrameContext& context)
     {
         Fill(pixels, entity.data.fill.color);
         return true;
@@ -62,7 +85,8 @@ struct EntityCircle_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.circle.center); }
 };
@@ -74,7 +98,8 @@ struct EntityRectangle_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.rectangle.center); }
 };
@@ -86,7 +111,8 @@ struct EntityLine_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId)
+        int threadId,
+        const EntityActionFrameContext& context)
     {
         Data::Point2D offset = Point3D_XY(GetParentPosition(document, entityMap, entity));
 
@@ -104,7 +130,8 @@ struct EntityLine3D_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return (entity.data.line3d.A + entity.data.line3d.B) * 0.5f; }
 };
@@ -116,7 +143,8 @@ struct EntityLines3D_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity)
     {
@@ -136,7 +164,7 @@ struct EntityLines3D_Action : EntityActionBase
 
 struct EntityCamera_Action : EntityActionBase
 {
-    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity);
+    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity)
     {
@@ -146,7 +174,7 @@ struct EntityCamera_Action : EntityActionBase
 
 struct EntityTransform_Action : EntityActionBase
 {
-    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity);
+    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity)
     {
@@ -161,7 +189,8 @@ struct EntityLatex_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.latex.position); }
 };
@@ -175,7 +204,8 @@ struct EntityLinearGradient_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return Data::Point3D{ 0.0f, 0.0f, 0.0f }; }
 };
@@ -187,7 +217,8 @@ struct EntityDigitalDissolve_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return Data::Point3D{ 0.0f, 0.0f, 0.0f }; }
 };
@@ -196,16 +227,58 @@ struct EntityImage_Action : EntityActionBase
 {
     static bool Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex);
 
-    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity);
+    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context);
 
     static bool DoAction(
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.image.position); }
+};
+
+struct EntityFlipbook_Action : EntityActionBase
+{
+    static bool Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex);
+
+    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context);
+
+    static bool DoAction(
+        const Data::Document& document,
+        const std::unordered_map<std::string, Data::Entity>& entityMap,
+        std::vector<Data::ColorPMA>& pixels,
+        const Data::Entity& entity,
+        int threadId,
+        const EntityActionFrameContext& context);
+
+    static Data::Point3D GetPosition(const Data::Entity& entity) { return ToPoint3D(entity.data.image.position); }
+
+    static int GetImageIndex(const Data::Document& document, const Data::Entity& entity, const EntityActionFrameContext& context)
+    {
+        const Data::EntityFlipbook& flipbook = entity.data.flipbook;
+
+        int imageIndex = 0;
+        if (flipbook.timePerFrame > 0.0f)
+            imageIndex = int((context.frameTime - entity.createTime) / flipbook.timePerFrame);
+        else
+            imageIndex = Max(0, context.frameIndex - SecondsToFrameIndex(document, entity.createTime));
+
+        if (flipbook.loop)
+            imageIndex = imageIndex % (int)flipbook.fileNames.size();
+        else
+            imageIndex = Min(imageIndex, (int)flipbook.fileNames.size() - 1);
+
+        return imageIndex;
+    }
+
+    static void ExtraFrameHash(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context, size_t& hash)
+    {
+        int imageIndex = GetImageIndex(document, entity, context);
+        Hash(hash, imageIndex);
+    }
 };
 
 struct EntityCubicBezier_Action : EntityActionBase
@@ -215,7 +288,8 @@ struct EntityCubicBezier_Action : EntityActionBase
         const std::unordered_map<std::string, Data::Entity>& entityMap,
         std::vector<Data::ColorPMA>& pixels,
         const Data::Entity& entity,
-        int threadId);
+        int threadId,
+        const EntityActionFrameContext& context);
 
     static Data::Point3D GetPosition(const Data::Entity& entity)
     {

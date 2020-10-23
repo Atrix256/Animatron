@@ -222,7 +222,10 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
     std::vector<Data::ColorPMA>& pixels = threadContext.pixelsPMA;
 
     // setup for the frame
-    float frameTime = (float(frameIndex) / float(document.FPS)) + document.startTime;
+    float frameTime = FrameIndexToSeconds(document, frameIndex);
+    EntityActionFrameContext frameContext;
+    frameContext.frameIndex = frameIndex;
+    frameContext.frameTime = frameTime;
     pixels.resize(document.renderSizeX * document.renderSizeY);
     std::fill(pixels.begin(), pixels.end(), Data::ColorPMA{ 0.0f, 0.0f, 0.0f, 1.0f });
 
@@ -284,7 +287,12 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
             {
                 #include "df_serialize/df_serialize/_common.h"
                 #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                    case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::FrameInitialize(document, entity); break;
+                    case Data::EntityVariant::c_index_##_NAME: \
+                    { \
+                        error = ! _TYPE##_Action::FrameInitialize(document, entity, frameContext); \
+                        _TYPE##_Action::ExtraFrameHash(document, entity, frameContext, frameHash); \
+                        break; \
+                    }
                 #include "df_serialize/df_serialize/_fillunsetdefines.h"
                 #include "schemas/schemas_entities.h"
                 default:
@@ -334,7 +342,7 @@ bool RenderFrame(const Data::Document& document, int frameIndex, ThreadContext& 
         {
             #include "df_serialize/df_serialize/_common.h"
             #define VARIANT_TYPE(_TYPE, _NAME, _DEFAULT, _DESCRIPTION) \
-                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity, threadContext.threadId); break;
+                case Data::EntityVariant::c_index_##_NAME: error = ! _TYPE##_Action::DoAction(document, entityMap, pixels, entity, threadContext.threadId, frameContext); break;
             #include "df_serialize/df_serialize/_fillunsetdefines.h"
             #include "schemas/schemas_entities.h"
             default:

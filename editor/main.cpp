@@ -1044,8 +1044,8 @@ INT WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nC
                     ImGui::PopID();
 
                     int min, sec, tmin, tsec;
-                    FrameIndexToMinutesSeconds(g_rootDocument, g_previewFrameIndex+1, min, sec);
-                    FrameIndexToMinutesSeconds(g_rootDocument, totalFrames, tmin, tsec);
+                    FrameIndexToRelativeMinutesSeconds(g_rootDocument, g_previewFrameIndex+1, min, sec);
+                    FrameIndexToRelativeMinutesSeconds(g_rootDocument, totalFrames, tmin, tsec);
                     ImGui::Text("%02d:%02d / %02d:%02d", min, sec, tmin, tsec);
 
                     ImGui::SameLine();

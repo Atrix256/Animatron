@@ -8,6 +8,7 @@
 #include "entities.h"
 #include "schemas/hash.h"
 #include "cas.h"
+#include "animatron.h"
 
 #include <Windows.h>
 
@@ -39,7 +40,7 @@ void Run(const char* program, char* commandLine, const char* currentDirectory, b
     if (ret && waitForFinish)
         WaitForSingleObject(pi.hProcess, INFINITE);
 
-    // Close process and thread handles. 
+    // Close process and thread handles.
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
 }
@@ -49,7 +50,8 @@ bool EntityCircle_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityCircle& circle = entity.data.circle;
     Data::Point2D center = circle.center + Point3D_XY(GetParentPosition(document, entityMap, entity));
@@ -110,7 +112,8 @@ bool EntityRectangle_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityRectangle& rectangle = entity.data.rectangle;
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(rectangle.color);
@@ -176,7 +179,7 @@ bool EntityRectangle_Action::DoAction(
     return true;
 }
 
-bool EntityCamera_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity)
+bool EntityCamera_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context)
 {
     Data::EntityCamera& camera = entity.data.camera;
     Data::Matrix4x4 projMtx;
@@ -231,7 +234,8 @@ bool EntityLine3D_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityLine3D& line3d = entity.data.line3d;
     Data::Point3D offset = GetParentPosition(document, entityMap, entity);
@@ -282,10 +286,11 @@ bool EntityLine3D_Action::DoAction(
 
 bool EntityLines3D_Action::DoAction(
     const Data::Document& document,
-    const std::unordered_map<std::string, Data::Entity>& entityMap, 
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityLines3D& lines3d = entity.data.lines3d;
     Data::Point3D offset = GetParentPosition(document, entityMap, entity);
@@ -342,7 +347,7 @@ bool EntityLines3D_Action::DoAction(
     return true;
 }
 
-bool EntityTransform_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity)
+bool EntityTransform_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context)
 {
     Data::EntityTransform& transform = entity.data.transform;
 
@@ -456,7 +461,8 @@ bool EntityLatex_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityLatex& latex = entity.data.latex;
 
@@ -542,7 +548,8 @@ bool EntityLinearGradient_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityLinearGradient& linearGradient = entity.data.linearGradient;
 
@@ -613,7 +620,8 @@ bool EntityDigitalDissolve_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityDigitalDissolve& digitalDissolve = entity.data.digitalDissolve;
 
@@ -674,24 +682,24 @@ bool EntityImage_Action::Initialize(const Data::Document& document, Data::Entity
     Data::EntityImage& image = entity.data.image;
 
     int channels;
-    stbi_uc* pixels = stbi_load(image.fileName.c_str(), &image._rawwidth, &image._rawheight, &channels, 4);
+    stbi_uc* pixels = stbi_load(image.fileName.c_str(), &image._image.rawwidth, &image._image.rawheight, &channels, 4);
     if (pixels == nullptr)
     {
         printf("Could not load image %s.\n", image.fileName.c_str());
         return false;
     }
 
-    image._rawpixels.resize(image._rawwidth* image._rawheight);
+    image._image.rawpixels.resize(image._image.rawwidth* image._image.rawheight);
     const Data::ColorU8* pixel = (Data::ColorU8*)pixels;
 
-    for (size_t index = 0; index < image._rawpixels.size(); ++index)
+    for (size_t index = 0; index < image._image.rawpixels.size(); ++index)
     {
         Data::Color color{ float(pixel->R) / 255.0f, float(pixel->G) / 255.0f, float(pixel->B) / 255.0f, float(pixel->A) / 255.0f };
         color.R = SRGBToLinear(color.R);
         color.G = SRGBToLinear(color.G);
         color.B = SRGBToLinear(color.B);
         color.A = SRGBToLinear(color.A);
-        image._rawpixels[index] = ToPremultipliedAlpha(color);
+        image._image.rawpixels[index] = ToPremultipliedAlpha(color);
         pixel++;
     }
 
@@ -699,7 +707,7 @@ bool EntityImage_Action::Initialize(const Data::Document& document, Data::Entity
     return true;
 }
 
-bool EntityImage_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity)
+bool EntityImage_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context)
 {
     Data::EntityImage& image = entity.data.image;
 
@@ -710,14 +718,14 @@ bool EntityImage_Action::FrameInitialize(const Data::Document& document, Data::E
     // if it's already the right size, nothing to do
     int desiredWidth = pixelMaxX - pixelMinX;
     int desiredHeight = pixelMaxY - pixelMinY;
-    if (image._width == desiredWidth && image._height == desiredHeight)
+    if (image._image.width == desiredWidth && image._image.height == desiredHeight)
         return true;
 
     // resize
-    image._pixels = image._rawpixels;
-    image._width = desiredWidth;
-    image._height = desiredHeight;
-    Resize(image._pixels, image._rawwidth, image._rawheight, desiredWidth, desiredHeight);
+    image._image.pixels = image._image.rawpixels;
+    image._image.width = desiredWidth;
+    image._image.height = desiredHeight;
+    Resize(image._image.pixels, image._image.rawwidth, image._image.rawheight, desiredWidth, desiredHeight);
 
     return true;
 }
@@ -727,7 +735,8 @@ bool EntityImage_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityImage& image = entity.data.image;
 
@@ -752,7 +761,126 @@ bool EntityImage_Action::DoAction(
     for (size_t iy = pixelMinY; iy < pixelMaxY; ++iy)
     {
         Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + pixelMinX];
-        const Data::ColorPMA* srcPixel = &image._pixels[(iy - pixelMinY + srcOffsetY) * image._width + srcOffsetX];
+        const Data::ColorPMA* srcPixel = &image._image.pixels[(iy - pixelMinY + srcOffsetY) * image._image.width + srcOffsetX];
+
+        for (size_t ix = pixelMinX; ix < pixelMaxX; ++ix)
+        {
+            *destPixel = Blend(*destPixel, *srcPixel * tint);
+            srcPixel++;
+            destPixel++;
+        }
+    }
+
+    return true;
+}
+
+bool EntityFlipbook_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
+{
+    Data::EntityFlipbook& flipbook = entity.data.flipbook;
+    if (flipbook.fileNames.empty())
+    {
+        printf("No images specified for flipbook.\n");
+        return false;
+    }
+
+    int channels = 0;
+
+    flipbook._images.reserve(flipbook.fileNames.size());
+    for (std::string& fileName : flipbook.fileNames)
+    {
+        flipbook._images.resize(flipbook._images.size() + 1);
+        Data::LoadedImage& image = flipbook._images.back();
+
+        stbi_uc* pixels = stbi_load(fileName.c_str(), &image.rawwidth, &image.rawheight, &channels, 4);
+
+        if (pixels == nullptr)
+        {
+            printf("Could not load image %s.\n", fileName.c_str());
+            return false;
+        }
+
+        image.rawpixels.resize(image.rawwidth * image.rawheight);
+        const Data::ColorU8* pixel = (Data::ColorU8*)pixels;
+
+        for (size_t index = 0; index < image.rawpixels.size(); ++index)
+        {
+            Data::Color color{ float(pixel->R) / 255.0f, float(pixel->G) / 255.0f, float(pixel->B) / 255.0f, float(pixel->A) / 255.0f };
+            color.R = SRGBToLinear(color.R);
+            color.G = SRGBToLinear(color.G);
+            color.B = SRGBToLinear(color.B);
+            color.A = SRGBToLinear(color.A);
+            image.rawpixels[index] = ToPremultipliedAlpha(color);
+            pixel++;
+        }
+
+        stbi_image_free(pixels);
+    }
+    return true;
+}
+
+bool EntityFlipbook_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context)
+{
+    Data::EntityFlipbook& flipbook = entity.data.flipbook;
+
+    // get the image we are using this frame
+    int imageIndex = GetImageIndex(document, entity, context);
+    Data::LoadedImage& image = flipbook._images[imageIndex];
+
+    // calculate the desired width of the flipbook, in pixels
+    int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
+    GetPixelBoundingBox_PointRadius(document, flipbook.position.X, flipbook.position.Y, flipbook.radius.X, flipbook.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
+
+    // if it's already the right size, nothing to do
+    int desiredWidth = pixelMaxX - pixelMinX;
+    int desiredHeight = pixelMaxY - pixelMinY;
+    if (image.width == desiredWidth && image.height == desiredHeight)
+        return true;
+
+    // resize
+    image.pixels = image.rawpixels;
+    image.width = desiredWidth;
+    image.height = desiredHeight;
+    Resize(image.pixels, image.rawwidth, image.rawheight, desiredWidth, desiredHeight);
+
+    return true;
+}
+
+bool EntityFlipbook_Action::DoAction(
+    const Data::Document& document,
+    const std::unordered_map<std::string, Data::Entity>& entityMap,
+    std::vector<Data::ColorPMA>& pixels,
+    const Data::Entity& entity,
+    int threadId,
+    const EntityActionFrameContext& context)
+{
+    const Data::EntityFlipbook& flipbook = entity.data.flipbook;
+
+    // get the image we are using this frame
+    int imageIndex = GetImageIndex(document, entity, context);
+    const Data::LoadedImage& image = flipbook._images[imageIndex];
+
+    // calculate the begin and end of the image
+    int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
+    GetPixelBoundingBox_PointRadius(document, flipbook.position.X, flipbook.position.Y, flipbook.radius.X, flipbook.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
+
+    // clip the image to the screen
+    int srcOffsetX = 0;
+    int srcOffsetY = 0;
+    if (pixelMinX < 0)
+        srcOffsetX = pixelMinX * -1;
+    if (pixelMinY < 0)
+        srcOffsetY = pixelMinY * -1;
+    pixelMinX = Clamp(pixelMinX, 0, document.renderSizeX);
+    pixelMaxX = Clamp(pixelMaxX, 0, document.renderSizeX);
+    pixelMinY = Clamp(pixelMinY, 0, document.renderSizeY);
+    pixelMaxY = Clamp(pixelMaxY, 0, document.renderSizeY);
+
+    // paste the image
+    Data::ColorPMA tint = ToPremultipliedAlpha(flipbook.tint);
+    for (size_t iy = pixelMinY; iy < pixelMaxY; ++iy)
+    {
+        Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + pixelMinX];
+        const Data::ColorPMA* srcPixel = &image.pixels[(iy - pixelMinY + srcOffsetY) * image.width + srcOffsetX];
 
         for (size_t ix = pixelMinX; ix < pixelMaxX; ++ix)
         {
@@ -860,7 +988,8 @@ bool EntityCubicBezier_Action::DoAction(
     const std::unordered_map<std::string, Data::Entity>& entityMap,
     std::vector<Data::ColorPMA>& pixels,
     const Data::Entity& entity,
-    int threadId)
+    int threadId,
+    const EntityActionFrameContext& context)
 {
     const Data::EntityCubicBezier& cubicBezier = entity.data.cubicBezier;
     Data::ColorPMA colorPMA = ToPremultipliedAlpha(cubicBezier.color);
