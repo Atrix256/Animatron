@@ -678,56 +678,53 @@ bool EntityDigitalDissolve_Action::DoAction(
     return true;
 }
 
-bool EntityImage_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
+static bool GetOrMakeImage(const char* filename, int width, int height, const Data::ColorPMA*& data)
 {
-    Data::EntityImage& image = entity.data.image;
+    // try and get the data from the CAS
+    size_t hash = 0;
+    Hash(hash, filename);
+    Hash(hash, width);
+    Hash(hash, height);
+    data = (const Data::ColorPMA*)CAS::Get().Get(hash);
 
-    int channels;
-    stbi_uc* pixels = stbi_load(image.fileName.c_str(), &image._image.rawwidth, &image._image.rawheight, &channels, 4);
-    if (pixels == nullptr)
+    // if it doesn't exist, create it
+    if (!data)
     {
-        printf("Could not load image %s.\n", image.fileName.c_str());
-        return false;
+        // load the file
+        int w, h, channels;
+        stbi_uc* pixels = stbi_load(filename, &w, &h, &channels, 4);
+        if (pixels == nullptr)
+        {
+            printf("could not load file %s\n", filename);
+            return false;
+        }
+
+        // convert to PMA
+        std::vector<Data::ColorPMA> pixelsPMA(w * h);
+        const Data::ColorU8* pixel = (Data::ColorU8*)pixels;
+        for (size_t index = 0; index < w * h; ++index)
+        {
+            Data::Color color{ float(pixel->R) / 255.0f, float(pixel->G) / 255.0f, float(pixel->B) / 255.0f, float(pixel->A) / 255.0f };
+            color.R = SRGBToLinear(color.R);
+            color.G = SRGBToLinear(color.G);
+            color.B = SRGBToLinear(color.B);
+            color.A = SRGBToLinear(color.A);
+            pixelsPMA[index] = ToPremultipliedAlpha(color);
+            pixel++;
+        }
+
+        // Resize the image to the desired size
+        Resize(pixelsPMA, w, h, width, height);
+
+        // store this data in the CAS
+        CAS::Set(hash, pixelsPMA, false);
+
+        // free the memory
+        stbi_image_free(pixels);
+
+        // Get the data from the CAS now that we have set it
+        data = (const Data::ColorPMA*)CAS::Get().Get(hash);
     }
-
-    image._image.rawpixels.resize(image._image.rawwidth* image._image.rawheight);
-    const Data::ColorU8* pixel = (Data::ColorU8*)pixels;
-
-    for (size_t index = 0; index < image._image.rawpixels.size(); ++index)
-    {
-        Data::Color color{ float(pixel->R) / 255.0f, float(pixel->G) / 255.0f, float(pixel->B) / 255.0f, float(pixel->A) / 255.0f };
-        color.R = SRGBToLinear(color.R);
-        color.G = SRGBToLinear(color.G);
-        color.B = SRGBToLinear(color.B);
-        color.A = SRGBToLinear(color.A);
-        image._image.rawpixels[index] = ToPremultipliedAlpha(color);
-        pixel++;
-    }
-
-    stbi_image_free(pixels);
-    return true;
-}
-
-bool EntityImage_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context)
-{
-    Data::EntityImage& image = entity.data.image;
-
-    // calculate the desired width of the image, in pixels
-    int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
-    GetPixelBoundingBox_PointRadius(document, image.position.X, image.position.Y, image.radius.X, image.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
-
-    // if it's already the right size, nothing to do
-    int desiredWidth = pixelMaxX - pixelMinX;
-    int desiredHeight = pixelMaxY - pixelMinY;
-    if (image._image.width == desiredWidth && image._image.height == desiredHeight)
-        return true;
-
-    // resize
-    image._image.pixels = image._image.rawpixels;
-    image._image.width = desiredWidth;
-    image._image.height = desiredHeight;
-    Resize(image._image.pixels, image._image.rawwidth, image._image.rawheight, desiredWidth, desiredHeight);
-
     return true;
 }
 
@@ -741,9 +738,15 @@ bool EntityImage_Action::DoAction(
 {
     const Data::EntityImage& image = entity.data.image;
 
-    // calculate the begin and end of the image
+    // calculate the desired width of the image, in pixels
     int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
     GetPixelBoundingBox_PointRadius(document, image.position.X, image.position.Y, image.radius.X, image.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
+
+    // Get the image
+    int desiredWidth = pixelMaxX - pixelMinX;
+    int desiredHeight = pixelMaxY - pixelMinY;
+    const Data::ColorPMA* srcPixels = nullptr;
+    GetOrMakeImage(image.fileName.c_str(), desiredWidth, desiredHeight, srcPixels);
 
     // clip the image to the screen
     int srcOffsetX = 0;
@@ -762,7 +765,7 @@ bool EntityImage_Action::DoAction(
     for (size_t iy = pixelMinY; iy < pixelMaxY; ++iy)
     {
         Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + pixelMinX];
-        const Data::ColorPMA* srcPixel = &image._image.pixels[(iy - pixelMinY + srcOffsetY) * image._image.width + srcOffsetX];
+        const Data::ColorPMA* srcPixel = &srcPixels[(iy - pixelMinY + srcOffsetY) * desiredWidth + srcOffsetX];
 
         for (size_t ix = pixelMinX; ix < pixelMaxX; ++ix)
         {
@@ -771,77 +774,6 @@ bool EntityImage_Action::DoAction(
             destPixel++;
         }
     }
-
-    return true;
-}
-
-bool EntityFlipbook_Action::Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex)
-{
-    Data::EntityFlipbook& flipbook = entity.data.flipbook;
-    if (flipbook.fileNames.empty())
-    {
-        printf("No images specified for flipbook.\n");
-        return false;
-    }
-
-    int channels = 0;
-
-    flipbook._images.reserve(flipbook.fileNames.size());
-    for (std::string& fileName : flipbook.fileNames)
-    {
-        flipbook._images.resize(flipbook._images.size() + 1);
-        Data::LoadedImage& image = flipbook._images.back();
-
-        stbi_uc* pixels = stbi_load(fileName.c_str(), &image.rawwidth, &image.rawheight, &channels, 4);
-
-        if (pixels == nullptr)
-        {
-            printf("Could not load image %s.\n", fileName.c_str());
-            return false;
-        }
-
-        image.rawpixels.resize(image.rawwidth * image.rawheight);
-        const Data::ColorU8* pixel = (Data::ColorU8*)pixels;
-
-        for (size_t index = 0; index < image.rawpixels.size(); ++index)
-        {
-            Data::Color color{ float(pixel->R) / 255.0f, float(pixel->G) / 255.0f, float(pixel->B) / 255.0f, float(pixel->A) / 255.0f };
-            color.R = SRGBToLinear(color.R);
-            color.G = SRGBToLinear(color.G);
-            color.B = SRGBToLinear(color.B);
-            color.A = SRGBToLinear(color.A);
-            image.rawpixels[index] = ToPremultipliedAlpha(color);
-            pixel++;
-        }
-
-        stbi_image_free(pixels);
-    }
-    return true;
-}
-
-bool EntityFlipbook_Action::FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context)
-{
-    Data::EntityFlipbook& flipbook = entity.data.flipbook;
-
-    // get the image we are using this frame
-    int imageIndex = GetImageIndex(document, entity, context);
-    Data::LoadedImage& image = flipbook._images[imageIndex];
-
-    // calculate the desired width of the flipbook, in pixels
-    int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
-    GetPixelBoundingBox_PointRadius(document, flipbook.position.X, flipbook.position.Y, flipbook.radius.X, flipbook.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
-
-    // if it's already the right size, nothing to do
-    int desiredWidth = pixelMaxX - pixelMinX;
-    int desiredHeight = pixelMaxY - pixelMinY;
-    if (image.width == desiredWidth && image.height == desiredHeight)
-        return true;
-
-    // resize
-    image.pixels = image.rawpixels;
-    image.width = desiredWidth;
-    image.height = desiredHeight;
-    Resize(image.pixels, image.rawwidth, image.rawheight, desiredWidth, desiredHeight);
 
     return true;
 }
@@ -856,13 +788,16 @@ bool EntityFlipbook_Action::DoAction(
 {
     const Data::EntityFlipbook& flipbook = entity.data.flipbook;
 
-    // get the image we are using this frame
-    int imageIndex = GetImageIndex(document, entity, context);
-    const Data::LoadedImage& image = flipbook._images[imageIndex];
-
-    // calculate the begin and end of the image
+    // calculate the desired width of the image, in pixels
     int pixelMinX, pixelMinY, pixelMaxX, pixelMaxY;
     GetPixelBoundingBox_PointRadius(document, flipbook.position.X, flipbook.position.Y, flipbook.radius.X, flipbook.radius.Y, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY);
+
+    // Get the image we are using this frame
+    int imageIndex = GetImageIndex(document, entity, context);
+    int desiredWidth = pixelMaxX - pixelMinX;
+    int desiredHeight = pixelMaxY - pixelMinY;
+    const Data::ColorPMA* srcPixels = nullptr;
+    GetOrMakeImage(flipbook.fileNames[imageIndex].c_str(), desiredWidth, desiredHeight, srcPixels);
 
     // clip the image to the screen
     int srcOffsetX = 0;
@@ -881,7 +816,7 @@ bool EntityFlipbook_Action::DoAction(
     for (size_t iy = pixelMinY; iy < pixelMaxY; ++iy)
     {
         Data::ColorPMA* destPixel = &pixels[iy * document.renderSizeX + pixelMinX];
-        const Data::ColorPMA* srcPixel = &image.pixels[(iy - pixelMinY + srcOffsetY) * image.width + srcOffsetX];
+        const Data::ColorPMA* srcPixel = &srcPixels[(iy - pixelMinY + srcOffsetY) * desiredWidth + srcOffsetX];
 
         for (size_t ix = pixelMinX; ix < pixelMaxX; ++ix)
         {

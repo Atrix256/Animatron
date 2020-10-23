@@ -78,15 +78,6 @@ STRUCT_BEGIN(Data, Point2DArray, "A dynamic array of Point2Ds")
     STRUCT_DYNAMIC_ARRAY(Point2D, points, "")
 STRUCT_END()
 
-STRUCT_BEGIN(Data, LoadedImage, "Everything a loaded image needs")
-    STRUCT_FIELD(int, rawwidth, 0, "the width of the loaded image")
-    STRUCT_FIELD(int, rawheight, 0, "the height of the loaded image")
-    STRUCT_DYNAMIC_ARRAY(Data::ColorPMA, rawpixels, "The PMA pixels of the loaded image")
-    STRUCT_FIELD(int, width, 0, "the width of the resized image")
-    STRUCT_FIELD(int, height, 0, "the height of the resized image")
-    STRUCT_DYNAMIC_ARRAY(Data::ColorPMA, pixels, "The PMA pixels of the resized image")
-STRUCT_END()
-
 // ----------------------------- Enums -----------------------------
 
 ENUM_BEGIN(Data, SamplesType2D, "Type of 2d samples generated")
@@ -199,7 +190,6 @@ STRUCT_BEGIN(Data, EntityImage, "An image file")
     STRUCT_FIELD(Point2D, position, Data::Point2D(), "The center of the image")
     STRUCT_FIELD(Point2D, radius, Data::Point2D{ 50 COMMA 50 }, "half width and height, in canvas coordinates")
     STRUCT_FIELD(Color, tint, Data::Color{ 1.0f COMMA 1.0f COMMA 1.0f COMMA 1.0f }, "A color to multiply the image by")
-    STRUCT_FIELD_NO_SERIALIZE(LoadedImage, _image, LoadedImage(), "data for the loaded image")
 STRUCT_END()
 
 STRUCT_BEGIN(Data, EntityFlipbook, "An list of image files, played in sequence")
@@ -209,7 +199,6 @@ STRUCT_BEGIN(Data, EntityFlipbook, "An list of image files, played in sequence")
     STRUCT_FIELD(Color, tint, Data::Color{ 1.0f COMMA 1.0f COMMA 1.0f COMMA 1.0f }, "A color to multiply the image by")
     STRUCT_FIELD(float, timePerFrame, 0.2f, "Time per frame in seconds. 0 means a single frame.")
     STRUCT_FIELD(bool, loop, true, "Whether to loop or not")
-    STRUCT_FIELD_NO_SERIALIZE(std::vector<LoadedImage>, _images, std::vector<LoadedImage>(), "data for the loaded image")
 STRUCT_END()
 
 // ----------------------------- Entity -----------------------------

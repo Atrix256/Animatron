@@ -225,10 +225,6 @@ struct EntityDigitalDissolve_Action : EntityActionBase
 
 struct EntityImage_Action : EntityActionBase
 {
-    static bool Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex);
-
-    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context);
-
     static bool DoAction(
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
@@ -242,10 +238,6 @@ struct EntityImage_Action : EntityActionBase
 
 struct EntityFlipbook_Action : EntityActionBase
 {
-    static bool Initialize(const Data::Document& document, Data::Entity& entity, int entityIndex);
-
-    static bool FrameInitialize(const Data::Document& document, Data::Entity& entity, const EntityActionFrameContext& context);
-
     static bool DoAction(
         const Data::Document& document,
         const std::unordered_map<std::string, Data::Entity>& entityMap,
